@@ -1,0 +1,61 @@
+/* --- Général --- */
+body { margin:0; padding:0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+
+/* --- En-tête --- */
+header {
+  background: #0F6A3B;
+  color: #fff;
+  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 60px;
+}
+header .logo { height: 70px; }
+
+/* --- Carte --- */
+#map { width:100%; height: calc(100vh - 60px); z-index:1; }
+
+/* --- Coordonnées --- */
+#coords {
+  position:absolute; bottom:10px; left:10px;
+  background: rgba(255,255,255,0.8); padding:6px 10px;
+  font-size:12px; border-radius:4px; z-index:1000;
+  box-shadow:0 1px 4px rgba(0,0,0,0.3);
+}
+
+/* --- Footer --- */
+.footer-bar {
+    background-color: #0E2A45; color:white; text-align:center;
+    padding:1px 0; position:fixed; bottom:0; left:0; width:100%; z-index:999;
+}
+
+/* --- Gestionnaire de couches --- */
+#layer-manager {
+    position: absolute;
+    top: 75px; right: 40px;
+    width: 320px; background: rgba(255,255,255,0.95);
+    border: 1px solid #ccc; padding:10px;
+    display:flex; gap:10px; z-index:1001;
+    font-size:14px; box-shadow:0 1px 6px rgba(0,0,0,0.3);
+}
+#layer-manager.hidden { display:none; }
+#layer-manager .column { flex:1; }
+#layer-manager h3 { margin:5px 0; }
+.theme-btn { display:block; margin:3px 0; width:100%; }
+.theme-btn.active { background:#0F6A3B; color:#fff; }
+.layer-btn {
+    position: absolute;
+    top: 70px;
+    right: 10px;
+    z-index: 1100;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 5px;
+    color: #ee7c0a; /* couleur de l'icône */
+}
+.layer-btn:hover {
+    color: #28a745; /* couleur au survol */
+}
+

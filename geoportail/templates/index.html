@@ -1,0 +1,71 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Géoportail Aného</title>
+
+    <!-- Leaflet & Leaflet Draw CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+  <!-- En-tête -->
+  <header>
+    <img src="{% static 'images/logo.png' %}" alt="Logo" class="logo">
+    <h1><i class="fa-duotone fa-regular fa-map"></i> E-commune</h1>
+    <div class="header-right">
+      <button id="toggle-search-btn">🔍 Rechercher</button>
+      <button id="toggle-dashboard-btn">Commune</button>
+      <select id="Canton-select">
+        <option value="">-- Choisir canton --</option>
+      </select>
+      <select id="quartier-select">
+        <option value="">-- Choisir un quartier --</option>
+      </select>
+      <!-- Bouton Gestion des couches avec icône empilement -->
+<button id="layerBtn" class="layer-btn">
+    <i class="fa-solid fa-layer-group fa-2x"></i>
+</button>
+
+    </div>
+  </header>
+
+  <!-- Carte -->
+  <div id="map"></div>
+  <div id="coords">X : -- | Y : --</div>
+
+  <!-- Panneau gestion des couches -->
+  <div id="layer-manager" class="hidden">
+    <div class="column">
+      <h3>Basemap</h3>
+      <label><input type="radio" name="basemap" value="osm" checked> OpenStreetMap</label><br>
+      <label><input type="radio" name="basemap" value="satellite"> Satellite</label><br>
+      <label><input type="radio" name="basemap" value="hybrid"> Hybride</label>
+    </div>
+    <div class="column">
+      <h3>Thèmes</h3>
+      <button class="theme-btn active" data-theme="admin">Limites Admin</button>
+      <button class="theme-btn" data-theme="hydro">Hydrographie</button>
+      <button class="theme-btn" data-theme="transport">Transport</button>
+      <div id="layer-list" style="margin-top:10px;"></div>
+    </div>
+  </div>
+
+  <footer class="footer-bar">
+    <p>© {% now "F Y" %} - Horison.tg | Tous droits réservés</p>
+  </footer>
+
+  <!-- Scripts JS -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.8.1/proj4.js"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
+  <script src="{% static 'js/scripts.js' %}"></script>
+</body>
+</html>
