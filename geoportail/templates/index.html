@@ -2,9 +2,10 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
+  
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Géoportail Aného</title>
+    <title>commune Blitta II</title>
 
     <!-- Leaflet & Leaflet Draw CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -35,6 +36,79 @@
 
     </div>
   </header>
+   <!-- Panneau gauche -->
+  <div id="left-panel" class="collapsed">
+    <div class="panel-header">
+      <span>Outils SIG</span>
+      <button id="toggle-left-panel"><i class="fa-solid fa-bars"></i></button>
+    </div>
+    <div class="panel-content">
+      <!-- Indicateurs -->
+      <section>
+        <h4>📊 Indicateurs</h4>
+        <ul>
+          <li>Population : <strong>--</strong></li>
+          <li>Villages : <strong>--</strong></li>
+          <li>Points d’eau : <strong>--</strong></li>
+        </ul>
+      </section>
+      <!-- Outils -->
+      <section>
+        <h4>🧭 Outils</h4>
+        <button class="tool-btn">📍 Localiser</button>
+        <button class="tool-btn">✏️ Dessiner</button>
+        <button class="tool-btn">📐 Mesurer</button>
+      </section>
+      <!-- Statistiques -->
+<!-- Filtrer et statistiques -->
+<section>
+  <h4>🔎 Filtres & Stats</h4>
+
+  <!-- Filtre Canton -->
+  <label for="filter-canton">Canton :</label>
+  <select id="filter-canton">
+    <option value="">-- Tous les cantons --</option>
+  </select>
+
+  <!-- Filtre Thème -->
+  <label for="filter-theme">Thème :</label>
+  <select id="filter-theme">
+    <option value="">-- Tous les thèmes --</option>
+    <option value="infrastructure">Infrastructure</option>
+    <option value="hydro">Hydrographie</option>
+    <option value="transport">Transport</option>
+    <option value="admin">Limites Admin</option>
+  </select>
+
+  <!-- Filtre Couches -->
+  <div id="filter-layers">
+    <label><input type="checkbox" data-layer="Lycées" checked> Lycées</label><br>
+    <label><input type="checkbox" data-layer="Collèges" checked> Collèges</label><br>
+    <label><input type="checkbox" data-layer="Jardins" checked> Jardins</label><br>
+    <label><input type="checkbox" data-layer="marches" checked> Marchés</label><br>
+    <label><input type="checkbox" data-layer="Points d'eau autonome" checked> Points d'eau</label><br>
+    <label><input type="checkbox" data-layer="borne_fontaine" checked> Borne Fontaine</label><br>
+    <label><input type="checkbox" data-layer="chateau" checked> Château</label><br>
+  </div>
+
+  <!-- Statistiques -->
+  <ul id="stats-list">
+    <li>Lycées : <strong id="stat-lycees">0</strong></li>
+    <li>Collèges : <strong id="stat-colleges">0</strong></li>
+    <li>Jardins : <strong id="stat-jardins">0</strong></li>
+    <li>Marchés : <strong id="stat-marches">0</strong></li>
+    <li>Points d'eau : <strong id="stat-points-eau">0</strong></li>
+    <li>Borne fontaine : <strong id="stat-borne">0</strong></li>
+    <li>Châteaux : <strong id="stat-chateau">0</strong></li>
+  </ul>
+</section>
+
+    </div>
+  </div>
+
+  
+
+ 
 
   <!-- Carte -->
   <div id="map"></div>
@@ -53,6 +127,10 @@
       <button class="theme-btn active" data-theme="admin">Limites Admin</button>
       <button class="theme-btn" data-theme="hydro">Hydrographie</button>
       <button class="theme-btn" data-theme="transport">Transport</button>
+      <button class="theme-btn" data-theme="infrastructure">Infrastructure</button>
+       <button class="theme-btn" data-theme="sante">Santé</button>
+      <button class="theme-btn" data-theme="sport">sport et loisirs</button>
+      <button class="theme-btn" data-theme="agriculutre">Agriculture</button>
       <div id="layer-list" style="margin-top:10px;"></div>
     </div>
   </div>
@@ -66,6 +144,6 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
-  <script src="{% static 'js/scripts.js' %}"></script>
+  <script src="{% static 'js/script.js' %}"></script>
 </body>
 </html>
