@@ -1,32 +1,77 @@
-/* --- Général --- */
+/* --- Body & header --- */
 body { margin:0; padding:0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-
-/* --- En-tête --- */
-header {
-  background: #0F6A3B;
-  color: #fff;
-  padding: 8px 16px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  height: 60px;
-}
-header .logo { height: 70px; }
+header { background: #0F6A3B; color: #fff; padding: 8px 16px; display: flex; align-items: center; justify-content: space-between; height: 60px; }
+header .logo { height: 50px; }
 
 /* --- Carte --- */
-#map { width:100%; height: calc(100vh - 60px); z-index:1; }
+#map { 
+    position:absolute;
+    top:60px; /* sous le header */
+    left:0;
+    width:100%;
+    height: calc(100vh - 60px); 
+    z-index:1; 
+}
 
 /* --- Coordonnées --- */
-#coords {
-  position:absolute; bottom:10px; left:10px;
-  background: rgba(255,255,255,0.8); padding:6px 10px;
-  font-size:12px; border-radius:4px; z-index:1000;
-  box-shadow:0 1px 4px rgba(0,0,0,0.3);
-}
+#coords { position:absolute; bottom:10px; left:10px; background: rgba(255,255,255,0.8); padding:6px 10px; font-size:12px; border-radius:4px; z-index:1000; }
 
 /* --- Footer --- */
 .footer-bar {
-    background-color: #0E2A45; color:white; text-align:center;
+    background-color: #5596d3;
+    color: rgb(73, 172, 218);
+    text-align: center;
+    padding: 1px 0;   /* moins d’espace que 0.5px */
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    z-index: 999;
+    font-size: 12px;  /* optionnel : réduire la taille du texte */
+}
+
+/* --- Panneau gauche --- */
+#left-panel {
+    position: absolute;
+    top: 60px;
+    left: 0;
+    width: 260px;
+    height: calc(100% - 60px);
+    background: #ffffff;
+    border-right: 1px solid #ddd;
+    box-shadow: 2px 0 8px rgba(0,0,0,0.1);
+    z-index: 1000;
+    transition: transform 0.3s ease;
+    overflow-y: auto;
+}
+#left-panel.collapsed { transform: translateX(-230px); }
+.panel-header { display:flex; justify-content:space-between; align-items:center; padding:12px; background:#1f2937; color:#fff; }
+.panel-header button { background:none; border:none; color:#fff; font-size:18px; cursor:pointer; }
+.panel-content { padding:12px; }
+.tool-btn { display:block; width:100%; padding:8px; margin-bottom:6px; border:none; background:#f3f4f6; cursor:pointer; border-radius:4px; text-align:left; }
+.tool-btn:hover { background:#e5e7eb; }
+
+/* --- Gestionnaire de couches --- */
+#layer-manager {
+    position: absolute;
+    top: 75px;
+    right: 10px;
+    width: 320px;
+    background: rgba(255,255,255,0.95);
+    border: 1px solid #ccc; 
+    padding:10px;
+    display:flex; 
+    gap:10px; 
+    z-index:1001;
+    font-size:14px;
+    box-shadow:0 1px 6px rgba(0,0,0,0.3);
+}
+#layer-manager.hidden { display:none; }
+
+
+/* --- Footer --- */
+.footer-bar {
+    background-color: #0E2A45; color:rgb(73, 172, 218); text-align:center;
     padding:1px 0; position:fixed; bottom:0; left:0; width:100%; z-index:999;
 }
 
@@ -58,4 +103,56 @@ header .logo { height: 70px; }
 .layer-btn:hover {
     color: #28a745; /* couleur au survol */
 }
+
+/* Dans votre fichier style.css */
+.custom-popup .leaflet-popup-content-wrapper {
+    border-radius: 8px;
+    padding: 0;
+    overflow: hidden;
+}
+
+.custom-popup .leaflet-popup-content {
+    margin: 0;
+    padding: 15px;
+    min-width: 200px;
+}
+
+.custom-popup .leaflet-popup-content h3 {
+    margin-top: 0;
+    color: #0F6A3B;
+    border-bottom: 2px solid #0F6A3B;
+    padding-bottom: 8px;
+}
+
+.custom-popup .leaflet-popup-content p {
+    margin: 8px 0;
+    line-height: 1.4;
+}
+
+.custom-popup .leaflet-popup-content hr {
+    margin: 10px 0;
+    border: none;
+    border-top: 1px solid #eee;
+}
+
+
+
+.quartier-popup, .feature-popup {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    max-width: 300px;
+}
+
+.quartier-popup h3, .feature-popup h3 {
+    color: #0F6A3B;
+    margin: 0 0 10px 0;
+}
+
+#suppresion du cadadre noir /* Supprimer le contour sur focus */
+button:focus,
+select:focus,
+input:focus {
+    outline: none;
+    box-shadow: none; /* Certains navigateurs utilisent shadow */
+}
+
 

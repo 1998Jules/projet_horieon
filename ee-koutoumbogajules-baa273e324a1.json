@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "ee-koutoumbogajules",
+  "private_key_id": "baa273e324a157818acfddb8b7b2e7c9726e51b3",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDLVlH5b/08rnVG\n/Th3uJp+jxE0OeBjkaohQo6J4OHOECJAjYEUPJP/dZCIqlRK0pveQF03i9JWCvzF\nXhzZbuSMA+iB8Uo7zuTUTrLZM9a/A/KCLoD6DijCLwcWc7aedgg+HiQq4zVFpBEq\nHObltdwWcKA/toeoDaXhZyPkC7eaiS24QxL9Pu7YHsdmNn8h5wAMq51y7BqY0lww\nJhl2dL/oRFE2zQvC5Cl5lk3gAodzdjUrSzUpZw0fDFYRBT3ZDTpbF4XBowOvFjr8\nW0v3vjp6/jnUMMtWI7TCMlMH7bLcJnMxGKdcX8QQPL7FREEIb1mGEF/4uSzT+Qcl\nOctt1QKDAgMBAAECggEAHLouTKpYwbj4ErZ1wtxO33CBArrmi8qpmZdYofwmisFW\nxX34bY59bksCx3wg+o00vjqjsNRNPCDDQ3Mfakyzd2CZ+bnIPhjl1WTk+bDMNyJs\noZ3GVQ2pDn4sZyyj8VFFqtkBTRnajeM3FZcNvAhsdrMkwLueAM0k0WqL9Iz/PJLC\nMe64KS9SVtRcHkI9Ix1rXr4pPmWyJMC6abYuL3idzs5+w+weEbdEBDpgXuAu5KWd\n2FyxejBPkk/A+e9tkDUCZb1P9W7BiSPR9aYSowu0y6mUVaU85WvRPX7OZL3hPHMC\nZcXqw+4iIU66VhU8BZmg6CO7VqaT8Gb4o9k6dgNZAQKBgQD4e8eyMUzsE9fM0OFH\nkqLBUJ7YsxPWpo0wx3h6lEan8TvAujvqrOwr4TOrebVbze+JsDrfNgdFZ+H9EYiW\n2QlZDE7103whS0HqtNLHEcXAfGnlfu//TSLTkJfozF/JLBivU0v65qlXl1vdmqyb\niUDyzfHFq6hgYphFblCvkmkyAwKBgQDRfO8AsTIWD7Yg3BqXNvDl8yq2aXGsay6M\nXGnUJQpO8lo5GtwAmmWnLd8QoNijJjeNl827+lj1IA5Nx/wSXs6VjprW6Wd5BfrF\nMXDmMOq9Txwj6e6xXRBKFaYkILo8BEPgw/BvsSkGtmagY/m2uf/3BkrpFudrc5ej\napqFvshFgQKBgQCdHqfHJSVeoa1y9SF+AFqpojDPFW0V7XqZvYeQ+vEygHcoBpqc\naXtsw5nIc80Zn743chfHzIIMgQOE4fFccSBYDlBfYLq80rl7j5s4BSTl8cWEOB/J\nbxz2ahekPJbUve1d72272N57ZFnSZlt+fetznIWkWEa/q5hdTsP2QL4DwQKBgBWR\n45oSpLGY1Iv1nddMFOnYa+F0Yfv63UQej9cEKVePpLKUjWqSez0HgBxaM3Q5DydJ\nJing0SAMOOzRVqcdk+/aSx8t0TWo4/VB7foFt2Xeq2sXPziL+I1oRT8bD5H2bnbK\nNguKFktWpKKHKMMjy7NHtpbhgNqTgF2XMGntBvoBAoGAf5YxzuaLB3DFL36o4ajU\npq7IGB0Se2RMSBd5OWPDjk4FzUp1XrZAXtnBb0WzwOYHNlNSJeyRxpheIfup3xiM\n3bgtNGusFbwO8rGlQCpLyxWwM+D8PIf8bbn60Csw6V7e+fnMoyYuHZBNBP+hdpwU\nOZcAp8+7Qpzi6k7iGHSRRpA=\n-----END PRIVATE KEY-----\n",
+  "client_email": "observatoire@ee-koutoumbogajules.iam.gserviceaccount.com",
+  "client_id": "102084984447012919787",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/observatoire%40ee-koutoumbogajules.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}

@@ -6,6 +6,12 @@ let hoverLayer = null;
 let clickLayer = null;
 let allQuartiers = [];
 
+
+
+
+
+
+
 // ==============================
 // --- Basemaps --- 
 // ==============================
@@ -22,9 +28,13 @@ const wmsLayers = {
     "Quartiers": L.tileLayer.wms("http://localhost:8089/geoserver/horicommune/wms",{layers:"qartier_aneho", format:"image/png", transparent:true, attribution:"GeoServer", maxZoom:22}).addTo(map),
     "Commune": L.tileLayer.wms("http://localhost:8089/geoserver/horicommune/wms",{layers:"commune_lac1", format:"image/png", transparent:true, attribution:"GeoServer", maxZoom:22}).addTo(map),
     "Routes": L.tileLayer.wms("http://localhost:8089/geoserver/horicommune/wms",{layers:"route", format:"image/png", transparent:true, attribution:"GeoServer", maxZoom:22}),
-    "Lagune": L.tileLayer.wms("http://localhost:8089/geoserver/horicommune/wms",{layers:"lagune", format:"image/png", transparent:true, attribution:"GeoServer", maxZoom:22})
+    "Lagune": L.tileLayer.wms("http://localhost:8089/geoserver/horicommune/wms",{layers:"lagune", format:"image/png", transparent:true, attribution:"GeoServer", maxZoom:22}),
+    "Marches": L.tileLayer.wms("http://localhost:8089/geoserver/horicommune/wms",{layers:"marches", format:"image/png", transparent:true, attribution:"GeoServer", maxZoom:22})
+
 };
 
+
+L.control.scale().addTo(map);
 // ==============================
 // --- Visibilité selon zoom --- 
 // ==============================
@@ -247,7 +257,8 @@ function updateLayerList(theme){
     const themeLayers = {
         "admin":["Quartiers","Commune"],
         "hydro":["Lagune"],
-        "transport":["Routes"]
+        "transport":["Routes"],
+        "infrastructure":["Marches"]
     };
     if(!themeLayers[theme]) return;
 
