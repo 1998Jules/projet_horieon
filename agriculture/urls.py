@@ -30,6 +30,13 @@ urlpatterns = [
     # 3. Récupérer l'historique NDVI d'un champ spécifique (Graphique & Carte)
     path('api/field-ndvi/', views.field_ndvi_timeseries, name='field_ndvi_timeseries'),
     path('api/field-indices-comparison/', views.field_indices_comparison, name='field_indices_comparison'),
-
+# Liste, Ajout, Modif, Suppression
+    path('api/crop-calendar/', views.get_crop_calendar, name='get_crop_calendar'),
+    path('api/crop-calendar/add/', views.add_crop_calendar, name='add_crop_calendar'),
+    path('api/crop-calendar/update/<int:pk>/', views.update_crop_calendar, name='update_crop_calendar'),
+    path('api/crop-calendar/delete/<int:pk>/', views.delete_crop_calendar, name='delete_crop_calendar'),
+    
+    # NOUVEAU : Simulation de croissance
+    path('api/crop-calendar/simulate/', views.simulate_growth, name='simulate_growth'),
     
 ]
