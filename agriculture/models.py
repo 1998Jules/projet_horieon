@@ -58,3 +58,43 @@ class Champ(models.Model):
 
     class Meta:
         db_table = "agriculture_champ"
+
+
+
+# agriculture/models.py
+# ... (vos imports existants) ...
+
+# ... autres imports...
+
+class CropCalendar(models.Model):
+    CROP_TYPES = [
+        ('CEREAL', 'Céréale'),
+        ('LEGUME', 'Légume'),
+        ('TUBERCULE', 'Tubercule'),
+        ('LEGUMINEUSE', 'Légumineuse'),
+    ]
+
+    name = models.CharField(max_length=100, verbose_name="Nom de la culture")
+    variety = models.CharField(max_length=100, blank=True, null=True, verbose_name="Variété") # NOUVEAU
+    crop_type = models.CharField(max_length=20, choices=CROP_TYPES, verbose_name="Type")
+    duration_days = models.IntegerField(default=90, verbose_name="Durée cycle (jours)") # NOUVEAU
+    
+    # Périodes (stockées en mois : 1=Janvier, 12=Décembre)
+    sowing_start = models.IntegerField(verbose_name="Début Semi (Mois)")
+    sowing_end = models.IntegerField(verbose_name="Fin Semi (Mois)")
+    
+    weeding_start = models.IntegerField(verbose_name="Début Sarclage (Mois)")
+    weeding_end = models.IntegerField(verbose_name="Fin Sarclage (Mois)")
+    
+    harvest_start = models.IntegerField(verbose_name="Début Récolte (Mois)")
+    harvest_end = models.IntegerField(verbose_name="Fin Récolte (Mois)")
+    
+    other_activities = models.TextField(blank=True, null=True, verbose_name="Autres activités")
+
+    class Meta:
+        db_table = "agriculture_crop_calendar"
+        verbose_name = "Calendrier Cultural"
+        verbose_name_plural = "Calendriers Culturaux"
+
+    def __str__(self):
+        return f"{self.name} - {self.variety}" if self.variety else self.name

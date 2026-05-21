@@ -5,6 +5,8 @@ from django.core.serializers import serialize
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 import json
+from .models import CropCalendar # Ajoutez cet import
+
 import logging
 from datetime import datetime  # <-- IMPORT AJOUTÉ ICI AUSSI
 from .models import Prefecture, Region, Commune
@@ -399,3 +401,180 @@ def field_indices_comparison(request):
         "success": True,
         "data": result
     })
+
+
+
+# ... imports existants ...
+from django.views.decorators.http import require_http_methods
+
+# ... Vos autres vues ...
+
+# MISE À JOUR : Inclure variety et duration_days
+@csrf_exempt
+@require_http_methods(["GET"])
+def get_crop_calendar(request):
+    try:
+        items = CropCalendar.objects.all().order_by('name', 'variety')
+        data = list(items.values(
+            'id', 'name', 'variety', 'crop_type', 'duration_days', # Ajoutés
+            'sowing_start', 'sowing_end',
+            'weeding_start', 'weeding_end',
+            'harvest_start', 'harvest_end',
+            'other_activities'
+        ))
+        return JsonResponse({'success': True, 'data': data})
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+# MISE À JOUR : Ajout/Create
+@csrf_exempt
+@require_http_methods(["POST"])
+def add_crop_calendar(request):
+    try:
+        data = json.loads(request.body)
+        item = CropCalendar.objects.create(
+            name=data['name'],
+            variety=data.get('variety', ''), # Nouveau
+            crop_type=data['crop_type'],
+            duration_days=data.get('duration_days', 90), # Nouveau
+            sowing_start=data['sowing_start'],
+            sowing_end=data['sowing_end'],
+            weeding_start=data['weeding_start'],
+            weeding_end=data['weeding_end'],
+            harvest_start=data['harvest_start'],
+            harvest_end=data['harvest_end'],
+            other_activities=data.get('other_activities', '')
+        )
+        return JsonResponse({'success': True, 'id': item.id})
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+# MISE À JOUR : Update
+@csrf_exempt
+@require_http_methods(["POST"])
+def update_crop_calendar(request, pk):
+    try:
+        data = json.loads(request.body)
+        item = CropCalendar.objects.get(pk=pk)
+        item.name = data.get('name', item.name)
+        item.variety = data.get('variety', item.variety) # Nouveau
+        item.crop_type = data.get('crop_type', item.crop_type)
+        item.duration_days = data.get('duration_days', item.duration_days) # Nouveau
+        # ... autres champs ...
+        item.sowing_start = data.get('sowing_start', item.sowing_start)
+        item.sowing_end = data.get('sowing_end', item.sowing_end)
+        item.weeding_start = data.get('weeding_start', item.weeding_start)
+        item.weeding_end = data.get('weeding_end', item.weeding_end)
+        item.harvest_start = data.get('harvest_start', item.harvest_start)
+        item.harvest_end = data.get('harvest_end', item.harvest_end)
+        item.other_activities = data.get('other_activities', item.other_activities)
+        item.save()
+        return JsonResponse({'success': True})
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+# NOUVELLE VUE : Simulation
+@csrf_exempt
+@require_http_methods(["POST"])
+def simulate_growth(request):
+    """
+    Simule la croissance basée sur le calendrier sélectionné et le jour actuel.
+    """
+    try:
+        data = json.loads(request.body)
+        calendar_id = data.get('calendar_id')
+        current_day = int(data.get('day', 0))
+
+        if not calendar_id:
+            return JsonResponse({'success': False, 'error': 'ID Calendrier manquant'}, status=400)
+
+        item = CropCalendar.objects.get(id=calendar_id)
+        duration = item.duration_days if item.duration_days else 90
+        
+        # Calcul du pourcentage de progression
+        progress = min(100, (current_day / duration) * 100)
+        
+        # Définition des étapes phénologiques (simplifiées)
+        stage = ""
+        actions = []
+        icon = "🌱"
+
+        if progress < 10:
+            stage = "Germination / Levée"
+            icon = "🌱"
+            actions = [
+                "Surveiller l'humidité du sol",
+                "Protéger contre les oiseaux et rongeurs",
+                "Vérifier la levée uniforme"
+            ]
+        elif progress < 30:
+            stage = "Croissance Végétative (Début)"
+            icon = "🌿"
+            actions = [
+                "Effectuer le premier désherbage",
+                "Apporter une fertilisation de fond (si non fait)",
+                "Surveiller les maladies de jeunes plants"
+            ]
+        elif progress < 60:
+            stage = "Croissance Végétative (Pleine phase)"
+            icon = "🪴"
+            actions = [
+                "Deuxième désherbage (sarclage)",
+                "Application d'engrais (couverture)",
+                "Lutte contre les ravageurs (chenilles, etc.)"
+            ]
+        elif progress < 80:
+            stage = "Floraison / Fructification"
+            icon = "🌸"
+            actions = [
+                "Régulation de l'eau (stress hydrique à éviter)",
+                "Surveillance des maladies fongiques (mildiou, rouille)",
+                "Apport de potasse si nécessaire"
+            ]
+        elif progress < 100:
+            stage = "Maturation"
+            icon = "🌾"
+            actions = [
+                "Arrêt progressif de l'irrigation",
+                "Préparation du matériel de récolte",
+                "Surveillance des prédateurs de grains/fruits"
+            ]
+        else:
+            stage = "Récolte"
+            icon = " baskets" # Emoji cueillette
+            actions = [
+                "Récolter au moment optimal",
+                "Séchage et tri de la récolte",
+                "Stockage dans des conditions appropriées"
+            ]
+
+        return JsonResponse({
+            'success': True,
+            'data': {
+                'crop_name': f"{item.name} ({item.variety})",
+                'current_day': current_day,
+                'total_days': duration,
+                'progress': round(progress, 1),
+                'stage': stage,
+                'icon': icon,
+                'actions': actions
+            }
+        })
+
+    except CropCalendar.DoesNotExist:
+        return JsonResponse({'success': False, 'error': 'Culture introuvable'}, status=404)
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+@csrf_exempt
+@require_http_methods(["POST", "DELETE"])
+def delete_crop_calendar(request, pk):
+    """Supprime une entrée du calendrier"""
+    try:
+        # On cherche l'élément par sa clé primaire (pk)
+        item = CropCalendar.objects.get(pk=pk)
+        item.delete()
+        return JsonResponse({'success': True})
+    except CropCalendar.DoesNotExist:
+        return JsonResponse({'success': False, 'error': 'Culture introuvable'}, status=404)
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
