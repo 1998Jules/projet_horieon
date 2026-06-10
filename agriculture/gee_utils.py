@@ -454,7 +454,7 @@ def calculate_index(image, index_type):
         ).rename('NDVI')
     elif index_type == 'ndwi':
         # NDWI (Gao) = (GREEN - NIR) / (GREEN + NIR)
-        return image.normalizedDifference(['B3', 'B8']).rename('NDVI')
+        return image.normalizedDifference(['B8', 'B11']).rename('NDVI')
     elif index_type == 'msavi':
         # MSAVI2 simplifié : (2*NIR+1 - sqrt((2*NIR+1)^2 - 8*(NIR-RED))) / 2
         msavi = image.expression(
@@ -649,7 +649,7 @@ def get_field_indices_history(geojson_geometry, start_date_str, indices):
                         ).rename('INDEX')
                     elif idx == 'ndwi':
                         # NDWI (Gao) = (GREEN - NIR) / (GREEN + NIR)
-                        index_img = median_image.normalizedDifference(['B3', 'B8']).rename('INDEX')
+                        index_img = median_image.normalizedDifference(['B8', 'B11']).rename('INDEX')
                     elif idx == 'msavi':
                         # MSAVI2 : (2*NIR+1 - sqrt((2*NIR+1)^2 - 8*(NIR-RED))) / 2
                         nir = median_image.select('B8')

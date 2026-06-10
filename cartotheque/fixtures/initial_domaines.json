@@ -1,0 +1,244 @@
+[
+  {
+    "model": "cartotheque.domainecarte",
+    "pk": 1,
+    "fields": {
+      "nom": "Santé",
+      "slug": "sante",
+      "description": "Cartes thématiques relatives aux infrastructures et services de santé de la commune",
+      "icone": "Heart",
+      "couleur": "#ef4444",
+      "ordre": 1,
+      "actif": true
+    }
+  },
+  {
+    "model": "cartotheque.domainecarte",
+    "pk": 2,
+    "fields": {
+      "nom": "Éducation",
+      "slug": "education",
+      "description": "Cartes thématiques sur les établissements scolaires et l'accès à l'éducation",
+      "icone": "GraduationCap",
+      "couleur": "#3b82f6",
+      "ordre": 2,
+      "actif": true
+    }
+  },
+  {
+    "model": "cartotheque.domainecarte",
+    "pk": 3,
+    "fields": {
+      "nom": "Hydrologie",
+      "slug": "hydrologie",
+      "description": "Cartes liées aux ressources en eau, points d'eau et réseaux hydrographiques",
+      "icone": "Droplets",
+      "couleur": "#06b6d4",
+      "ordre": 3,
+      "actif": true
+    }
+  },
+  {
+    "model": "cartotheque.domainecarte",
+    "pk": 4,
+    "fields": {
+      "nom": "Infrastructure",
+      "slug": "infrastructure",
+      "description": "Cartes des infrastructures routières, bâtiments publics et équipements communautaires",
+      "icone": "Building2",
+      "couleur": "#f59e0b",
+      "ordre": 4,
+      "actif": true
+    }
+  },
+  {
+    "model": "cartotheque.domainecarte",
+    "pk": 5,
+    "fields": {
+      "nom": "Agriculture",
+      "slug": "agriculture",
+      "description": "Cartes thématiques sur les activités agricoles, cultures et cooperatives",
+      "icone": "Wheat",
+      "couleur": "#22c55e",
+      "ordre": 5,
+      "actif": true
+    }
+  },
+  {
+    "model": "cartotheque.domainecarte",
+    "pk": 6,
+    "fields": {
+      "nom": "Économie",
+      "slug": "economie",
+      "description": "Cartes sur les activités économiques, marchés et commerces",
+      "icone": "TrendingUp",
+      "couleur": "#8b5cf6",
+      "ordre": 6,
+      "actif": true
+    }
+  },
+  {
+    "model": "cartotheque.domainecarte",
+    "pk": 7,
+    "fields": {
+      "nom": "Administratif",
+      "slug": "administratif",
+      "description": "Cartes des limites administratives, cantons et découpages territoriaux",
+      "icone": "Landmark",
+      "couleur": "#64748b",
+      "ordre": 7,
+      "actif": true
+    }
+  },
+  {
+    "model": "cartotheque.domainecarte",
+    "pk": 8,
+    "fields": {
+      "nom": "Patrimoine",
+      "slug": "patrimoine",
+      "description": "Cartes du patrimoine culturel, sites historiques et lieux de culte",
+      "icone": "Church",
+      "couleur": "#d946ef",
+      "ordre": 8,
+      "actif": true
+    }
+  },
+  {
+    "model": "cartotheque.cartetheematique",
+    "pk": 1,
+    "fields": {
+      "titre": "Carte des formations sanitaires",
+      "description": "Localisation de l'ensemble des formations sanitaires de la commune de Blitta 2 : hopitaux, centres de santé, dispensaires et postes de santé. Cette carte permet d'identifier les zones couvertes et les lacunes en matière d'accès aux soins.",
+      "domaine": 1,
+      "vignette": "",
+      "geojson_url": "",
+      "geojson_file": "",
+      "couches_associees": ["hopitaux"],
+      "centre_lat": 8.32,
+      "centre_lng": 0.9797,
+      "zoom_default": 12,
+      "fond_carte": "osm",
+      "statut": "publie",
+      "auteur": "Service SIG",
+      "source": "Données communales 2024",
+      "mots_cles": "santé, hopital, dispensaire, centre de santé",
+      "date_creation": "2024-06-01T10:00:00Z",
+      "date_modification": "2024-06-01T10:00:00Z"
+    }
+  },
+  {
+    "model": "cartotheque.cartetheematique",
+    "pk": 2,
+    "fields": {
+      "titre": "Carte des établissements scolaires",
+      "description": "Répartition géographique des collèges et lycées sur le territoire communal. Cette carte met en évidence la couverture scolaire et les zones nécessitant de nouvelles infrastructures éducatives.",
+      "domaine": 2,
+      "vignette": "",
+      "geojson_url": "",
+      "geojson_file": "",
+      "couches_associees": ["colleges", "lycees"],
+      "centre_lat": 8.32,
+      "centre_lng": 0.9797,
+      "zoom_default": 12,
+      "fond_carte": "osm",
+      "statut": "publie",
+      "auteur": "Service SIG",
+      "source": "Données communales 2024",
+      "mots_cles": "éducation, collège, lycée, école",
+      "date_creation": "2024-06-02T14:00:00Z",
+      "date_modification": "2024-06-02T14:00:00Z"
+    }
+  },
+  {
+    "model": "cartotheque.cartetheematique",
+    "pk": 3,
+    "fields": {
+      "titre": "Carte des points d'eau potable",
+      "description": "Inventaire des bornes-fontaines et châteaux d'eau de la commune. Carte essentielle pour la gestion des ressources en eau et l'identification des populations mal desservies.",
+      "domaine": 3,
+      "vignette": "",
+      "geojson_url": "",
+      "geojson_file": "",
+      "couches_associees": ["bornes_fontaines", "chateaux_eau"],
+      "centre_lat": 8.32,
+      "centre_lng": 0.9797,
+      "zoom_default": 12,
+      "fond_carte": "osm",
+      "statut": "publie",
+      "auteur": "Service Hydrologie",
+      "source": "Données Togolaises de l'Eau 2024",
+      "mots_cles": "eau, borne-fontaine, château d'eau, hydrologie",
+      "date_creation": "2024-06-03T09:00:00Z",
+      "date_modification": "2024-06-03T09:00:00Z"
+    }
+  },
+  {
+    "model": "cartotheque.cartetheematique",
+    "pk": 4,
+    "fields": {
+      "titre": "Carte du réseau routier communal",
+      "description": "Visualisation de l'ensemble du réseau routier de la commune de Blitta 2 : routes nationales, routes régionales et pistes rurales. Permet d'évaluer la connectivité et l'accessibilité des différentes localités.",
+      "domaine": 4,
+      "vignette": "",
+      "geojson_url": "",
+      "geojson_file": "",
+      "couches_associees": ["routes"],
+      "centre_lat": 8.32,
+      "centre_lng": 0.9797,
+      "zoom_default": 11,
+      "fond_carte": "osm",
+      "statut": "publie",
+      "auteur": "Service Infrastructure",
+      "source": "Direction des Routes 2024",
+      "mots_cles": "route, infrastructure, transport, accessibilité",
+      "date_creation": "2024-06-04T11:00:00Z",
+      "date_modification": "2024-06-04T11:00:00Z"
+    }
+  },
+  {
+    "model": "cartotheque.cartetheematique",
+    "pk": 5,
+    "fields": {
+      "titre": "Carte des cooperatives agricoles",
+      "description": "Localisation des coopératives agricoles et des magasins d'intrants. Carte réalisée pour soutenir le développement agricole et faciliter l'accès aux ressources pour les exploitants.",
+      "domaine": 5,
+      "vignette": "",
+      "geojson_url": "",
+      "geojson_file": "",
+      "couches_associees": ["cooperatives", "magasins_intrants"],
+      "centre_lat": 8.32,
+      "centre_lng": 0.9797,
+      "zoom_default": 12,
+      "fond_carte": "satellite",
+      "statut": "publie",
+      "auteur": "Service Agriculture",
+      "source": "Données agricoles communales 2024",
+      "mots_cles": "agriculture, cooperative, intrant, développement",
+      "date_creation": "2024-06-05T08:00:00Z",
+      "date_modification": "2024-06-05T08:00:00Z"
+    }
+  },
+  {
+    "model": "cartotheque.cartetheematique",
+    "pk": 6,
+    "fields": {
+      "titre": "Carte des marchés et commerces",
+      "description": "Répartition des marchés de la commune avec indication des jours de marché. Outil essentiel pour le suivi des prix et la planification des activités commerciales.",
+      "domaine": 6,
+      "vignette": "",
+      "geojson_url": "",
+      "geojson_file": "",
+      "couches_associees": ["marches"],
+      "centre_lat": 8.32,
+      "centre_lng": 0.9797,
+      "zoom_default": 12,
+      "fond_carte": "osm",
+      "statut": "publie",
+      "auteur": "Service Économie",
+      "source": "Chambre de Commerce 2024",
+      "mots_cles": "marché, commerce, économie, prix",
+      "date_creation": "2024-06-06T15:00:00Z",
+      "date_modification": "2024-06-06T15:00:00Z"
+    }
+  }
+]

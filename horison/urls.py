@@ -25,6 +25,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('geoportail/', include('geoportail.urls')),
     path('agriculture/', include('agriculture.urls')),
+      path('api/cartotheque/', include('cartotheque.api_urls')), 
 ]
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
