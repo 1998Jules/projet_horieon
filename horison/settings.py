@@ -115,7 +115,10 @@ INSTALLED_APPS = [
     'rest_framework',
     'geoportail',
     'corsheaders',  # <-- IMPORTANT: Doit être ici
-    'agriculture'
+    'agriculture',
+    
+    'cartotheque', 
+
 ]
 
 # MIDDLEWARE - CORRIGÉ
