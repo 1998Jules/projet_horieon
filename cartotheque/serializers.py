@@ -1,12 +1,12 @@
 """
-Serializers DRF pour la Cartothèque
+Serializers DRF pour la Cartotheque
 """
 from rest_framework import serializers
 from .models import DomaineCarte, CarteTheematique
 
 
 class DomaineCarteSerializer(serializers.ModelSerializer):
-    """Serializer pour les domaines thématiques"""
+    """Serializer pour les domaines thematiques"""
     nombre_cartes = serializers.SerializerMethodField()
 
     class Meta:
@@ -22,20 +22,23 @@ class DomaineCarteSerializer(serializers.ModelSerializer):
 
 
 class CarteTheematiqueListSerializer(serializers.ModelSerializer):
-    """Serializer léger pour la liste des cartes (sans les données GeoJSON lourdes)"""
+    """Serializer leger pour la liste des cartes (sans les donnees GeoJSON lourdes)"""
     domaine_nom = serializers.CharField(source='domaine.nom', default=None, read_only=True)
     domaine_couleur = serializers.CharField(source='domaine.couleur', default=None, read_only=True)
     domaine_icone = serializers.CharField(source='domaine.icone', default=None, read_only=True)
     vignette_url = serializers.SerializerMethodField()
+    image_url = serializers.SerializerMethodField()
     type_carte = serializers.SerializerMethodField()
+    prix_formate = serializers.CharField(read_only=True)
 
     class Meta:
         model = CarteTheematique
         fields = [
             'id', 'titre', 'description', 'domaine', 'domaine_nom',
-            'domaine_couleur', 'domaine_icone', 'vignette_url',
+            'domaine_couleur', 'domaine_icone', 'vignette_url', 'image_url',
             'type_carte', 'statut', 'auteur', 'source', 'mots_cles',
-            'date_creation', 'date_modification'
+            'date_creation', 'date_modification', 'echelle', 'format_impression',
+            'date_edition', 'realisateur', 'is_payant', 'prix', 'prix_formate'
         ]
 
     def get_vignette_url(self, obj):
@@ -46,8 +49,16 @@ class CarteTheematiqueListSerializer(serializers.ModelSerializer):
             return obj.vignette.url
         return None
 
+    def get_image_url(self, obj):
+        if obj.image:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.image.url)
+            return obj.image.url
+        return None
+
     def get_type_carte(self, obj):
-        """Détermine le type de carte : dynamique (couches du géoportail) ou statique (GeoJSON)"""
+        """Determine le type de carte : dynamique (couches du geoportail) ou statique (GeoJSON)"""
         if obj.couches_associees and len(obj.couches_associees) > 0:
             return 'dynamique'
         elif obj.geojson_url:
@@ -58,7 +69,7 @@ class CarteTheematiqueListSerializer(serializers.ModelSerializer):
 
 
 class CarteTheematiqueDetailSerializer(CarteTheematiqueListSerializer):
-    """Serializer complet pour le détail d'une carte (avec les données de visualisation)"""
+    """Serializer complet pour le detail d'une carte (avec les donnees de visualisation)"""
     geojson_file_url = serializers.SerializerMethodField()
 
     class Meta(CarteTheematiqueListSerializer.Meta):
@@ -77,19 +88,21 @@ class CarteTheematiqueDetailSerializer(CarteTheematiqueListSerializer):
 
 
 class CarteTheematiqueCreateSerializer(serializers.ModelSerializer):
-    """Serializer pour la création/mise à jour d'une carte"""
+    """Serializer pour la creation/mise a jour d'une carte"""
 
     class Meta:
         model = CarteTheematique
         fields = [
-            'titre', 'description', 'domaine', 'vignette',
+            'titre', 'description', 'domaine', 'vignette', 'image',
             'geojson_url', 'geojson_file', 'couches_associees',
             'centre_lat', 'centre_lng', 'zoom_default', 'fond_carte',
-            'statut', 'auteur', 'source', 'mots_cles'
+            'statut', 'auteur', 'source', 'mots_cles',
+            'echelle', 'format_impression', 'date_edition',
+            'realisateur', 'is_payant', 'prix'
         ]
 
     def validate(self, data):
-        """Valider qu'au moins une source de données est fournie"""
+        """Valider qu'au moins une source de donnees est fournie"""
         geojson_url = data.get('geojson_url', '')
         geojson_file = data.get('geojson_file')
         couches = data.get('couches_associees', [])
