@@ -1,7 +1,4 @@
 from django.contrib import admin
-
-# Register your models here.
-from django.contrib import admin
 from .models import DomaineCarte, CarteTheematique
 
 
@@ -16,10 +13,39 @@ class DomaineCarteAdmin(admin.ModelAdmin):
 
 @admin.register(CarteTheematique)
 class CarteTheematiqueAdmin(admin.ModelAdmin):
-    list_display = ('titre', 'domaine', 'statut', 'date_creation', 'date_modification', 'auteur')
-    list_filter = ('statut', 'domaine')
-    search_fields = ('titre', 'description')
+    list_display = (
+        'titre', 'domaine', 'statut', 'is_payant', 'prix',
+        'echelle', 'format_impression', 'date_creation', 'date_modification', 'auteur'
+    )
+    list_filter = ('statut', 'domaine', 'is_payant', 'format_impression')
+    search_fields = ('titre', 'description', 'realisateur')
     list_editable = ('statut',)
     date_hierarchy = 'date_creation'
     ordering = ('-date_creation',)
     readonly_fields = ('date_creation', 'date_modification')
+
+    fieldsets = (
+        ('Informations generales', {
+            'fields': ('titre', 'description', 'domaine', 'statut')
+        }),
+        ('Images', {
+            'fields': ('vignette', 'image')
+        }),
+        ('Sources de donnees', {
+            'fields': ('geojson_url', 'geojson_file', 'couches_associees'),
+            'classes': ('collapse',)
+        }),
+        ('Configuration de la carte', {
+            'fields': ('centre_lat', 'centre_lng', 'zoom_default', 'fond_carte'),
+            'classes': ('collapse',)
+        }),
+        ('Metadonnees', {
+            'fields': ('auteur', 'source', 'mots_cles', 'realisateur')
+        }),
+        ('Caracteristiques produit', {
+            'fields': ('echelle', 'format_impression', 'date_edition')
+        }),
+        ('Tarification', {
+            'fields': ('is_payant', 'prix')
+        }),
+    )
