@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.urls import path
-from .views import get_all_layers
+from .views import get_all_layers,search_entities
 from . import views
 
 urlpatterns = [
@@ -17,7 +17,8 @@ urlpatterns = [
     path('geojson/bornefontaine/', views.borne_geojson, name='borne_geojson'),
     path('geojson/chateau/', views.chateau_geojson, name='chateau_geojson'),
     path('geojson/hopitale/', views.hopital_geojson, name='hopital_geojson'),
-    path('api/layers/', get_all_layers, name='get_all_layers'),
+    path('api/layers/', views.get_all_layers, name='get_all_layers'),
+    path('api/search/', views.search_entities, name='search_entities'),
    
    
     

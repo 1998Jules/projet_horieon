@@ -9,7 +9,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 # Chemin vers votre fichier clé
-SERVICE_ACCOUNT_KEY_FILE = 'ee-koutoumbogajules-baa273e324a1.json'
+SERVICE_ACCOUNT_KEY_FILE = 'ee-koutoumbogajules-c99000ca569e.json'
 
 def initialize_ee():
     """Initialise Earth Engine avec le compte de service"""
