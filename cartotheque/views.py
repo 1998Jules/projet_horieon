@@ -1,6 +1,3 @@
-from django.shortcuts import render
-
-# Create your views here.
 """
 Vues API pour la Cartothèque
 """

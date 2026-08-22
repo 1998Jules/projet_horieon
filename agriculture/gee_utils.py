@@ -1,3 +1,5 @@
+
+
 # agriculture/gee_utils.py
 import ee
 import pandas as pd
@@ -10,6 +12,7 @@ logger = logging.getLogger(__name__)
 
 # Chemin vers votre fichier clé
 SERVICE_ACCOUNT_KEY_FILE = 'ee-koutoumbogajules-c99000ca569e.json'
+
 
 def initialize_ee():
     """Initialise Earth Engine avec le compte de service"""
@@ -27,7 +30,7 @@ def initialize_ee():
     except Exception as e:
         print(f"Erreur critique lors de l'initialisation de Google Earth Engine: {e}")
         raise e
-
+ 
 def geojson_to_ee_geometry(geojson_geometry):
     """
     Convertit proprement un GeoJSON en géométrie Earth Engine
@@ -71,13 +74,13 @@ def geojson_to_ee_geometry(geojson_geometry):
     try:
         if not isinstance(geojson_geometry, dict):
             raise ValueError("L'entrée n'est pas un dictionnaire")
-
+ 
         geom_type = geojson_geometry.get("type")
         coords = geojson_geometry.get("coordinates")
-
+ 
         if not geom_type or not coords:
             raise ValueError("GeoJSON invalide")
-
+ 
         # FONCTION DE NETTOYAGE : Supprimer la 3ème dimension (Z) si elle existe
         def strip_z(coordinates, g_type):
             if g_type == 'Point':
@@ -103,21 +106,21 @@ def geojson_to_ee_geometry(geojson_geometry):
                 return [strip_z(poly, 'Polygon') for poly in coordinates]
             
             return coordinates
-
+ 
         # Appliquer le nettoyage
         clean_coords = strip_z(coords, geom_type)
-
+ 
         # Créer l'objet GeoJSON propre (2D)
         clean_geom = {
             "type": geom_type,
             "coordinates": clean_coords
         }
-
+ 
         # Créer la géométrie Earth Engine
         geom = ee.Geometry(clean_geom)
         
         return geom
-
+ 
     except Exception as e:
         logger.error(f"Erreur conversion GeoJSON -> EE: {e}")
         raise e
@@ -195,9 +198,9 @@ def get_monthly_ndvi_series(geojson_geometry, years):
         logger.error(f"Erreur dans get_monthly_ndvi_series: {e}")
         raise e
 # agriculture/gee_utils.py
-
+ 
 # agriculture/gee_utils.py
-
+ 
 def get_clipped_ndvi_map(geojson_geometry, year):
     """
     Génère une URL de tuiles (XYZ) NDVI découpée (clipped) pour une zone et une année spécifiques.
@@ -219,7 +222,7 @@ def get_clipped_ndvi_map(geojson_geometry, year):
         if count == 0:
              logger.warning(f"Aucune image Sentinel-2 trouvée pour {year}.")
              return None
-
+ 
         # Calculer NDVI
         ndvi_image = collection.median().normalizedDifference(['B8', 'B4']).rename('NDVI')
         
@@ -246,9 +249,9 @@ def get_clipped_ndvi_map(geojson_geometry, year):
         return None
     
 # agriculture/gee_utils.py
-
+ 
 # ... (imports existants) ...
-
+ 
 def get_ndvi_download_url(geojson_geometry, year):
     """
     Génère une URL de téléchargement pour l'image NDVI clipée (format GeoTIFF).
@@ -268,7 +271,7 @@ def get_ndvi_download_url(geojson_geometry, year):
         count = collection.size().getInfo()
         if count == 0:
             return None
-
+ 
         ndvi_image = collection.median().normalizedDifference(['B8', 'B4']).rename('NDVI')
         
         # Clipper l'image
@@ -289,12 +292,12 @@ def get_ndvi_download_url(geojson_geometry, year):
     except Exception as e:
         logger.error(f"Erreur génération URL téléchargement: {e}")
         return None
-
-
+ 
+ 
 # agriculture/gee_utils.py
-
+ 
 # ... (code existant) ...
-
+ 
 def get_8_day_ndvi_series(geojson_geometry, year):
     """
     Calcule la série temporelle NDVI avec une moyenne sur 8 jours
@@ -374,7 +377,7 @@ def get_8_day_ndvi_series(geojson_geometry, year):
     except Exception as e:
         logger.error(f"Erreur dans get_8_day_ndvi_series: {e}")
         raise e
-
+ 
 def get_8_day_ndvi_map(geojson_geometry, start_date_str):
     """
     Génère une URL de tuiles (XYZ) NDVI pour une période de 8 jours spécifique.
@@ -397,7 +400,7 @@ def get_8_day_ndvi_map(geojson_geometry, start_date_str):
         if count == 0:
             logger.warning(f"Aucune image Landsat trouvée pour la période du {start_date_str}.")
             return None
-
+ 
         # Calculer NDVI
         composite = collection.median()
         ndvi_image = composite.normalizedDifference(['SR_B5', 'SR_B4']).rename('NDVI')
@@ -419,14 +422,14 @@ def get_8_day_ndvi_map(geojson_geometry, start_date_str):
     except Exception as e:
         logger.error(f"Erreur génération carte NDVI 8 jours: {e}")
         return None
-
+ 
 # agriculture/gee_utils.py
-
+ 
 # agriculture/gee_utils.py
 # agriculture/gee_utils.py
-
+ 
 # ... (Vos imports existants) ...
-
+ 
 def mask_s2_clouds(image):
     """Masque les nuages et les cirrus d'une image Sentinel-2 en utilisant la bande QA60."""
     # (Votre code existant pour mask_s2_clouds ici...)
@@ -435,7 +438,7 @@ def mask_s2_clouds(image):
     cirrus_bit = 1 << 11
     mask = qa.bitwiseAnd(cloud_bit).eq(0).And(qa.bitwiseAnd(cirrus_bit).eq(0))
     return image.updateMask(mask)
-
+ 
 def calculate_index(image, index_type):
     """
     Calcule l'indice demandé (NDVI, EVI, NDWI, MSAVI).
@@ -468,7 +471,7 @@ def calculate_index(image, index_type):
     else:
         # Défaut NDVI
         return image.normalizedDifference(['B8', 'B4']).rename('NDVI')
-
+ 
 def get_field_ndvi_history(geojson_geometry, start_date_str, end_date_str=None, index_type='ndvi'):
     """
     Récupère l'historique image par image, MOYENNÉ PAR JOUR.
@@ -484,13 +487,13 @@ def get_field_ndvi_history(geojson_geometry, start_date_str, end_date_str=None, 
             end_date = ee.Date(end_date_str)
         else:
             end_date = ee.Date(datetime.now()) 
-
+ 
         # Collection Sentinel-2
         collection = ee.ImageCollection("COPERNICUS/S2_SR_HARMONIZED") \
             .filterBounds(geom) \
             .filterDate(start_date, end_date) \
             .filter(ee.Filter.lt('CLOUDY_PIXEL_PERCENTAGE', 40)) 
-
+ 
         # --- ÉTAPE 1 : RÉCUPÉRER LES DATES UNIQUES ---
         try:
             raw_date_list = collection.aggregate_array('system:time_start').getInfo()
@@ -511,7 +514,7 @@ def get_field_ndvi_history(geojson_geometry, start_date_str, end_date_str=None, 
         except Exception as e:
             logger.error(f"Erreur récupération dates: {e}")
             unique_dates = []
-
+ 
         unique_dates = unique_dates[:30] # Limite à 30 jours
         
         # Palettes de couleurs pour chaque indice
@@ -526,7 +529,7 @@ def get_field_ndvi_history(geojson_geometry, start_date_str, end_date_str=None, 
         
         # Palette par défaut (au cas où)
         current_vis_params = vis_params_map.get(index_type, vis_params_map['ndvi'])
-
+ 
         # --- ÉTAPE 2 : BOUCLE SUR CHAQUE JOUR UNIQUE ---
         for date_str in unique_dates:
             try:
@@ -543,10 +546,10 @@ def get_field_ndvi_history(geojson_geometry, start_date_str, end_date_str=None, 
                 # Vérifier s'il y a des images
                 if daily_col_masked.size().getInfo() == 0:
                     continue
-
+ 
                 # --- ÉTAPE 4 : CALCULER L'INDICE SPÉCIFIQUE ---
                 index_image = calculate_index(daily_col_masked.median(), index_type)
-
+ 
                 # Clipper sur la géométrie
                 ndvi_image = index_image.clip(geom) # Note: on garde le nom 'NDVI' pour simplifier, mais la valeur est celle de l'indice choisi
                 
@@ -561,7 +564,7 @@ def get_field_ndvi_history(geojson_geometry, start_date_str, end_date_str=None, 
                 
                 if mean_ndvi is None:
                     continue
-
+ 
                 # --- ÉTAPE 5 : GÉNÉRER L'URL DE LA CARTE ---
                 # Utiliser la palette de l'indice sélectionné
                 current_vis_params = vis_params_map[index_type]
@@ -578,18 +581,18 @@ def get_field_ndvi_history(geojson_geometry, start_date_str, end_date_str=None, 
             except Exception as e:
                 logger.warning(f"Erreur traitement jour {date_str}: {e}")
                 continue
-
+ 
         results.sort(key=lambda x: x['date'])
         return results
-
+ 
     except Exception as e:
         logger.error(f"Erreur get_field_ndvi_history: {e}")
         raise e
-
+ 
 # agriculture/gee_utils.py
 # agriculture/gee_utils.py
 # ... (gardez tout le code précédent inchangé jusqu'à calculate_index) ...
-
+ 
 def get_field_indices_history(geojson_geometry, start_date_str, indices):
     """
     Calcule l'historique pour plusieurs indices (NDVI, EVI, NDWI, MSAVI) en une seule passe.
@@ -691,4 +694,251 @@ def get_field_indices_history(geojson_geometry, start_date_str, indices):
         
     except Exception as e:
         logger.error(f"Erreur get_field_indices_history: {e}")
+        raise e
+ 
+ 
+# agriculture/gee_utils.py
+# ==================== DONNÉES CLIMATIQUES (CHIRPS + ERA5-Land) ====================
+# Ajouté pour l'onglet "Temps" : précipitations journalières (CHIRPS) et
+# température journalière (ERA5-Land), superposables aux séries d'indices spectraux.
+ 
+def get_chirps_precipitation_series(geojson_geometry, start_date_str, end_date_str=None):
+    """
+    Récupère la série temporelle journalière des précipitations (mm/jour)
+    à partir de CHIRPS Daily (résolution ~5.5 km) sur la zone du champ.
+    Une seule requête serveur (map + getInfo) pour éviter des centaines
+    d'appels séquentiels à Earth Engine.
+    """
+    try:
+        initialize_ee()
+        geom = geojson_to_ee_geometry(geojson_geometry)
+ 
+        start_date = ee.Date(start_date_str)
+        end_date = ee.Date(end_date_str) if end_date_str else ee.Date(datetime.now().strftime('%Y-%m-%d'))
+ 
+        collection = ee.ImageCollection('UCSB-CHG/CHIRPS/DAILY') \
+            .filterDate(start_date, end_date) \
+            .filterBounds(geom)
+ 
+        def reduce_image(img):
+            stats = img.reduceRegion(
+                reducer=ee.Reducer.mean(),
+                geometry=geom,
+                scale=5566,  # résolution native CHIRPS
+                maxPixels=1e9,
+                bestEffort=True
+            )
+            return ee.Feature(None, {
+                'date': img.date().format('YYYY-MM-dd'),
+                'precipitation': stats.get('precipitation')
+            })
+ 
+        features = collection.map(reduce_image).getInfo().get('features', [])
+ 
+        results = []
+        for f in features:
+            props = f['properties']
+            val = props.get('precipitation')
+            results.append({
+                'date': props.get('date'),
+                'precipitation': round(float(val), 2) if val is not None else 0
+            })
+ 
+        results.sort(key=lambda x: x['date'])
+        return results
+ 
+    except Exception as e:
+        logger.error(f"Erreur get_chirps_precipitation_series: {e}")
+        raise e
+ 
+ 
+def get_era5_temperature_series(geojson_geometry, start_date_str, end_date_str=None):
+    """
+    Récupère la série temporelle journalière de température (°C) — min, max, moyenne —
+    à partir de ERA5-Land Daily Aggregated (résolution ~11 km).
+    """
+    try:
+        initialize_ee()
+        geom = geojson_to_ee_geometry(geojson_geometry)
+ 
+        start_date = ee.Date(start_date_str)
+        end_date = ee.Date(end_date_str) if end_date_str else ee.Date(datetime.now().strftime('%Y-%m-%d'))
+ 
+        collection = ee.ImageCollection('ECMWF/ERA5_LAND/DAILY_AGGR') \
+            .filterDate(start_date, end_date) \
+            .filterBounds(geom) \
+            .select(['temperature_2m_max', 'temperature_2m_min', 'temperature_2m'])
+ 
+        def reduce_image(img):
+            stats = img.reduceRegion(
+                reducer=ee.Reducer.mean(),
+                geometry=geom,
+                scale=11132,  # résolution native ERA5-Land
+                maxPixels=1e9,
+                bestEffort=True
+            )
+            return ee.Feature(None, {
+                'date': img.date().format('YYYY-MM-dd'),
+                't_max': stats.get('temperature_2m_max'),
+                't_min': stats.get('temperature_2m_min'),
+                't_mean': stats.get('temperature_2m'),
+            })
+ 
+        features = collection.map(reduce_image).getInfo().get('features', [])
+ 
+        def k_to_c(v):
+            return round(float(v) - 273.15, 1) if v is not None else None
+ 
+        results = []
+        for f in features:
+            props = f['properties']
+            results.append({
+                'date': props.get('date'),
+                't_max': k_to_c(props.get('t_max')),
+                't_min': k_to_c(props.get('t_min')),
+                't_mean': k_to_c(props.get('t_mean')),
+            })
+ 
+        results.sort(key=lambda x: x['date'])
+        return results
+ 
+    except Exception as e:
+        logger.error(f"Erreur get_era5_temperature_series: {e}")
+        raise e
+ 
+ 
+# ==================== DÉTECTION AUTOMATIQUE SÉCHERESSE / INONDATION ====================
+# Indice PNP (Percent of Normal Precipitation) : standard agrométéorologique utilisé
+# notamment par FEWS NET pour le suivi de la sécheresse en Afrique. Calculé à partir de
+# CHIRPS en comparant le cumul de pluie récent à la climatologie historique (même fenêtre
+# calendaire, sur N années précédentes), sur la géométrie du champ ou de la zone.
+ 
+def compute_climate_risk(geojson_geometry, reference_date_str=None, years_history=10):
+    """
+    Calcule un indicateur de risque sécheresse (PNP 30j/90j) et inondation
+    (anomalie de pluie sur 5j) à partir de CHIRPS, pour une géométrie donnée.
+ 
+    Toutes les statistiques (actuelles + historiques) sont regroupées dans un seul
+    ee.Dictionary().getInfo() pour limiter les allers-retours client/serveur.
+    """
+    try:
+        initialize_ee()
+        geom = geojson_to_ee_geometry(geojson_geometry)
+ 
+        ref_date = ee.Date(reference_date_str) if reference_date_str else ee.Date(datetime.now().strftime('%Y-%m-%d'))
+        chirps = ee.ImageCollection('UCSB-CHG/CHIRPS/DAILY')
+ 
+        def cumulative_precip(end_date, days):
+            start = end_date.advance(-days, 'day')
+            filtered = chirps.filterDate(start, end_date).filterBounds(geom)
+            # CHIRPS Daily a un délai de publication : pour les fenêtres récentes
+            # (ex. les 5 derniers jours), il se peut qu'aucune image ne soit encore
+            # disponible. Dans ce cas, ImageCollection.sum() sur une collection vide
+            # renvoie une image SANS AUCUNE BANDE, ce qui fait échouer
+            # stats.get('precipitation') côté serveur EE ("Dictionary does not
+            # contain key"). On force donc une bande 'precipitation' à 0 par défaut
+            # pour garantir que la clé existe toujours dans le dictionnaire renvoyé.
+            total_img = ee.Image(ee.Algorithms.If(
+                filtered.size().gt(0),
+                filtered.sum(),
+                ee.Image.constant(0).rename('precipitation').clip(geom)
+            ))
+            stats = total_img.reduceRegion(
+                reducer=ee.Reducer.mean(),
+                geometry=geom,
+                scale=5566,
+                maxPixels=1e9,
+                bestEffort=True
+            )
+            return stats.get('precipitation')
+ 
+        # Cumuls actuels
+        current = {
+            'c30': cumulative_precip(ref_date, 30),
+            'c90': cumulative_precip(ref_date, 90),
+            'c5': cumulative_precip(ref_date, 5),
+        }
+ 
+        # Climatologie : mêmes fenêtres calendaires, N années précédentes
+        hist_30, hist_90, hist_5 = [], [], []
+        for y in range(1, years_history + 1):
+            past_end = ref_date.advance(-y, 'year')
+            hist_30.append(cumulative_precip(past_end, 30))
+            hist_90.append(cumulative_precip(past_end, 90))
+            hist_5.append(cumulative_precip(past_end, 5))
+ 
+        payload = ee.Dictionary({
+            'current': current,
+            'hist_30': hist_30,
+            'hist_90': hist_90,
+            'hist_5': hist_5,
+        }).getInfo()
+ 
+        def _pnp(current_val, hist_list):
+            valid = [h for h in hist_list if h is not None]
+            if not valid or current_val is None:
+                return None, None
+            mean_hist = sum(valid) / len(valid)
+            if mean_hist == 0:
+                return None, round(mean_hist, 1)
+            return round((current_val / mean_hist) * 100, 1), round(mean_hist, 1)
+ 
+        def _classify_drought(pnp_val):
+            if pnp_val is None:
+                return 'inconnu'
+            if pnp_val < 50:
+                return 'secheresse_severe'
+            if pnp_val < 75:
+                return 'secheresse_moderee'
+            if pnp_val < 90:
+                return 'secheresse_legere'
+            if pnp_val <= 110:
+                return 'normal'
+            return 'excedentaire'
+ 
+        pnp_30, mean_30 = _pnp(payload['current']['c30'], payload['hist_30'])
+        pnp_90, mean_90 = _pnp(payload['current']['c90'], payload['hist_90'])
+ 
+        # Inondation : anomalie standardisée du cumul 5 jours (z-score)
+        hist_5_valid = [h for h in payload['hist_5'] if h is not None]
+        flood_level = 'inconnu'
+        mean_5 = None
+        if payload['current']['c5'] is not None and len(hist_5_valid) >= 3:
+            mean_5 = sum(hist_5_valid) / len(hist_5_valid)
+            variance_5 = sum((x - mean_5) ** 2 for x in hist_5_valid) / len(hist_5_valid)
+            std_5 = variance_5 ** 0.5
+            flood_level = 'normal'
+            if std_5 > 0:
+                z_5 = (payload['current']['c5'] - mean_5) / std_5
+                if z_5 >= 2.5:
+                    flood_level = 'inondation_critique'
+                elif z_5 >= 1.5:
+                    flood_level = 'inondation_elevee'
+                elif z_5 >= 1.0:
+                    flood_level = 'inondation_moderee'
+ 
+        return {
+            'reference_date': reference_date_str or datetime.now().strftime('%Y-%m-%d'),
+            'years_history': years_history,
+            'drought_30d': {
+                'pnp': pnp_30,
+                'classification': _classify_drought(pnp_30),
+                'current_mm': round(payload['current']['c30'], 1) if payload['current']['c30'] is not None else None,
+                'historical_avg_mm': mean_30
+            },
+            'drought_90d': {
+                'pnp': pnp_90,
+                'classification': _classify_drought(pnp_90),
+                'current_mm': round(payload['current']['c90'], 1) if payload['current']['c90'] is not None else None,
+                'historical_avg_mm': mean_90
+            },
+            'flood_risk': {
+                'level': flood_level,
+                'current_5d_mm': round(payload['current']['c5'], 1) if payload['current']['c5'] is not None else None,
+                'historical_avg_5d_mm': round(mean_5, 1) if mean_5 is not None else None
+            }
+        }
+ 
+    except Exception as e:
+        logger.error(f"Erreur compute_climate_risk: {e}")
         raise e

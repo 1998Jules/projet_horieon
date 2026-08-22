@@ -565,6 +565,120 @@ def simulate_growth(request):
         return JsonResponse({'success': False, 'error': 'Culture introuvable'}, status=404)
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
+# ==================== ONGLET "TEMPS" : CLIMAT DU CHAMP ====================
+from .gee_utils import get_chirps_precipitation_series, get_era5_temperature_series, compute_climate_risk
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def field_climate_risk(request):
+    """
+    Calcule automatiquement le risque de sécheresse (PNP 30j/90j) et d'inondation
+    (anomalie de pluie 5j) pour un champ, à partir de CHIRPS. Remplace la saisie
+    manuelle des alertes DROUGHT/FLOOD par une détection automatique.
+
+    Body JSON attendu : { "champ_id": 1, "reference_date": "2026-08-16" (optionnel) }
+    """
+    try:
+        data = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({'success': False, 'error': 'JSON invalide'}, status=400)
+
+    champ_id = data.get('champ_id')
+    if not champ_id:
+        return JsonResponse({'success': False, 'error': 'ID champ manquant'}, status=400)
+
+    try:
+        champ = Champ.objects.get(id=champ_id)
+    except Champ.DoesNotExist:
+        return JsonResponse({'success': False, 'error': 'Champ introuvable'}, status=404)
+
+    reference_date = data.get('reference_date')
+
+    geom_wgs84 = champ.geom.transform(4326, clone=True)
+    geom_wgs84 = geom_wgs84.buffer(0)
+    geojson = json.loads(geom_wgs84.geojson)
+    centroid = geom_wgs84.centroid
+
+    try:
+        risk = compute_climate_risk(geojson, reference_date)
+    except Exception as e:
+        logger.error(f"Erreur compute_climate_risk pour le champ {champ_id}: {e}")
+        return JsonResponse({'success': False, 'error': "Erreur lors du calcul du risque climatique"}, status=500)
+
+    return JsonResponse({
+        'success': True,
+        'champ_id': champ_id,
+        'champ_nom': champ.nom,
+        'centroid': {'lat': centroid.y, 'lon': centroid.x},
+        **risk
+    })
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def field_climate_series(request):
+    """
+    Retourne pour un champ donné :
+    - la série journalière de précipitations CHIRPS (mm/jour)
+    - la série journalière de température ERA5-Land (min/max/moyenne en °C)
+    - le centroïde du champ (pour interroger la prévision météo 14 jours côté frontend)
+
+    Body JSON attendu : { "champ_id": 1, "start_date": "2024-01-01" (optionnel) }
+    Si start_date n'est pas fourni, on utilise la date de semis du champ,
+    ou 1 an en arrière si celle-ci est vide.
+    """
+    try:
+        data = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({'success': False, 'error': 'JSON invalide'}, status=400)
+
+    champ_id = data.get('champ_id')
+    if not champ_id:
+        return JsonResponse({'success': False, 'error': 'ID champ manquant'}, status=400)
+
+    try:
+        champ = Champ.objects.get(id=champ_id)
+    except Champ.DoesNotExist:
+        return JsonResponse({'success': False, 'error': 'Champ introuvable'}, status=404)
+
+    from datetime import timedelta
+    start_date = data.get('start_date')
+    if not start_date:
+        if champ.date_semi:
+            start_date = champ.date_semi.strftime('%Y-%m-%d')
+        else:
+            one_year_ago = datetime.now() - timedelta(days=365)
+            start_date = one_year_ago.strftime('%Y-%m-%d')
+
+    # Transformation géométrie (identique aux autres vues champ)
+    geom_wgs84 = champ.geom.transform(4326, clone=True)
+    geom_wgs84 = geom_wgs84.buffer(0)
+    geojson = json.loads(geom_wgs84.geojson)
+
+    precipitation = []
+    temperature = []
+
+    try:
+        precipitation = get_chirps_precipitation_series(geojson, start_date)
+    except Exception as e:
+        logger.error(f"Erreur CHIRPS pour le champ {champ_id}: {e}")
+
+    try:
+        temperature = get_era5_temperature_series(geojson, start_date)
+    except Exception as e:
+        logger.error(f"Erreur ERA5-Land pour le champ {champ_id}: {e}")
+
+    centroid = geom_wgs84.centroid
+
+    return JsonResponse({
+        'success': True,
+        'precipitation': precipitation,
+        'temperature': temperature,
+        'centroid': {'lat': centroid.y, 'lon': centroid.x},
+        'start_date': start_date,
+    })
+
+
 @csrf_exempt
 @require_http_methods(["POST", "DELETE"])
 def delete_crop_calendar(request, pk):

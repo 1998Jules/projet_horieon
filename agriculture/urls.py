@@ -30,6 +30,12 @@ urlpatterns = [
     # 3. Récupérer l'historique NDVI d'un champ spécifique (Graphique & Carte)
     path('api/field-ndvi/', views.field_ndvi_timeseries, name='field_ndvi_timeseries'),
     path('api/field-indices-comparison/', views.field_indices_comparison, name='field_indices_comparison'),
+
+    # Onglet "Temps" : précipitations (CHIRPS) + température (ERA5-Land) + centroïde du champ
+    path('api/field-climate/', views.field_climate_series, name='field_climate_series'),
+
+    # Détection automatique du risque sécheresse/inondation (indice PNP sur CHIRPS)
+    path('api/field-climate-risk/', views.field_climate_risk, name='field_climate_risk'),
 # Liste, Ajout, Modif, Suppression
     path('api/crop-calendar/', views.get_crop_calendar, name='get_crop_calendar'),
     path('api/crop-calendar/add/', views.add_crop_calendar, name='add_crop_calendar'),
