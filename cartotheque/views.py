@@ -5,6 +5,7 @@ from rest_framework import viewsets, status, filters
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
+from rest_framework.permissions import AllowAny, IsAdminUser
 from django_filters.rest_framework import DjangoFilterBackend
 
 from .models import DomaineCarte, CarteTheematique
@@ -44,6 +45,13 @@ class CarteTheematiqueViewSet(viewsets.ModelViewSet):
     search_fields = ['titre', 'description', 'mots_cles', 'auteur']
     ordering_fields = ['date_creation', 'titre', 'date_modification']
     ordering = ['-date_creation']
+
+    def get_permissions(self):
+        # La consultation reste publique, mais toute écriture est réservée
+        # aux administrateurs Django (is_staff=True).
+        if self.action in ['create', 'update', 'partial_update', 'destroy']:
+            return [IsAdminUser()]
+        return [AllowAny()]
 
     def get_serializer_class(self):
         if self.action == 'list':
