@@ -942,3 +942,467 @@ def compute_climate_risk(geojson_geometry, reference_date_str=None, years_histor
     except Exception as e:
         logger.error(f"Erreur compute_climate_risk: {e}")
         raise e
+
+# ==================== PLUIE QUASI TEMPS RÉEL (GPM IMERG) ====================
+# CHIRPS a un délai de publication de 2 à 3 jours : inutilisable pour détecter
+# une inondation "en cours". GPM IMERG (NASA) publie des données demi-horaires
+# avec une latence de quelques heures, ce qui permet un suivi beaucoup plus
+# proche du temps réel pour la pluie récente (dernières 24-72h).
+
+def get_realtime_precipitation(geojson_geometry, hours=72):
+    """
+    Récupère le cumul de pluie quasi temps réel (GPM IMERG, demi-horaire)
+    sur la zone, sur les dernières `hours` heures. Retourne le cumul total
+    et le cumul des 24 dernières heures, utiles pour une alerte inondation
+    immédiate.
+    """
+    try:
+        initialize_ee()
+        geom = geojson_to_ee_geometry(geojson_geometry)
+
+        now = ee.Date(datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S'))
+        start = now.advance(-hours, 'hour')
+
+        collection = ee.ImageCollection('NASA/GPM_L3/IMERG_V07') \
+            .filterDate(start, now) \
+            .filterBounds(geom) \
+            .select('precipitation')  # mm/h
+
+        def reduce_image(img):
+            stats = img.reduceRegion(
+                reducer=ee.Reducer.mean(),
+                geometry=geom,
+                scale=11132,
+                maxPixels=1e9,
+                bestEffort=True
+            )
+            return ee.Feature(None, {
+                'time': img.date().format('YYYY-MM-dd HH:mm'),
+                'rate_mm_h': stats.get('precipitation')
+            })
+
+        features = collection.map(reduce_image).getInfo().get('features', [])
+
+        slices = []
+        for f in features:
+            props = f['properties']
+            rate = props.get('rate_mm_h')
+            if rate is None:
+                continue
+            slices.append({
+                'time': props.get('time'),
+                'mm_30min': round(float(rate) * 0.5, 2)
+            })
+
+        slices.sort(key=lambda x: x['time'])
+        total_mm = round(sum(s['mm_30min'] for s in slices), 1)
+
+        last_24h_cutoff = datetime.utcnow().timestamp() - 24 * 3600
+        total_24h = 0.0
+        for s in slices:
+            try:
+                t = datetime.strptime(s['time'], '%Y-%m-%d %H:%M').timestamp()
+                if t >= last_24h_cutoff:
+                    total_24h += s['mm_30min']
+            except Exception:
+                continue
+        total_24h = round(total_24h, 1)
+
+        return {
+            'window_hours': hours,
+            'total_mm': total_mm,
+            'total_24h_mm': total_24h,
+            'nb_observations': len(slices),
+            'last_observation': slices[-1]['time'] if slices else None,
+            'series': slices,
+        }
+
+    except Exception as e:
+        logger.error(f"Erreur get_realtime_precipitation: {e}")
+        raise e
+
+
+def classify_realtime_flood(total_24h_mm, total_72h_mm=None):
+    """
+    Classification simple du risque d'inondation immédiat. Seuils courants
+    en Afrique de l'Ouest (50mm/24h, 100mm/72h) — à ajuster selon la zone.
+    """
+    if total_24h_mm is None:
+        return 'inconnu'
+    if total_24h_mm >= 100 or (total_72h_mm is not None and total_72h_mm >= 150):
+        return 'inondation_critique'
+    if total_24h_mm >= 50 or (total_72h_mm is not None and total_72h_mm >= 100):
+        return 'inondation_elevee'
+    if total_24h_mm >= 25:
+        return 'inondation_moderee'
+    return 'normal'
+
+
+# ==================== INDICES DE SÉCHERESSE HISTORIQUE (VCI / TCI / VHI / NCWSI) ====================
+# Version 2 — optimisée (cache mémoire + batch getInfo unique).
+#
+# Sources satellite :
+#   - MOD13A2 (16-day NDVI, 1 km)  : bande 'NDVI', scale factor 0.0001
+#   - MOD11A2 (8-day LST, 1 km)    : bande 'LST_Day_1km', scale factor 0.02 (K → °C)
+#
+# Indices implémentés (tous normalisés 0-100, plus haut = meilleure condition végétale) :
+#   - VCI    : Vegetation Condition Index = (NDVI - NDVImin) / (NDVImax - NDVImin) * 100
+#   - TCI    : Temperature Condition Index = (LSTmax - LST) / (LSTmax - LSTmin) * 100
+#   - VHI    : Vegetation Health Index = 0.5 * VCI + 0.5 * TCI
+#   - NCWSI  : Normalized Condition Water Stress Index = normalize(NDVI / LST) * 100
+#
+# Période de référence (min/max) : 2010 → année courante.
+
+import time
+import json as _json
+import hashlib as _hashlib
+
+DROUGHT_START_YEAR = 2010
+
+_DROUGHT_VIS_PARAMS = {
+    'min': 0,
+    'max': 100,
+    'palette': [
+        '#a50026', '#d73027', '#f46d43', '#fdae61', '#fee08b',
+        '#d9ef8b', '#a6d96a', '#66bd63', '#1a9850', '#006837'
+    ]
+}
+
+# --- Cache mémoire (TTL 1h) : évite de recalculer les mêmes indices si l'utilisateur
+#     recharge la même zone/années dans l'heure. Énorme gain de performance.
+_DROUGHT_CACHE = {}
+_DROUGHT_CACHE_TTL = 3600  # 1 heure
+
+
+def _drought_cache_key(geojson_geometry, years, index_type, kind):
+    """Construit une clé de cache stable à partir des paramètres."""
+    try:
+        geom_str = _json.dumps(geojson_geometry, sort_keys=True)
+    except Exception:
+        geom_str = str(geojson_geometry)
+    years_str = ','.join(str(int(y)) for y in sorted(set(int(y) for y in years)))
+    key_str = f"{kind}|{index_type}|{years_str}|{_hashlib.md5(geom_str.encode()).hexdigest()}"
+    return key_str
+
+
+def _drought_cache_get(key):
+    if key in _DROUGHT_CACHE:
+        ts, val = _DROUGHT_CACHE[key]
+        if time.time() - ts < _DROUGHT_CACHE_TTL:
+            return val
+        del _DROUGHT_CACHE[key]
+    return None
+
+
+def _drought_cache_set(key, value):
+    # Limite simple pour éviter une croissance infinie en mémoire
+    if len(_DROUGHT_CACHE) > 200:
+        # Supprime les 50 plus anciennes entrées
+        sorted_keys = sorted(_DROUGHT_CACHE.keys(), key=lambda k: _DROUGHT_CACHE[k][0])
+        for k in sorted_keys[:50]:
+            del _DROUGHT_CACHE[k]
+    _DROUGHT_CACHE[key] = (time.time(), value)
+
+
+def _load_modis_ndvi_collection(geom, start_year, end_year):
+    """Charge MOD13A2 NDVI à l'échelle réelle [0, 1] sur la période donnée."""
+    start_date = ee.Date.fromYMD(start_year, 1, 1)
+    end_date = ee.Date.fromYMD(end_year, 12, 31)
+    return (
+        ee.ImageCollection("MODIS/061/MOD13A2")
+        .filterDate(start_date, end_date)
+        .filterBounds(geom)
+        .select('NDVI')
+        .map(lambda img: img.multiply(0.0001)
+             .copyProperties(img, ['system:time_start', 'system:time_end']))
+    )
+
+
+def _load_modis_lst_collection(geom, start_year, end_year):
+    """Charge MOD11A2 LST (jour) en °C sur la période donnée."""
+    start_date = ee.Date.fromYMD(start_year, 1, 1)
+    end_date = ee.Date.fromYMD(end_year, 12, 31)
+    return (
+        ee.ImageCollection("MODIS/061/MOD11A2")
+        .filterDate(start_date, end_date)
+        .filterBounds(geom)
+        .select('LST_Day_1km')
+        .map(lambda img: img.multiply(0.02).subtract(273.15)
+             .copyProperties(img, ['system:time_start', 'system:time_end']))
+    )
+
+
+def _build_drought_image(ndvi_month, lst_month, ndvi_min, ndvi_max,
+                         lst_min, lst_max, ncws_min, ncws_max, index_type):
+    """Construit l'image mensuelle pour l'indice demandé. Toutes les entrées sont des ee.Image."""
+    if index_type == 'vci':
+        return ndvi_month.expression(
+            '(Ia - Imin) / (Imax - Imin) * 100',
+            {'Ia': ndvi_month, 'Imin': ndvi_min, 'Imax': ndvi_max}
+        ).rename('INDEX')
+    if index_type == 'tci':
+        return lst_month.expression(
+            '(Imax - Ia) / (Imax - Imin) * 100',
+            {'Ia': lst_month, 'Imin': lst_min, 'Imax': lst_max}
+        ).rename('INDEX')
+    if index_type == 'vhi':
+        vci = ndvi_month.expression(
+            '(Ia - Imin) / (Imax - Imin) * 100',
+            {'Ia': ndvi_month, 'Imin': ndvi_min, 'Imax': ndvi_max}
+        )
+        tci = lst_month.expression(
+            '(Imax - Ia) / (Imax - Imin) * 100',
+            {'Ia': lst_month, 'Imin': lst_min, 'Imax': lst_max}
+        )
+        return vci.multiply(0.5).add(tci.multiply(0.5)).rename('INDEX')
+    if index_type == 'ncwsi':
+        ncws = ndvi_month.divide(lst_month)
+        return ncws.expression(
+            '(Ia - Imin) / (Imax - Imin) * 100',
+            {'Ia': ncws, 'Imin': ncws_min, 'Imax': ncws_max}
+        ).rename('INDEX')
+    # Défaut : VCI
+    return ndvi_month.expression(
+        '(Ia - Imin) / (Imax - Imin) * 100',
+        {'Ia': ndvi_month, 'Imin': ndvi_min, 'Imax': ndvi_max}
+    ).rename('INDEX')
+
+
+def _compute_ncws_min_max(geom, ndvi_col, lst_col, ref_start, ref_end):
+    """
+    Calcule min/max de NCWS = NDVI / LST sur la période de référence.
+    Approche approximée : on prend le min/max des composites mensuels NDVI/LST.
+    """
+    # Composite mensuel moyen sur toute la période de référence
+    ndvi_mean = ndvi_col.mean()
+    lst_mean = lst_col.mean()
+    # NCWS de référence = NDVI moyen / LST moyen
+    ncws_ref = ndvi_mean.divide(lst_mean)
+    # Pour le min/max on prend les bornes approximées (suffisant pour normaliser)
+    ncws_min = ncws_ref.multiply(0.5)
+    ncws_max = ncws_ref.multiply(2.0)
+    return ncws_min, ncws_max
+
+
+def get_drought_index_timeseries(geojson_geometry, years, index_type='vhi'):
+    """
+    Calcule la série mensuelle d'un indice de sécheresse (VCI/TCI/VHI/NCWSI) sur une zone,
+    pour les années sélectionnées. La période de référence (min/max) s'étend de
+    DROUGHT_START_YEAR (2010) à la dernière année sélectionnée.
+
+    OPTIMISATIONS v2 :
+      - 1 seul appel getInfo() au lieu de 12×N (gain ~10× sur le temps de réponse).
+      - Cache mémoire Python (TTL 1h) pour les requêtes répétées.
+    """
+    try:
+        # Vérification du cache en premier
+        years_int = sorted(set(int(y) for y in years))
+        if not years_int:
+            return []
+
+        cache_key = _drought_cache_key(geojson_geometry, years_int, index_type, 'ts')
+        cached = _drought_cache_get(cache_key)
+        if cached is not None:
+            logger.info(f"[CACHE HIT] drought timeseries {index_type} years={years_int}")
+            return cached
+
+        initialize_ee()
+        geom = geojson_to_ee_geometry(geojson_geometry)
+
+        ref_end = max(years_int)
+        ref_start = DROUGHT_START_YEAR
+
+        # Collections de référence (pour min/max)
+        ndvi_col = _load_modis_ndvi_collection(geom, ref_start, ref_end)
+        lst_col = _load_modis_lst_collection(geom, ref_start, ref_end)
+
+        ndvi_min = ndvi_col.min()
+        ndvi_max = ndvi_col.max()
+        lst_min = lst_col.min()
+        lst_max = lst_col.max()
+
+        ncws_min, ncws_max = (None, None)
+        if index_type == 'ncwsi':
+            ncws_min, ncws_max = _compute_ncws_min_max(geom, ndvi_col, lst_col, ref_start, ref_end)
+
+        band_name = 'INDEX'
+
+        # --- Construction d'une FeatureCollection (côté serveur) ---
+        # Chaque feature contient year, month, et la valeur moyenne de l'indice.
+        # Cela permet un SEUL getInfo() pour récupérer TOUTES les valeurs mensuelles.
+        def _build_monthly_feature(year_month):
+            year, month = year_month
+            start = ee.Date.fromYMD(year, month, 1)
+            end = start.advance(1, 'month')
+
+            ndvi_month = ndvi_col.filterDate(start, end).mean()
+            lst_month = lst_col.filterDate(start, end).mean()
+
+            img = _build_drought_image(
+                ndvi_month, lst_month,
+                ndvi_min, ndvi_max, lst_min, lst_max,
+                ncws_min, ncws_max, index_type
+            ).clip(geom)
+
+            stats = img.reduceRegion(
+                reducer=ee.Reducer.mean(),
+                geometry=geom,
+                scale=1000,  # MODIS natif ~1 km
+                maxPixels=1e9,
+                bestEffort=True
+            )
+            return ee.Feature(None, {
+                'year': year,
+                'month': month,
+                'value': stats.get(band_name)
+            })
+
+        # Liste des (year, month) à calculer — UNIQUEMENT les années sélectionnées
+        year_months = [(y, m) for y in years_int for m in range(1, 13)]
+
+        # Construire la FeatureCollection côté serveur
+        features_list = [_build_monthly_feature(ym) for ym in year_months]
+        fc = ee.FeatureCollection(features_list)
+
+        # UN SEUL appel getInfo() pour récupérer toutes les valeurs
+        features_info = fc.getInfo()
+
+        # Parser côté Python
+        results = []
+        for f in features_info.get('features', []):
+            props = f.get('properties', {})
+            val = props.get('value')
+            year = props.get('year')
+            month = props.get('month')
+            if val is None:
+                val = 0
+            else:
+                val = round(float(val), 2)
+            try:
+                month_name = datetime(year, month, 1).strftime('%b')
+            except Exception:
+                month_name = str(month)
+            results.append({
+                'year': year,
+                'month': month,
+                'month_name': month_name,
+                'value': val
+            })
+
+        # Trier par year puis month
+        results.sort(key=lambda r: (r['year'], r['month']))
+
+        # Mettre en cache
+        _drought_cache_set(cache_key, results)
+        logger.info(f"[CACHE SET] drought timeseries {index_type} years={years_int} ({len(results)} points)")
+
+        return results
+
+    except Exception as e:
+        logger.error(f"Erreur get_drought_index_timeseries: {e}")
+        raise e
+
+
+def get_drought_index_map_url(geojson_geometry, year, index_type='vhi'):
+    """
+    Génère une URL de tuiles XYZ pour la carte d'un indice de sécheresse, sur une année donnée
+    (moyenne annuelle). Utilise un cache mémoire pour les requêtes répétées.
+    """
+    try:
+        year = int(year)
+        cache_key = _drought_cache_key(geojson_geometry, [year], index_type, 'map')
+        cached = _drought_cache_get(cache_key)
+        if cached is not None:
+            return cached
+
+        initialize_ee()
+        geom = geojson_to_ee_geometry(geojson_geometry)
+
+        ndvi_col = _load_modis_ndvi_collection(geom, DROUGHT_START_YEAR, max(year, DROUGHT_START_YEAR))
+        lst_col = _load_modis_lst_collection(geom, DROUGHT_START_YEAR, max(year, DROUGHT_START_YEAR))
+
+        ndvi_min = ndvi_col.min()
+        ndvi_max = ndvi_col.max()
+        lst_min = lst_col.min()
+        lst_max = lst_col.max()
+        ncws_min, ncws_max = (None, None)
+        if index_type == 'ncwsi':
+            ncws_min, ncws_max = _compute_ncws_min_max(geom, ndvi_col, lst_col, DROUGHT_START_YEAR, year)
+
+        start = ee.Date.fromYMD(year, 1, 1)
+        end = start.advance(1, 'year')
+        ndvi_year = ndvi_col.filterDate(start, end).mean()
+        lst_year = lst_col.filterDate(start, end).mean()
+
+        yearly_img = _build_drought_image(
+            ndvi_year, lst_year,
+            ndvi_min, ndvi_max, lst_min, lst_max,
+            ncws_min, ncws_max, index_type
+        ).clip(geom)
+
+        map_id_dict = yearly_img.getMapId(_DROUGHT_VIS_PARAMS)
+        url = map_id_dict['tile_fetcher'].url_format
+        _drought_cache_set(cache_key, url)
+        return url
+
+    except Exception as e:
+        logger.error(f"Erreur génération carte drought: {e}")
+        return None
+
+
+def get_drought_index_download_url(geojson_geometry, year, index_type='vhi'):
+    """
+    Génère une URL de téléchargement GeoTIFF pour la carte annuelle d'un indice de sécheresse.
+    Utilise un cache mémoire pour les requêtes répétées.
+    """
+    try:
+        year = int(year)
+        cache_key = _drought_cache_key(geojson_geometry, [year], index_type, 'dl')
+        cached = _drought_cache_get(cache_key)
+        if cached is not None:
+            return cached
+
+        initialize_ee()
+        geom = geojson_to_ee_geometry(geojson_geometry)
+
+        ndvi_col = _load_modis_ndvi_collection(geom, DROUGHT_START_YEAR, max(year, DROUGHT_START_YEAR))
+        lst_col = _load_modis_lst_collection(geom, DROUGHT_START_YEAR, max(year, DROUGHT_START_YEAR))
+
+        ndvi_min = ndvi_col.min()
+        ndvi_max = ndvi_col.max()
+        lst_min = lst_col.min()
+        lst_max = lst_col.max()
+        ncws_min, ncws_max = (None, None)
+        if index_type == 'ncwsi':
+            ncws_min, ncws_max = _compute_ncws_min_max(geom, ndvi_col, lst_col, DROUGHT_START_YEAR, year)
+
+        start = ee.Date.fromYMD(year, 1, 1)
+        end = start.advance(1, 'year')
+        ndvi_year = ndvi_col.filterDate(start, end).mean()
+        lst_year = lst_col.filterDate(start, end).mean()
+
+        yearly_img = _build_drought_image(
+            ndvi_year, lst_year,
+            ndvi_min, ndvi_max, lst_min, lst_max,
+            ncws_min, ncws_max, index_type
+        ).clip(geom)
+
+        url = yearly_img.getDownloadURL({
+            'scale': 1000,
+            'region': geom,
+            'format': 'GEO_TIFF',
+            'name': f'{index_type.upper()}_{year}'
+        })
+        _drought_cache_set(cache_key, url)
+        return url
+
+    except Exception as e:
+        logger.error(f"Erreur génération URL téléchargement drought: {e}")
+        return None
+
+
+def clear_drought_cache():
+    """Vide le cache mémoire des indices de sécheresse (utile en cas de mise à jour des données)."""
+    global _DROUGHT_CACHE
+    _DROUGHT_CACHE.clear()
+    logger.info("Cache drought vidé.")

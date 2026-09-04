@@ -679,6 +679,95 @@ def field_climate_series(request):
     })
 
 
+
+#Amélioration des condition de preision de la météo pour les champs
+# ==================== SUIVI TEMPS RÉEL + PRÉVISION (SÉCHERESSE / INONDATION) ====================
+from .gee_utils import get_realtime_precipitation, classify_realtime_flood
+from .weather_forecast import compute_forecast_risk
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def field_realtime_status(request):
+    """
+    Vue d'ensemble complète du risque climatique d'un champ, en 3 blocs
+    distincts pour l'agriculteur :
+    1. "maintenant"        -> pluie quasi temps réel (GPM IMERG, 24-72h)
+    2. "tendance_recente"  -> anomalie vs climatologie (CHIRPS, 30j/90j)
+    3. "a_venir"           -> vraie prévision 7-14j (Open-Meteo)
+
+    Body JSON attendu : { "champ_id": 1, "forecast_days": 14 (optionnel) }
+    """
+    try:
+        data = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({'success': False, 'error': 'JSON invalide'}, status=400)
+
+    champ_id = data.get('champ_id')
+    if not champ_id:
+        return JsonResponse({'success': False, 'error': 'ID champ manquant'}, status=400)
+
+    try:
+        champ = Champ.objects.get(id=champ_id)
+    except Champ.DoesNotExist:
+        return JsonResponse({'success': False, 'error': 'Champ introuvable'}, status=404)
+
+    forecast_days = int(data.get('forecast_days', 14))
+
+    geom_wgs84 = champ.geom.transform(4326, clone=True)
+    geom_wgs84 = geom_wgs84.buffer(0)
+    geojson = json.loads(geom_wgs84.geojson)
+    centroid = geom_wgs84.centroid
+
+    result = {
+        'success': True,
+        'champ_id': champ_id,
+        'champ_nom': champ.nom,
+        'centroid': {'lat': centroid.y, 'lon': centroid.x},
+    }
+
+    try:
+        realtime = get_realtime_precipitation(geojson, hours=72)
+        realtime['flood_level_now'] = classify_realtime_flood(
+            realtime.get('total_24h_mm'), realtime.get('total_mm')
+        )
+        result['maintenant'] = realtime
+    except Exception as e:
+        logger.error(f"Erreur bloc 'maintenant' (GPM IMERG) champ {champ_id}: {e}")
+        result['maintenant'] = {'error': "Données temps réel indisponibles pour le moment"}
+
+    try:
+        result['tendance_recente'] = compute_climate_risk(geojson)
+    except Exception as e:
+        logger.error(f"Erreur bloc 'tendance_recente' (CHIRPS) champ {champ_id}: {e}")
+        result['tendance_recente'] = {'error': "Anomalie historique indisponible pour le moment"}
+
+    try:
+        result['a_venir'] = compute_forecast_risk(centroid.y, centroid.x, forecast_days=forecast_days)
+    except Exception as e:
+        logger.error(f"Erreur bloc 'a_venir' (Open-Meteo) champ {champ_id}: {e}")
+        result['a_venir'] = {'error': "Prévision météo indisponible pour le moment"}
+
+    def _severity(level):
+        order = ['normal', 'inconnu', 'secheresse_legere', 'inondation_moderee',
+                 'secheresse_moderee', 'inondation_elevee',
+                 'secheresse_severe', 'inondation_critique']
+        return order.index(level) if level in order else 0
+
+    flood_now = result.get('maintenant', {}).get('flood_level_now', 'inconnu')
+    flood_future = result.get('a_venir', {}).get('flood_forecast', {}).get('level', 'inconnu')
+    drought_future = result.get('a_venir', {}).get('drought_forecast', {}).get('level', 'inconnu')
+    drought_recent = result.get('tendance_recente', {}).get('drought_30d', {}).get('classification', 'inconnu')
+
+    result['alerte_synthese'] = {
+        'inondation': flood_now if _severity(flood_now) >= _severity(flood_future) else flood_future,
+        'inondation_source': 'temps_reel' if _severity(flood_now) >= _severity(flood_future) else 'prevision',
+        'secheresse': drought_recent if _severity(drought_recent) >= _severity(drought_future) else drought_future,
+        'secheresse_source': 'tendance_recente' if _severity(drought_recent) >= _severity(drought_future) else 'prevision',
+    }
+
+    return JsonResponse(result)
+
 @csrf_exempt
 @require_http_methods(["POST", "DELETE"])
 def delete_crop_calendar(request, pk):
@@ -692,3 +781,217 @@ def delete_crop_calendar(request, pk):
         return JsonResponse({'success': False, 'error': 'Culture introuvable'}, status=404)
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+
+
+
+# ==================== INDICES DE SÉCHERESSE HISTORIQUE (VCI / TCI / VHI / NCWSI) ====================
+# Endpoints :
+#   - /api/drought-indices/        (admin zone : region | prefecture | commune)
+#   - /api/field-drought-indices/  (champ utilisateur)
+from .gee_utils import (
+    get_drought_index_timeseries,
+    get_drought_index_map_url,
+    get_drought_index_download_url,
+)
+
+DROUGHT_INDEX_TYPES = {'vci', 'tci', 'vhi', 'ncwsi'}
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def drought_indices(request):
+    """
+    Endpoint pour les indices de sécheresse sur une zone administrative.
+
+    Body JSON attendu :
+    {
+        "zone_type":  "region" | "prefecture" | "commune",
+        "zone_id":     <int>,
+        "years":       [<int>, ...],   // ex : [2022, 2023, 2024]
+        "index_type":  "vhi"           // optionnel, défaut "vhi"
+                                       // valeurs : vci | tci | vhi | ncwsi
+    }
+
+    Réponse :
+    {
+        "success": true,
+        "index_type": "vhi",
+        "data": [{"year": 2024, "month": 1, "month_name": "Jan", "value": 45.2}, ...],
+        "map_url":      "<XYZ tile URL>",  // moyenne annuelle de l'année la plus récente
+        "download_url": "<GeoTIFF URL>"    // idem
+    }
+    """
+    try:
+        data = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({'success': False, 'error': 'JSON invalide'}, status=400)
+
+    zone_type = data.get('zone_type')
+    zone_id = data.get('zone_id')
+    years = data.get('years', [])
+    index_type = (data.get('index_type') or 'vhi').lower()
+
+    if not zone_type or not zone_id or not years:
+        return JsonResponse({
+            'success': False,
+            'error': 'Paramètres manquants (zone_type, zone_id, years)'
+        }, status=400)
+
+    if index_type not in DROUGHT_INDEX_TYPES:
+        return JsonResponse({
+            'success': False,
+            'error': f"index_type invalide. Valeurs acceptées : {sorted(DROUGHT_INDEX_TYPES)}"
+        }, status=400)
+
+    try:
+        if zone_type == 'region':
+            geo_model = Region.objects.get(id=zone_id)
+        elif zone_type == 'prefecture':
+            geo_model = Prefecture.objects.get(id=zone_id)
+        elif zone_type == 'commune':
+            geo_model = Commune.objects.get(id=zone_id)
+        else:
+            return JsonResponse({
+                'success': False,
+                'error': f"Type de zone inconnu : {zone_type}"
+            }, status=400)
+    except (Region.DoesNotExist, Prefecture.DoesNotExist, Commune.DoesNotExist):
+        return JsonResponse({'success': False, 'error': 'Zone introuvable'}, status=404)
+    except Exception as e:
+        logger.error(f"Erreur base de données drought: {e}")
+        return JsonResponse({'success': False, 'error': "Erreur d'accès à la base"}, status=500)
+
+    try:
+        geom_wgs84 = geo_model.geom.transform(4326, clone=True)
+        geom_wgs84 = geom_wgs84.buffer(0)
+        geojson_str = geom_wgs84.geojson
+        geojson = json.loads(geojson_str)
+
+        if hasattr(geom_wgs84, 'num_coords') and geom_wgs84.num_coords > 1000:
+            simplified = geom_wgs84.simplify(tolerance=0.001, preserve_topology=True)
+            geojson = json.loads(simplified.geojson)
+    except Exception as e:
+        logger.error(f"Erreur transformation géométrie drought: {e}")
+        return JsonResponse({
+            'success': False,
+            'error': f'Erreur de traitement de la géométrie : {str(e)}'
+        }, status=500)
+
+    try:
+        map_year = max(int(y) for y in years)
+
+        timeseries_data = get_drought_index_timeseries(geojson, years, index_type=index_type)
+
+        map_url = None
+        download_url = None
+        try:
+            map_url = get_drought_index_map_url(geojson, map_year, index_type=index_type)
+        except Exception as map_err:
+            logger.warning(f"Impossible de générer la carte drought ({index_type}): {map_err}")
+        try:
+            download_url = get_drought_index_download_url(geojson, map_year, index_type=index_type)
+        except Exception as dl_err:
+            logger.warning(f"Impossible de générer le téléchargement drought ({index_type}): {dl_err}")
+
+        return JsonResponse({
+            'success': True,
+            'index_type': index_type,
+            'data': timeseries_data,
+            'map_url': map_url,
+            'map_year': map_year,
+            'download_url': download_url
+        })
+
+    except Exception as e:
+        logger.error(f"Erreur GEE drought indices: {e}")
+        import traceback
+        traceback.print_exc()
+        return JsonResponse({
+            'success': False,
+            'error': f'Erreur de calcul Google Earth Engine : {str(e)}'
+        }, status=500)
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def field_drought_indices(request):
+    """
+    Endpoint pour les indices de sécheresse sur un CHAMP précis (mode "Mes Champs").
+
+    Body JSON attendu :
+    {
+        "champ_id":    <int>,
+        "years":       [<int>, ...],
+        "index_type":  "vhi"
+    }
+    """
+    try:
+        data = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({'success': False, 'error': 'JSON invalide'}, status=400)
+
+    champ_id = data.get('champ_id')
+    years = data.get('years', [])
+    index_type = (data.get('index_type') or 'vhi').lower()
+
+    if not champ_id:
+        return JsonResponse({'success': False, 'error': 'ID champ manquant'}, status=400)
+    if not years:
+        return JsonResponse({'success': False, 'error': 'Années manquantes (years)'}, status=400)
+    if index_type not in DROUGHT_INDEX_TYPES:
+        return JsonResponse({
+            'success': False,
+            'error': f"index_type invalide. Valeurs acceptées : {sorted(DROUGHT_INDEX_TYPES)}"
+        }, status=400)
+
+    try:
+        champ = Champ.objects.get(id=champ_id)
+    except Champ.DoesNotExist:
+        return JsonResponse({'success': False, 'error': 'Champ introuvable'}, status=404)
+
+    try:
+        geom_wgs84 = champ.geom.transform(4326, clone=True)
+        geom_wgs84 = geom_wgs84.buffer(0)
+        geojson = json.loads(geom_wgs84.geojson)
+    except Exception as e:
+        logger.error(f"Erreur transformation géométrie champ drought: {e}")
+        return JsonResponse({
+            'success': False,
+            'error': f'Erreur de traitement de la géométrie : {str(e)}'
+        }, status=500)
+
+    try:
+        map_year = max(int(y) for y in years)
+        timeseries_data = get_drought_index_timeseries(geojson, years, index_type=index_type)
+
+        map_url = None
+        download_url = None
+        try:
+            map_url = get_drought_index_map_url(geojson, map_year, index_type=index_type)
+        except Exception as map_err:
+            logger.warning(f"Impossible de générer la carte drought champ ({index_type}): {map_err}")
+        try:
+            download_url = get_drought_index_download_url(geojson, map_year, index_type=index_type)
+        except Exception as dl_err:
+            logger.warning(f"Impossible de générer le téléchargement drought champ ({index_type}): {dl_err}")
+
+        return JsonResponse({
+            'success': True,
+            'index_type': index_type,
+            'champ_id': champ_id,
+            'champ_nom': champ.nom,
+            'data': timeseries_data,
+            'map_url': map_url,
+            'map_year': map_year,
+            'download_url': download_url
+        })
+
+    except Exception as e:
+        logger.error(f"Erreur GEE drought indices champ: {e}")
+        import traceback
+        traceback.print_exc()
+        return JsonResponse({
+            'success': False,
+            'error': f'Erreur de calcul Google Earth Engine : {str(e)}'
+        }, status=500)
