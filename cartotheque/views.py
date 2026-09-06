@@ -5,7 +5,7 @@ from rest_framework import viewsets, status, filters
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
-from rest_framework.permissions import AllowAny, IsAdminUser
+from rest_framework.permissions import AllowAny, DjangoModelPermissions
 from django_filters.rest_framework import DjangoFilterBackend
 
 from .models import DomaineCarte, CarteTheematique
@@ -47,10 +47,10 @@ class CarteTheematiqueViewSet(viewsets.ModelViewSet):
     ordering = ['-date_creation']
 
     def get_permissions(self):
-        # La consultation reste publique, mais toute écriture est réservée
-        # aux administrateurs Django (is_staff=True).
+        # La consultation reste publique. Pour écrire, Django vérifie les
+        # permissions add/change/delete attribuées à l'utilisateur ou à ses groupes.
         if self.action in ['create', 'update', 'partial_update', 'destroy']:
-            return [IsAdminUser()]
+            return [DjangoModelPermissions()]
         return [AllowAny()]
 
     def get_serializer_class(self):
