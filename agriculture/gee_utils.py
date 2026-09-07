@@ -431,12 +431,18 @@ def get_8_day_ndvi_map(geojson_geometry, start_date_str):
 # ... (Vos imports existants) ...
  
 def mask_s2_clouds(image):
-    """Masque les nuages et les cirrus d'une image Sentinel-2 en utilisant la bande QA60."""
-    # (Votre code existant pour mask_s2_clouds ici...)
-    qa = image.select('QA60')
-    cloud_bit = 1 << 10
-    cirrus_bit = 1 << 11
-    mask = qa.bitwiseAnd(cloud_bit).eq(0).And(qa.bitwiseAnd(cirrus_bit).eq(0))
+    """Masque les nuages Sentinel-2 avec la classification SCL."""
+    # QA60 peut être absent ou trop restrictif selon la période de données.
+    # SCL est fourni par COPERNICUS/S2_SR_HARMONIZED et permet d'exclure
+    # explicitement ombres, nuages, cirrus et neige/glace.
+    scl = image.select('SCL')
+    mask = (
+        scl.neq(3)    # ombre de nuage
+        .And(scl.neq(8))    # nuage moyen
+        .And(scl.neq(9))    # nuage fort
+        .And(scl.neq(10))   # cirrus
+        .And(scl.neq(11))   # neige/glace
+    )
     return image.updateMask(mask)
  
 def calculate_index(image, index_type):
@@ -492,7 +498,14 @@ def get_field_ndvi_history(geojson_geometry, start_date_str, end_date_str=None, 
         collection = ee.ImageCollection("COPERNICUS/S2_SR_HARMONIZED") \
             .filterBounds(geom) \
             .filterDate(start_date, end_date) \
-            .filter(ee.Filter.lt('CLOUDY_PIXEL_PERCENTAGE', 40)) 
+            .filter(ee.Filter.lt('CLOUDY_PIXEL_PERCENTAGE', 40))
+        collection_count = collection.size().getInfo()
+        logger.info(
+            "NDVI champ: %s images Sentinel-2 entre %s et %s",
+            collection_count,
+            start_date_str,
+            end_date_str or datetime.now().strftime('%Y-%m-%d')
+        )
  
         # --- ÉTAPE 1 : RÉCUPÉRER LES DATES UNIQUES ---
         try:
@@ -516,6 +529,7 @@ def get_field_ndvi_history(geojson_geometry, start_date_str, end_date_str=None, 
             unique_dates = []
  
         unique_dates = unique_dates[:30] # Limite à 30 jours
+        logger.info("NDVI champ: %s dates distinctes à traiter", len(unique_dates))
         
         # Palettes de couleurs pour chaque indice
         vis_params_map = {
@@ -565,13 +579,23 @@ def get_field_ndvi_history(geojson_geometry, start_date_str, end_date_str=None, 
                 if mean_ndvi is None:
                     continue
  
-                # --- ÉTAPE 5 : GÉNÉRER L'URL DE LA CARTE ---
-                # Utiliser la palette de l'indice sélectionné
-                current_vis_params = vis_params_map[index_type]
-                
-                map_id_dict = ndvi_image.getMapId(current_vis_params)
-                tile_url = map_id_dict['tile_fetcher'].url_format
-                
+                # --- ÉTAPE 5 : GÉNÉRER L'URL DE LA CARTE (OPTIONNEL) ---
+                # Une erreur de tuilage ne doit pas supprimer la valeur NDVI
+                # déjà calculée pour cette date.
+                tile_url = None
+                try:
+                    current_vis_params = vis_params_map.get(
+                        index_type, vis_params_map['ndvi']
+                    )
+                    map_id_dict = ndvi_image.getMapId(current_vis_params)
+                    tile_url = map_id_dict['tile_fetcher'].url_format
+                except Exception as map_error:
+                    logger.warning(
+                        "URL tuile NDVI indisponible pour %s: %s",
+                        date_str,
+                        map_error
+                    )
+
                 results.append({
                     'date': date_str,
                     'ndvi': round(float(mean_ndvi), 3), # On garde le nom 'ndvi' pour le frontend (valeur générique de l'indice)
@@ -583,8 +607,9 @@ def get_field_ndvi_history(geojson_geometry, start_date_str, end_date_str=None, 
                 continue
  
         results.sort(key=lambda x: x['date'])
+        logger.info("NDVI champ: %s résultats produits", len(results))
         return results
- 
+
     except Exception as e:
         logger.error(f"Erreur get_field_ndvi_history: {e}")
         raise e
@@ -942,6 +967,105 @@ def compute_climate_risk(geojson_geometry, reference_date_str=None, years_histor
     except Exception as e:
         logger.error(f"Erreur compute_climate_risk: {e}")
         raise e
+
+
+def compute_observed_spi_windows(geojson_geometry, reference_date_str=None, years_history=10):
+    """Calcule les SPI observés sur 30 et 90 jours avec CHIRPS.
+
+    Les cumuls actuels sont comparés aux mêmes fenêtres calendaires des années
+    précédentes, puis transformés par ajustement Gamma vers la loi normale.
+    """
+    try:
+        initialize_ee()
+        geom = geojson_to_ee_geometry(geojson_geometry)
+        ref_date = ee.Date(reference_date_str or datetime.now().strftime('%Y-%m-%d'))
+        chirps = ee.ImageCollection('UCSB-CHG/CHIRPS/DAILY')
+        windows = (30, 90)
+        requests = {}
+
+        for days in windows:
+            current_images = chirps.filterDate(
+                ref_date.advance(-days, 'day'), ref_date
+            ).filterBounds(geom)
+            current_image = ee.Image(ee.Algorithms.If(
+                current_images.size().gt(0),
+                current_images.sum(),
+                ee.Image.constant(0).rename('precipitation')
+            ))
+            requests[f'current_{days}'] = current_image.reduceRegion(
+                reducer=ee.Reducer.mean(), geometry=geom, scale=5566,
+                maxPixels=1e9, bestEffort=True
+            ).get('precipitation')
+
+            for year_offset in range(1, years_history + 1):
+                end_date = ref_date.advance(-year_offset, 'year')
+                images = chirps.filterDate(
+                    end_date.advance(-days, 'day'), end_date
+                ).filterBounds(geom)
+                image = ee.Image(ee.Algorithms.If(
+                    images.size().gt(0),
+                    images.sum(),
+                    ee.Image.constant(0).rename('precipitation')
+                ))
+                requests[f'hist_{days}_{year_offset}'] = image.reduceRegion(
+                    reducer=ee.Reducer.mean(), geometry=geom, scale=5566,
+                    maxPixels=1e9, bestEffort=True
+                ).get('precipitation')
+
+        payload = ee.Dictionary(requests).getInfo()
+        from scipy.stats import gamma, norm
+
+        output = {}
+        for days in windows:
+            current = payload.get(f'current_{days}')
+            historical = [
+                payload.get(f'hist_{days}_{year_offset}')
+                for year_offset in range(1, years_history + 1)
+            ]
+            historical = [float(value) for value in historical if value is not None]
+            if current is None or len(historical) < 5:
+                output[str(days)] = {
+                    'spi': None, 'current_mm': current,
+                    'historical_mean_mm': None, 'alert': 'inconnu'
+                }
+                continue
+
+            positive = [value for value in historical if value > 0]
+            if len(positive) < 3:
+                spi = None
+            else:
+                shape, _, scale = gamma.fit(positive, floc=0)
+                zero_probability = (len(historical) - len(positive)) / len(historical)
+                probability = gamma.cdf(max(float(current), 0), shape, loc=0, scale=scale)
+                probability = zero_probability + (1 - zero_probability) * probability
+                spi = round(float(norm.ppf(min(max(probability, 1e-6), 1 - 1e-6))), 2)
+
+            if spi is None:
+                alert = 'inconnu'
+            elif spi <= -2:
+                alert = 'secheresse_extreme'
+            elif spi <= -1.5:
+                alert = 'secheresse_severe'
+            elif spi <= -1:
+                alert = 'secheresse_moderee'
+            elif spi >= 2:
+                alert = 'tres_humide'
+            elif spi >= 1.5:
+                alert = 'humide'
+            else:
+                alert = 'normal'
+
+            output[str(days)] = {
+                'spi': spi,
+                'current_mm': round(float(current), 2),
+                'historical_mean_mm': round(sum(historical) / len(historical), 2),
+                'historical_years': len(historical),
+                'alert': alert,
+            }
+        return output
+    except Exception as exc:
+        logger.exception('Erreur calcul SPI observé 30/90 jours')
+        raise exc
 
 # ==================== PLUIE QUASI TEMPS RÉEL (GPM IMERG) ====================
 # CHIRPS a un délai de publication de 2 à 3 jours : inutilisable pour détecter

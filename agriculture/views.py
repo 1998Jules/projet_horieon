@@ -14,6 +14,11 @@ from .gee_utils import get_monthly_ndvi_series, get_clipped_ndvi_map, get_ndvi_d
 from django.contrib.gis.geos import GEOSException
 import json
 from django.contrib.gis.geos import GEOSGeometry
+from .chirps_gefs import (
+    get_field_forecast,
+    get_forecast_spi,
+    summarize_forecast_alert,
+)
 logger = logging.getLogger(__name__)
 
 # --- Pages HTML ---
@@ -303,7 +308,29 @@ def field_ndvi_timeseries(request):
     """
     logger.info("--- REQUÊTE NDVI CHAMP ---")
     try:
+        if request.method != 'POST':
+            return JsonResponse({
+                'success': False,
+                'error': 'Méthode HTTP invalide. Utilisez POST avec un body JSON.'
+            }, status=405)
+        if not request.body:
+            return JsonResponse({
+                'success': False,
+                'error': 'Body JSON manquant. Exemple : {"champ_id": 1, "index_type": "ndvi"}'
+            }, status=400)
         data = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({
+            'success': False,
+            'error': 'JSON invalide. Exemple : {"champ_id": 1, "index_type": "ndvi"}'
+        }, status=400)
+    except UnicodeDecodeError:
+        return JsonResponse({
+            'success': False,
+            'error': 'Le body de la requête doit être encodé en UTF-8.'
+        }, status=400)
+
+    try:
         champ_id = data.get('champ_id')
         
         # --- NOUVEAU : RÉCUPÉRATION DU TYPE D'INDICE ---
@@ -566,7 +593,12 @@ def simulate_growth(request):
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
 # ==================== ONGLET "TEMPS" : CLIMAT DU CHAMP ====================
-from .gee_utils import get_chirps_precipitation_series, get_era5_temperature_series, compute_climate_risk
+from .gee_utils import (
+    get_chirps_precipitation_series,
+    get_era5_temperature_series,
+    compute_climate_risk,
+    compute_observed_spi_windows,
+)
 
 
 @csrf_exempt
@@ -621,7 +653,9 @@ def field_climate_series(request):
     Retourne pour un champ donné :
     - la série journalière de précipitations CHIRPS (mm/jour)
     - la série journalière de température ERA5-Land (min/max/moyenne en °C)
-    - le centroïde du champ (pour interroger la prévision météo 14 jours côté frontend)
+    - la prévision de pluie CHIRPS3-GEFS sur 15 jours
+    - le SPI prévisionnel et l'alerte finale sur l'évolution des 15 jours
+    - le centroïde du champ
 
     Body JSON attendu : { "champ_id": 1, "start_date": "2024-01-01" (optionnel) }
     Si start_date n'est pas fourni, on utilise la date de semis du champ,
@@ -654,9 +688,14 @@ def field_climate_series(request):
     geom_wgs84 = champ.geom.transform(4326, clone=True)
     geom_wgs84 = geom_wgs84.buffer(0)
     geojson = json.loads(geom_wgs84.geojson)
+    centroid = geom_wgs84.centroid
 
     precipitation = []
     temperature = []
+    forecast = {}
+    forecast_spi = {}
+    observed_spi = {}
+    open_meteo_forecast = {}
 
     try:
         precipitation = get_chirps_precipitation_series(geojson, start_date)
@@ -668,12 +707,83 @@ def field_climate_series(request):
     except Exception as e:
         logger.error(f"Erreur ERA5-Land pour le champ {champ_id}: {e}")
 
-    centroid = geom_wgs84.centroid
+    try:
+        forecast = get_field_forecast(champ, forecast_days=15)
+    except Exception as e:
+        logger.error(f"Erreur prévision CHIRPS3-GEFS pour le champ {champ_id}: {e}")
+        forecast = {'error': 'Prévision de pluie indisponible pour le moment'}
+
+    try:
+        forecast_spi = get_forecast_spi(
+            champ, forecast_days=15, years_history=int(data.get('years_history', 10))
+        )
+    except Exception as e:
+        logger.error(f"Erreur SPI prévisionnel pour le champ {champ_id}: {e}")
+        forecast_spi = {'error': 'SPI prévisionnel indisponible pour le moment'}
+
+    try:
+        observed_spi = compute_observed_spi_windows(
+            geojson, years_history=int(data.get('years_history', 10))
+        )
+    except Exception as e:
+        logger.error(f"Erreur SPI observé 30/90 jours pour le champ {champ_id}: {e}")
+        observed_spi = {'error': 'SPI observé indisponible pour le moment'}
+
+    try:
+        open_meteo_forecast = compute_forecast_risk(
+            centroid.y, centroid.x, forecast_days=15
+        )
+    except Exception as e:
+        logger.error(f"Erreur Open-Meteo pour le champ {champ_id}: {e}")
+        open_meteo_forecast = {'error': 'Prévision Open-Meteo indisponible pour le moment'}
+
+    if 'error' not in forecast and 'error' not in forecast_spi:
+        final_alert = summarize_forecast_alert(forecast, forecast_spi)
+    else:
+        final_alert = {
+            'niveau': 'inconnu',
+            'type': 'inconnu',
+            'source': 'evolution_prevision_15_jours',
+        }
+
+    forecast_series = [
+        {**item, 'source': 'prevision_chirps3_gefs'}
+        for item in forecast.get('daily', [])
+    ] if 'error' not in forecast else []
+    precipitation_complete = [
+        {**item, 'source': 'observation_chirps'} if isinstance(item, dict) else item
+        for item in precipitation
+    ] + forecast_series
+
+    chirps_by_date = {
+        item.get('date'): item.get('precipitation_mm')
+        for item in forecast.get('daily', [])
+    }
+    open_meteo_by_date = {
+        item.get('date'): item.get('precipitation_mm')
+        for item in open_meteo_forecast.get('daily', [])
+    }
+    comparison_dates = sorted(set(chirps_by_date) | set(open_meteo_by_date))
+    forecast_comparison = [
+        {
+            'date': forecast_date,
+            'chirps_gefs_mm': chirps_by_date.get(forecast_date),
+            'open_meteo_mm': open_meteo_by_date.get(forecast_date),
+        }
+        for forecast_date in comparison_dates
+    ]
 
     return JsonResponse({
         'success': True,
         'precipitation': precipitation,
+        'precipitation_complete': precipitation_complete,
         'temperature': temperature,
+        'prevision_15j': forecast,
+        'spi_previsionnel': forecast_spi,
+        'spi_observe': observed_spi,
+        'open_meteo_15j': open_meteo_forecast,
+        'comparaison_previsions_15j': forecast_comparison,
+        'alerte_finale': final_alert,
         'centroid': {'lat': centroid.y, 'lon': centroid.x},
         'start_date': start_date,
     })
@@ -694,9 +804,11 @@ def field_realtime_status(request):
     distincts pour l'agriculteur :
     1. "maintenant"        -> pluie quasi temps réel (GPM IMERG, 24-72h)
     2. "tendance_recente"  -> anomalie vs climatologie (CHIRPS, 30j/90j)
-    3. "a_venir"           -> vraie prévision 7-14j (Open-Meteo)
+    3. "a_venir"           -> série de précipitations CHIRPS3-GEFS sur 15j
+    4. "spi_previsionnel"  -> SPI calculé sur la prévision de 15j
+    5. "alerte_finale"     -> alerte issue de l'évolution complète des 15j
 
-    Body JSON attendu : { "champ_id": 1, "forecast_days": 14 (optionnel) }
+    Body JSON attendu : { "champ_id": 1, "years_history": 10 (optionnel) }
     """
     try:
         data = json.loads(request.body)
@@ -712,7 +824,9 @@ def field_realtime_status(request):
     except Champ.DoesNotExist:
         return JsonResponse({'success': False, 'error': 'Champ introuvable'}, status=404)
 
-    forecast_days = int(data.get('forecast_days', 14))
+    # La rubrique Temps utilise une fenêtre homogène de 15 jours pour la
+    # série de précipitations, le SPI et l'alerte finale.
+    forecast_days = 15
 
     geom_wgs84 = champ.geom.transform(4326, clone=True)
     geom_wgs84 = geom_wgs84.buffer(0)
@@ -743,10 +857,35 @@ def field_realtime_status(request):
         result['tendance_recente'] = {'error': "Anomalie historique indisponible pour le moment"}
 
     try:
-        result['a_venir'] = compute_forecast_risk(centroid.y, centroid.x, forecast_days=forecast_days)
+        forecast = get_field_forecast(champ, forecast_days=forecast_days)
+        result['a_venir'] = {
+            'source': 'CHIRPS3-GEFS',
+            'forecast_days': forecast_days,
+            'total_precipitation_mm': forecast.get('total_precipitation_mm'),
+            'daily': forecast.get('daily', []),
+        }
     except Exception as e:
-        logger.error(f"Erreur bloc 'a_venir' (Open-Meteo) champ {champ_id}: {e}")
-        result['a_venir'] = {'error': "Prévision météo indisponible pour le moment"}
+        logger.error(f"Erreur bloc 'a_venir' (CHIRPS3-GEFS) champ {champ_id}: {e}")
+        result['a_venir'] = {'error': "Prévision de précipitations indisponible pour le moment"}
+
+    try:
+        result['spi_previsionnel'] = get_forecast_spi(
+            champ, forecast_days=15, years_history=int(data.get('years_history', 10))
+        )
+    except Exception as e:
+        logger.error(f"Erreur SPI prévisionnel champ {champ_id}: {e}")
+        result['spi_previsionnel'] = {'error': "SPI prévisionnel indisponible pour le moment"}
+
+    if 'error' not in result.get('a_venir', {}) and 'error' not in result.get('spi_previsionnel', {}):
+        result['alerte_finale'] = summarize_forecast_alert(
+            result['a_venir'], result['spi_previsionnel']
+        )
+    else:
+        result['alerte_finale'] = {
+            'niveau': 'inconnu',
+            'type': 'inconnu',
+            'source': 'evolution_prevision_15_jours',
+        }
 
     def _severity(level):
         order = ['normal', 'inconnu', 'secheresse_legere', 'inondation_moderee',
@@ -755,15 +894,17 @@ def field_realtime_status(request):
         return order.index(level) if level in order else 0
 
     flood_now = result.get('maintenant', {}).get('flood_level_now', 'inconnu')
-    flood_future = result.get('a_venir', {}).get('flood_forecast', {}).get('level', 'inconnu')
-    drought_future = result.get('a_venir', {}).get('drought_forecast', {}).get('level', 'inconnu')
+    final_forecast = result.get('alerte_finale', {}).get('niveau', 'inconnu')
+    final_type = result.get('alerte_finale', {}).get('type', 'inconnu')
     drought_recent = result.get('tendance_recente', {}).get('drought_30d', {}).get('classification', 'inconnu')
 
     result['alerte_synthese'] = {
-        'inondation': flood_now if _severity(flood_now) >= _severity(flood_future) else flood_future,
-        'inondation_source': 'temps_reel' if _severity(flood_now) >= _severity(flood_future) else 'prevision',
-        'secheresse': drought_recent if _severity(drought_recent) >= _severity(drought_future) else drought_future,
-        'secheresse_source': 'tendance_recente' if _severity(drought_recent) >= _severity(drought_future) else 'prevision',
+        'alerte_finale_15j': final_forecast,
+        'type_final_15j': final_type,
+        'inondation': flood_now,
+        'inondation_source': 'temps_reel',
+        'secheresse': drought_recent,
+        'secheresse_source': 'tendance_recente',
     }
 
     return JsonResponse(result)
@@ -995,3 +1136,119 @@ def field_drought_indices(request):
             'success': False,
             'error': f'Erreur de calcul Google Earth Engine : {str(e)}'
         }, status=500)
+
+
+@csrf_exempt
+def field_chirps_gefs(request):
+    """Prévision CHIRPS3-GEFS sur un champ, sans stockage permanent du TIFF.
+
+    Body JSON : {"champ_id": 1, "forecast_days": 5}
+    """
+    if request.method != 'POST':
+        return JsonResponse({
+            'success': False,
+            'error': 'Utilisez POST avec un body JSON.'
+        }, status=405)
+
+    try:
+        data = json.loads(request.body or '{}')
+    except json.JSONDecodeError:
+        return JsonResponse({'success': False, 'error': 'JSON invalide'}, status=400)
+
+    champ_id = data.get('champ_id')
+    if not champ_id:
+        return JsonResponse({'success': False, 'error': 'ID champ manquant'}, status=400)
+
+    try:
+        forecast_days = int(data.get('forecast_days', 5))
+    except (TypeError, ValueError):
+        return JsonResponse({
+            'success': False,
+            'error': 'forecast_days doit être un entier entre 1 et 15'
+        }, status=400)
+
+    if not 1 <= forecast_days <= 15:
+        return JsonResponse({
+            'success': False,
+            'error': 'forecast_days doit être compris entre 1 et 15'
+        }, status=400)
+
+    try:
+        champ = Champ.objects.get(id=champ_id)
+    except Champ.DoesNotExist:
+        return JsonResponse({'success': False, 'error': 'Champ introuvable'}, status=404)
+
+    try:
+        forecast = get_field_forecast(champ, forecast_days=forecast_days)
+        return JsonResponse({
+            'success': True,
+            'champ_id': champ.id,
+            'champ_nom': champ.nom,
+            'data': forecast,
+        })
+    except Exception as exc:
+        logger.exception('Erreur CHIRPS3-GEFS pour le champ %s', champ_id)
+        return JsonResponse({
+            'success': False,
+            'error': str(exc),
+        }, status=502)
+
+
+@csrf_exempt
+def field_forecast_spi(request):
+    """SPI prévisionnel sur 15 jours basé sur CHIRPS + CHIRPS3-GEFS.
+
+    Body JSON : {"champ_id": 1, "years_history": 10}
+    """
+    if request.method != 'POST':
+        return JsonResponse({
+            'success': False,
+            'error': 'Utilisez POST avec un body JSON.'
+        }, status=405)
+
+    try:
+        data = json.loads(request.body or '{}')
+    except json.JSONDecodeError:
+        return JsonResponse({'success': False, 'error': 'JSON invalide'}, status=400)
+
+    champ_id = data.get('champ_id')
+    if not champ_id:
+        return JsonResponse({'success': False, 'error': 'ID champ manquant'}, status=400)
+
+    try:
+        years_history = int(data.get('years_history', 10))
+    except (TypeError, ValueError):
+        return JsonResponse({
+            'success': False,
+            'error': 'years_history doit être un entier entre 5 et 40'
+        }, status=400)
+
+    if not 5 <= years_history <= 40:
+        return JsonResponse({
+            'success': False,
+            'error': 'years_history doit être compris entre 5 et 40'
+        }, status=400)
+
+    try:
+        champ = Champ.objects.get(id=champ_id)
+    except Champ.DoesNotExist:
+        return JsonResponse({'success': False, 'error': 'Champ introuvable'}, status=404)
+
+    try:
+        spi_data = get_forecast_spi(
+            champ,
+            forecast_days=15,
+            years_history=years_history,
+        )
+        return JsonResponse({
+            'success': True,
+            'champ_id': champ.id,
+            'champ_nom': champ.nom,
+            'data': spi_data,
+        })
+    except Exception as exc:
+        logger.exception('Erreur SPI prévisionnel pour le champ %s', champ_id)
+        return JsonResponse({
+            'success': False,
+            'error': str(exc),
+        }, status=502)

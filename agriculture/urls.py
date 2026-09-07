@@ -28,11 +28,17 @@ urlpatterns = [
     path('api/champs/create/', views.create_champ, name='create_champ'),
 
     # 3. Récupérer l'historique NDVI d'un champ spécifique (Graphique & Carte)
+    # Les deux formes évitent une redirection POST impossible avec APPEND_SLASH.
     path('api/field-ndvi/', views.field_ndvi_timeseries, name='field_ndvi_timeseries'),
+    path('api/field-ndvi', views.field_ndvi_timeseries, name='field_ndvi_timeseries_no_slash'),
     path('api/field-indices-comparison/', views.field_indices_comparison, name='field_indices_comparison'),
 
     # Onglet "Temps" : précipitations (CHIRPS) + température (ERA5-Land) + centroïde du champ
     path('api/field-climate/', views.field_climate_series, name='field_climate_series'),
+    # Prévision CHIRPS3-GEFS à la demande, TIFF supprimé après traitement
+    path('api/field-chirps-gefs/', views.field_chirps_gefs, name='field_chirps_gefs'),
+    # SPI prévisionnel 15 jours : historique CHIRPS + prévision CHIRPS3-GEFS
+    path('api/field-forecast-spi/', views.field_forecast_spi, name='field_forecast_spi'),
 
     # Détection automatique du risque sécheresse/inondation (indice PNP sur CHIRPS)
     path('api/field-climate-risk/', views.field_climate_risk, name='field_climate_risk'),
