@@ -4,6 +4,9 @@ from django.http import JsonResponse, HttpResponse
 from django.core.serializers import serialize
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
+from functools import wraps
+from django.contrib.auth import get_user_model
+from rest_framework.authtoken.models import Token
 import json
 from .models import CropCalendar # Ajoutez cet import
 
@@ -20,6 +23,45 @@ from .chirps_gefs import (
     summarize_forecast_alert,
 )
 logger = logging.getLogger(__name__)
+User = get_user_model()
+
+
+def _token_user(request):
+    """Retourne l'utilisateur de session ou du header Authorization: Token."""
+    current = getattr(request, 'user', None)
+    if current is not None and current.is_authenticated:
+        return current
+    header = request.META.get('HTTP_AUTHORIZATION', '')
+    scheme, _, key = header.partition(' ')
+    if scheme.lower() not in {'token', 'bearer'} or not key:
+        return None
+    try:
+        return Token.objects.select_related('user').get(key=key.strip()).user
+    except Token.DoesNotExist:
+        return None
+
+
+def require_api_user(view):
+    @wraps(view)
+    def wrapped(request, *args, **kwargs):
+        user = _token_user(request)
+        if user is None:
+            return JsonResponse({'success': False, 'error': 'Authentification requise.'}, status=401)
+        request.user = user
+        return view(request, *args, **kwargs)
+    return wrapped
+
+
+def get_authorized_champ(request, champ_id):
+    """Retourne un champ seulement si l'utilisateur en est propriétaire ou admin."""
+    champ = Champ.objects.filter(id=champ_id).first()
+    if champ is None:
+        return None
+    user = request.user
+    if user.is_staff or user.is_superuser or champ.owner_id == user.id:
+        return champ
+    return None
+
 
 # --- Pages HTML ---
 def index(request):
@@ -232,8 +274,10 @@ from django.core.serializers import serialize
 from .gee_utils import get_field_ndvi_history # Importez la nouvelle fonction
 
 # --- Vue pour lister les GeoJSON des champs (pour la carte) ---
+@require_api_user
 def champs_geojson(request):
-    qs = Champ.objects.all()
+    user = request.user
+    qs = Champ.objects.all() if (user.is_staff or user.is_superuser) else Champ.objects.filter(owner=user)
     data = serialize(
         'geojson',
         qs,
@@ -244,6 +288,7 @@ def champs_geojson(request):
 
 # --- Vue API pour créer un champ (Simplifiée pour l'exemple) ---
 @csrf_exempt
+@require_api_user
 def create_champ(request):
     if request.method != 'POST':
         return JsonResponse({'error': 'Method not allowed'}, status=405)
@@ -287,7 +332,8 @@ def create_champ(request):
             proprietaire=data.get('proprietaire', ''),
             type_culture=data.get('type_culture', ''),
             date_semi=date_semi,
-            geom=geom
+            geom=geom,
+            owner=request.user
         )
         return JsonResponse({'success': True, 'id': champ.id})
     except Exception as e:
@@ -299,6 +345,7 @@ def create_champ(request):
 
 # --- Nouvelle Vue NDVI pour un Champ Spécifique ---
 @csrf_exempt
+@require_api_user
 def field_ndvi_timeseries(request):
     """
     Endpoint spécifique pour un Champ (ID).
@@ -339,9 +386,8 @@ def field_ndvi_timeseries(request):
         if not champ_id:
             return JsonResponse({'success': False, 'error': 'ID champ manquant'}, status=400)
 
-        try:
-            champ = Champ.objects.get(id=champ_id)
-        except Champ.DoesNotExist:
+        champ = get_authorized_champ(request, champ_id)
+        if champ is None:
             return JsonResponse({'success': False, 'error': 'Champ introuvable'}, status=404)
 
         # --- GESTION DE LA DATE DE SEMIS VIDE ---
@@ -380,6 +426,7 @@ def field_ndvi_timeseries(request):
 from .gee_utils import get_field_indices_history  # à créer plus bas
 
 @csrf_exempt
+@require_api_user
 def field_indices_comparison(request):
     """
     Endpoint pour comparer plusieurs indices spectraux pour un champ.
@@ -403,9 +450,8 @@ def field_indices_comparison(request):
     if not indices:
         return JsonResponse({'success': False, 'error': 'Aucun indice demandé'}, status=400)
     
-    try:
-        champ = Champ.objects.get(id=champ_id)
-    except Champ.DoesNotExist:
+    champ = get_authorized_champ(request, champ_id)
+    if champ is None:
         return JsonResponse({'success': False, 'error': 'Champ introuvable'}, status=404)
     
     # Gestion de la date de semis
@@ -433,6 +479,9 @@ def field_indices_comparison(request):
 
 # ... imports existants ...
 from django.views.decorators.http import require_http_methods
+from functools import wraps
+from django.contrib.auth import get_user_model
+from rest_framework.authtoken.models import Token
 
 # ... Vos autres vues ...
 
@@ -603,6 +652,7 @@ from .gee_utils import (
 
 @csrf_exempt
 @require_http_methods(["POST"])
+@require_api_user
 def field_climate_risk(request):
     """
     Calcule automatiquement le risque de sécheresse (PNP 30j/90j) et d'inondation
@@ -620,9 +670,8 @@ def field_climate_risk(request):
     if not champ_id:
         return JsonResponse({'success': False, 'error': 'ID champ manquant'}, status=400)
 
-    try:
-        champ = Champ.objects.get(id=champ_id)
-    except Champ.DoesNotExist:
+    champ = get_authorized_champ(request, champ_id)
+    if champ is None:
         return JsonResponse({'success': False, 'error': 'Champ introuvable'}, status=404)
 
     reference_date = data.get('reference_date')
@@ -648,6 +697,7 @@ def field_climate_risk(request):
 
 @csrf_exempt
 @require_http_methods(["POST"])
+@require_api_user
 def field_climate_series(request):
     """
     Retourne pour un champ donné :
@@ -670,9 +720,8 @@ def field_climate_series(request):
     if not champ_id:
         return JsonResponse({'success': False, 'error': 'ID champ manquant'}, status=400)
 
-    try:
-        champ = Champ.objects.get(id=champ_id)
-    except Champ.DoesNotExist:
+    champ = get_authorized_champ(request, champ_id)
+    if champ is None:
         return JsonResponse({'success': False, 'error': 'Champ introuvable'}, status=404)
 
     from datetime import timedelta
@@ -792,17 +841,42 @@ def field_climate_series(request):
 
 #Amélioration des condition de preision de la météo pour les champs
 # ==================== SUIVI TEMPS RÉEL + PRÉVISION (SÉCHERESSE / INONDATION) ====================
-from .gee_utils import get_realtime_precipitation, classify_realtime_flood
+from .gee_utils import classify_realtime_flood
 from .weather_forecast import compute_forecast_risk
+
+
+def get_chirps_gefs_now(champ):
+    """Construit le bloc pluie affiché comme "Maintenant" depuis CHIRPS-GEFS.
+
+    CHIRPS-GEFS est un produit de prévision quotidienne, pas une observation
+    temps réel. On expose donc explicitement la date cible et la source, tout
+    en conservant les clés attendues par le frontend et les seuils d'alerte.
+    """
+    forecast = get_field_forecast(champ, forecast_days=3)
+    daily = forecast.get('daily', [])
+    values = [item.get('precipitation_mm') for item in daily]
+    values = [float(value) for value in values if value is not None]
+    first_day = next((item for item in daily if item.get('precipitation_mm') is not None), None)
+    return {
+        'source': forecast.get('source', 'CHIRPS3-GEFS'),
+        'source_type': 'prevision_quotidienne',
+        'window_hours': 72,
+        'total_mm': round(sum(values), 2),
+        'total_24h_mm': round(float(first_day['precipitation_mm']), 2) if first_day else None,
+        'nb_observations': len(values),
+        'last_observation': first_day.get('date') if first_day else None,
+        'series': daily,
+    }
 
 
 @csrf_exempt
 @require_http_methods(["POST"])
+@require_api_user
 def field_realtime_status(request):
     """
     Vue d'ensemble complète du risque climatique d'un champ, en 3 blocs
     distincts pour l'agriculteur :
-    1. "maintenant"        -> pluie quasi temps réel (GPM IMERG, 24-72h)
+    1. "maintenant"        -> pluie CHIRPS3-GEFS (prévision quotidienne, 72h)
     2. "tendance_recente"  -> anomalie vs climatologie (CHIRPS, 30j/90j)
     3. "a_venir"           -> série de précipitations CHIRPS3-GEFS sur 15j
     4. "spi_previsionnel"  -> SPI calculé sur la prévision de 15j
@@ -819,9 +893,8 @@ def field_realtime_status(request):
     if not champ_id:
         return JsonResponse({'success': False, 'error': 'ID champ manquant'}, status=400)
 
-    try:
-        champ = Champ.objects.get(id=champ_id)
-    except Champ.DoesNotExist:
+    champ = get_authorized_champ(request, champ_id)
+    if champ is None:
         return JsonResponse({'success': False, 'error': 'Champ introuvable'}, status=404)
 
     # La rubrique Temps utilise une fenêtre homogène de 15 jours pour la
@@ -841,13 +914,13 @@ def field_realtime_status(request):
     }
 
     try:
-        realtime = get_realtime_precipitation(geojson, hours=72)
+        realtime = get_chirps_gefs_now(champ)
         realtime['flood_level_now'] = classify_realtime_flood(
             realtime.get('total_24h_mm'), realtime.get('total_mm')
         )
         result['maintenant'] = realtime
     except Exception as e:
-        logger.error(f"Erreur bloc 'maintenant' (GPM IMERG) champ {champ_id}: {e}")
+        logger.error(f"Erreur bloc 'maintenant' (CHIRPS3-GEFS) champ {champ_id}: {e}")
         result['maintenant'] = {'error': "Données temps réel indisponibles pour le moment"}
 
     try:
@@ -1056,6 +1129,7 @@ def drought_indices(request):
 
 @csrf_exempt
 @require_http_methods(["POST"])
+@require_api_user
 def field_drought_indices(request):
     """
     Endpoint pour les indices de sécheresse sur un CHAMP précis (mode "Mes Champs").
@@ -1086,9 +1160,8 @@ def field_drought_indices(request):
             'error': f"index_type invalide. Valeurs acceptées : {sorted(DROUGHT_INDEX_TYPES)}"
         }, status=400)
 
-    try:
-        champ = Champ.objects.get(id=champ_id)
-    except Champ.DoesNotExist:
+    champ = get_authorized_champ(request, champ_id)
+    if champ is None:
         return JsonResponse({'success': False, 'error': 'Champ introuvable'}, status=404)
 
     try:
@@ -1139,6 +1212,7 @@ def field_drought_indices(request):
 
 
 @csrf_exempt
+@require_api_user
 def field_chirps_gefs(request):
     """Prévision CHIRPS3-GEFS sur un champ, sans stockage permanent du TIFF.
 
@@ -1173,9 +1247,8 @@ def field_chirps_gefs(request):
             'error': 'forecast_days doit être compris entre 1 et 15'
         }, status=400)
 
-    try:
-        champ = Champ.objects.get(id=champ_id)
-    except Champ.DoesNotExist:
+    champ = get_authorized_champ(request, champ_id)
+    if champ is None:
         return JsonResponse({'success': False, 'error': 'Champ introuvable'}, status=404)
 
     try:
@@ -1195,6 +1268,7 @@ def field_chirps_gefs(request):
 
 
 @csrf_exempt
+@require_api_user
 def field_forecast_spi(request):
     """SPI prévisionnel sur 15 jours basé sur CHIRPS + CHIRPS3-GEFS.
 
@@ -1229,9 +1303,8 @@ def field_forecast_spi(request):
             'error': 'years_history doit être compris entre 5 et 40'
         }, status=400)
 
-    try:
-        champ = Champ.objects.get(id=champ_id)
-    except Champ.DoesNotExist:
+    champ = get_authorized_champ(request, champ_id)
+    if champ is None:
         return JsonResponse({'success': False, 'error': 'Champ introuvable'}, status=404)
 
     try:

@@ -50,6 +50,13 @@ class Champ(models.Model):
     proprietaire = models.CharField(max_length=200)
     type_culture = models.CharField(max_length=100)
     date_semi = models.DateField()
+    owner = models.ForeignKey(
+        User,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name='champs_agriculture',
+    )
 
     geom = gis_models.GeometryField(srid=4326)
 
