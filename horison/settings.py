@@ -268,7 +268,7 @@ EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'koutoumbogajules@gmail.com'  # Votre email d'envoi
-EMAIL_HOST_PASSWORD = '9264Jules1998:'  # Votre mot de passe d'application Gmail
+EMAIL_HOST_PASSWORD = 'cspz cfsx dhox wadj'  # Votre mot de passe d'application Gmail
 DEFAULT_FROM_EMAIL = 'koutoumbogajules@gmail.com'
 
 # L'adresse email qui reçoit les alertes (Contrôlée par vous)

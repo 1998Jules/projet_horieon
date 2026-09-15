@@ -60,4 +60,11 @@ urlpatterns = [
 
     # Vue combinée "maintenant" + "tendance récente" + "à venir"
     path('api/field-realtime-status/', views.field_realtime_status, name='field_realtime_status'),
+
+    # Liste des alertes de l'utilisateur connecté
+        path('api/alerts/', views.my_alerts, name='my_alerts'),
+        # Évaluation de risque d'un champ (score, niveau, sous-scores, historique)
+        path('api/champ-risk/<int:champ_id>/', views.champ_risk, name='champ_risk'),
+        # Déclenchement manuel : collecte + scoring + création d'alertes
+        path('api/evaluate-champ/', views.evaluate_champ_now, name='evaluate_champ_now'),
 ]

@@ -1325,3 +1325,171 @@ def field_forecast_spi(request):
             'success': False,
             'error': str(exc),
         }, status=502)
+
+
+
+# ============================================================
+# API POUR LE SYSTÈME D'ALERTES AGRICOLES
+# ============================================================
+from .models import FarmerAlert, RiskAssessment  # noqa: E402
+
+
+@require_api_user
+@require_http_methods(["GET"])
+def my_alerts(request):
+    """Liste les alertes de l'utilisateur connecté.
+
+    Query params optionnels :
+    - status : OPEN | ACKNOWLEDGED | RESOLVED | EXPIRED (filtre)
+    - champ_id : limite à un champ
+    - limit : nombre max (défaut 50)
+    """
+    from django.core.serializers.json import DjangoJSONEncoder
+
+    qs = FarmerAlert.objects.filter(farmer=request.user).select_related("champ")
+    status_filter = request.GET.get("status")
+    if status_filter:
+        qs = qs.filter(status=status_filter.upper())
+    champ_id = request.GET.get("champ_id")
+    if champ_id:
+        qs = qs.filter(champ_id=champ_id)
+    limit = min(int(request.GET.get("limit", 50)), 200)
+    alerts = qs.order_by("-created_at")[:limit]
+
+    data = [
+        {
+            "id": a.id,
+            "champ_id": a.champ_id,
+            "champ_nom": a.champ.nom,
+            "alert_type": a.alert_type,
+            "alert_type_display": a.get_alert_type_display(),
+            "risk_level": a.risk_level,
+            "risk_level_display": a.get_risk_level_display(),
+            "risk_score": a.risk_score,
+            "severity": a.severity,
+            "title": a.title,
+            "message": a.message,
+            "recommendation": a.recommendation,
+            "contributing_indicators": a.contributing_indicators,
+            "indicator": a.indicator,
+            "observed_value": a.observed_value,
+            "status": a.status,
+            "observed_at": a.observed_at.isoformat(),
+            "created_at": a.created_at.isoformat(),
+        }
+        for a in alerts
+    ]
+    return JsonResponse({"success": True, "data": data, "total": len(data)})
+
+
+@require_api_user
+@require_http_methods(["GET"])
+def champ_risk(request, champ_id):
+    """Récupère le RiskAssessment le plus récent d'un champ + l'historique.
+
+    Renvoie :
+    - current : dernier RiskAssessment (score, niveau, sous-scores, indicateurs)
+    - history : 30 derniers RiskAssessment pour graphique
+    """
+    champ = get_authorized_champ(request, champ_id)
+    if champ is None:
+        return JsonResponse({"success": False, "error": "Champ introuvable"}, status=404)
+
+    current = (
+        RiskAssessment.objects.filter(champ=champ)
+        .order_by("-assessed_at")
+        .first()
+    )
+    history = list(
+        RiskAssessment.objects.filter(champ=champ)
+        .order_by("-assessed_at")[:30]
+        .values("id", "assessed_at", "score", "level", "sub_scores")
+    )
+
+    if not current:
+        return JsonResponse({
+            "success": True,
+            "current": None,
+            "history": [],
+            "message": "Aucune évaluation de risque disponible pour ce champ.",
+        })
+
+    return JsonResponse({
+        "success": True,
+        "current": {
+            "id": current.id,
+            "assessed_at": current.assessed_at.isoformat(),
+            "score": current.score,
+            "level": current.level,
+            "level_display": current.get_level_display(),
+            "sub_scores": current.sub_scores,
+            "indicators_snapshot": current.indicators_snapshot,
+        },
+        "history": [
+            {
+                "id": h["id"],
+                "assessed_at": h["assessed_at"].isoformat() if h["assessed_at"] else None,
+                "score": h["score"],
+                "level": h["level"],
+                "sub_scores": h["sub_scores"],
+            }
+            for h in history
+        ],
+    })
+
+
+@require_api_user
+@require_http_methods(["POST"])
+def evaluate_champ_now(request):
+    """Déclenche manuellement la collecte + scoring + alertes pour un champ.
+
+    Body JSON : { "champ_id": 1, "collect": true (défaut), "dry_run": false }
+    Utile pour tester le système sans attendre le cron.
+    """
+    try:
+        data = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({"success": False, "error": "JSON invalide"}, status=400)
+
+    champ_id = data.get("champ_id")
+    if not champ_id:
+        return JsonResponse({"success": False, "error": "champ_id requis"}, status=400)
+
+    champ = get_authorized_champ(request, champ_id)
+    if champ is None:
+        return JsonResponse({"success": False, "error": "Champ introuvable"}, status=404)
+
+    do_collect = data.get("collect", True)
+    dry_run = data.get("dry_run", False)
+
+    collect_report = None
+    if do_collect:
+        try:
+            from .indicator_collector import collect_champ_indicators
+            collect_report = collect_champ_indicators(champ)
+        except Exception as exc:
+            logger.exception("Erreur collecte champ %s", champ_id)
+            return JsonResponse(
+                {"success": False, "error": f"Erreur collecte : {exc}"},
+                status=502,
+            )
+
+    from .alert_services import evaluate_champ
+    result = evaluate_champ(champ, dry_run=dry_run)
+
+    return JsonResponse({
+        "success": True,
+        "champ_id": champ_id,
+        "collect": collect_report,
+        "evaluation": {
+            "score": result.score,
+            "level": result.level,
+            "previous_level": result.previous_level,
+            "level_changed": result.level_changed,
+            "alerts_created": result.alerts_created,
+            "deliveries_created": result.deliveries_created,
+            "alert_types": result.alert_types,
+            "errors": result.errors,
+            "assessment_id": result.assessment_id,
+        },
+    })
