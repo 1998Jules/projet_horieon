@@ -19,8 +19,8 @@ from .models import  Cantons, Commune,routes,lycee,college,jardin,pea,marche,bor
 
 def cantons_geojson(request):
     qs = Cantons.objects.all()
-    geojson = serialize('geojson', qs, geometry_field='geom', fields=('canton','code_canton','prefecture','code_prefe','region','code_regio'))
-    return HttpResponse(geojson, content_type='application/json')
+    geojson = serialize('geojson', qs, geometry_field='geom', fields=('canton','code_canto','prefecture','code_prefe','region','code_regio'))
+    return HttpResponse(geojson, content_type='application/json; charset=utf-8')
 
 
 
@@ -34,39 +34,39 @@ def commune_geojson(request):
         geometry_field='geom',
         fields=('commune','code_commu','region','code_regio','prefecture','code_prefe')
     )
-    return HttpResponse(geojson, content_type='application/json')
+    return HttpResponse(geojson, content_type='application/json; charset=utf-8')
 
 
 def route_geojson(request):
     qs = routes.objects.all()
     geojson = serialize('geojson', qs, geometry_field='geom', fields=('route_clas','route_type','route_clas','route_reco','route_nom'))
-    return HttpResponse(geojson, content_type='application/json')
+    return HttpResponse(geojson, content_type='application/json; charset=utf-8')
 
 def lycee_geojson(request):
     qs = lycee.objects.all()
     geojson = serialize(
         'geojson', qs, geometry_field='geom',
-        fields=('canton_nom','nom_locali','etablissem','ouverture','etabliss_1','type_terrain','inspection')
+        fields=('canton_nom','nom_locali','etablissem','ouverture','etabliss_1','terrain','inspection')
     )
-    return HttpResponse(geojson, content_type='application/json')
+    return HttpResponse(geojson, content_type='application/json; charset=utf-8')
 
 
 def college_geojson(request):
     qs = college.objects.all()
     geojson = serialize(
         'geojson', qs, geometry_field='geom',
-        fields=('canton_nom','nom_locali','etablissem','ouverture','etabliss_1','type_terrain','inspection')
+        fields=('canton_nom','nom_locali','etablissem','ouverture','etabliss_1','terrain','inspection')
     )
-    return HttpResponse(geojson, content_type='application/json')
+    return HttpResponse(geojson, content_type='application/json; charset=utf-8')
 
 
 def jardin_geojson(request):
     qs = jardin.objects.all()
     geojson = serialize(
         'geojson', qs, geometry_field='geom',
-        fields=('canton_nom','nom_locali','etablissem','ouverture','etabliss_1','type_terrain','inspection')
+        fields=('canton_nom','nom_locali','etablissem','ouverture','etabliss_1','terrain','inspection')
     )
-    return HttpResponse(geojson, content_type='application/json')
+    return HttpResponse(geojson, content_type='application/json; charset=utf-8')
 
 
 def pea_geojson(request):
@@ -77,7 +77,7 @@ def pea_geojson(request):
         geometry_field='geom',
         fields=('canton_nom','nom_locali','forage_nom','forage_typ','batiment_n')
     )
-    return HttpResponse(geojson, content_type='application/json')
+    return HttpResponse(geojson, content_type='application/json; charset=utf-8')
 from django.core.serializers import serialize
 from django.http import JsonResponse, HttpResponse
 import json
@@ -92,7 +92,7 @@ def marche_geojson(request):
         geometry_field='geom',
         fields=('canton_nom','nom_locali','marche_nom','jour')
     )
-    return HttpResponse(geojson, content_type='application/json')
+    return HttpResponse(geojson, content_type='application/json; charset=utf-8')
 
 
 
@@ -102,9 +102,9 @@ def borne_geojson(request):
         'geojson',
         qs,
         geometry_field='geom',
-        fields=('canton_nom','nom_locali','borne_font')
+        fields=('canton_nom','borne_font')
     )
-    return HttpResponse(geojson, content_type='application/json')
+    return HttpResponse(geojson, content_type='application/json; charset=utf-8')
 
 
 def chateau_geojson(request):
@@ -116,7 +116,7 @@ def chateau_geojson(request):
         geometry_field='geom',
         fields=('canton_nom','nom_locali','chateau_no','organisme')
     )
-    return HttpResponse(geojson, content_type='application/json')
+    return HttpResponse(geojson, content_type='application/json; charset=utf-8')
 
 
 
@@ -130,7 +130,7 @@ def terrain_geojson(request):
         geometry_field='geom',
         fields=('canton_nom','nom_locali','terrain','terrain_sp')
     )
-    return HttpResponse(geojson, content_type='application/json')
+    return HttpResponse(geojson, content_type='application/json; charset=utf-8')
 
 
 
@@ -143,7 +143,7 @@ def hopital_geojson(request):
         geometry_field='geom',
         fields=('canton_nom','nom_locali','nom_fs','ouverture','secteur','services_p')
     )
-    return HttpResponse(geojson, content_type='application/json')
+    return HttpResponse(geojson, content_type='application/json; charset=utf-8')
 
 
 
@@ -156,7 +156,7 @@ def cooperative_geojson(request):
         geometry_field='geom',
         fields=('canton_nom','nom_locali','cooperativ','cooperat_1')
     )
-    return HttpResponse(geojson, content_type='application/json')
+    return HttpResponse(geojson, content_type='application/json; charset=utf-8')
 
 
 
@@ -170,7 +170,7 @@ def magazin_geojson(request):
         geometry_field='geom',
         fields=('canton_nom','etab_nom','ouverture','organisme')
     )
-    return HttpResponse(geojson, content_type='application/json')
+    return HttpResponse(geojson, content_type='application/json; charset=utf-8')
 
 # pour construrure l'api 
 

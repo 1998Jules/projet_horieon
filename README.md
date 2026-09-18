@@ -1,0 +1,107 @@
+# E-commune Horison — Géoportail de la commune de Blitta 2 (Togo)
+
+**E-commune** est une application web qui affiche sur une carte interactive les
+infrastructures d'une commune togolaise (écoles, centres de santé, marchés,
+points d'eau, routes…) et qui aide les agriculteurs à **surveiller leurs champs
+par satellite** (santé de la végétation, sécheresse, pluie, alertes par e-mail).
+Développée avec **Django 6**, **Django REST Framework** et **PostGIS**.
+
+La commune couverte est **Blitta 2** (préfecture de Blitta, région Centrale),
+formée des cantons d'**Agbandi** (chef-lieu), **Langabou**, **Koffiti** et
+**Tcharè-Baou**.
+
+> Une documentation détaillée, destinée aussi bien aux non-développeurs
+> (présentation, lexique, installation pas à pas, problèmes fréquents) qu'aux
+> développeurs (architecture, base de données, API, système d'alertes, limites
+> connues et pistes d'amélioration), est disponible dans
+> [DOCUMENTATION.md](DOCUMENTATION.md). Elle existe aussi en PDF :
+> [docs/Documentation_E-commune.pdf](docs/Documentation_E-commune.pdf).
+
+Corrections apportées le 18 septembre 2026 (sécurité, installation, cartes,
+données, et ce qu'il reste à faire de votre côté) :
+[RAPPORT-CORRECTIONS-2026-09-18.md](RAPPORT-CORRECTIONS-2026-09-18.md).
+
+## Sommaire
+
+1. [En deux phrases, pour tout le monde](#en-deux-phrases-pour-tout-le-monde)
+2. [Démarrage rapide](#démarrage-rapide)
+3. [Technologies](#technologies)
+4. [Données](#données)
+
+---
+
+## En deux phrases, pour tout le monde
+
+- **Le géoportail** : c'est comme Google Maps, mais pour la mairie. On y voit,
+  sur une carte, où se trouvent les écoles, les centres de santé, les marchés,
+  les points d'eau et les routes de la commune, et on peut cliquer dessus pour
+  avoir des informations.
+- **Le module agriculture** : un agriculteur dessine son champ sur la carte ;
+  l'application consulte les satellites et la météo, calcule un « score de
+  risque » (sécheresse, manque d'eau, excès de pluie…) et envoie une alerte par
+  e-mail quand la situation se dégrade.
+
+---
+
+## Démarrage rapide
+
+Prérequis : Python 3.12+, Docker, Git. Détails pas à pas, y compris pour les
+débutants : [Partie 2 de la documentation](DOCUMENTATION.md#partie-2--installer-et-lancer-le-projet).
+
+```bash
+git clone https://github.com/1998Jules/projet_horieon.git
+cd projet_horieon
+
+# 1. Base de données PostGIS (Docker)
+docker run -d --name horieon-postgis -e POSTGRES_PASSWORD=1234 -e POSTGRES_DB=Ecommune \
+  -p 127.0.0.1:5440:5432 -v horieon-pgdata:/var/lib/postgresql/data postgis/postgis:16-3.5
+
+# 2. Environnement Python
+python -m venv .venv
+.venv\Scripts\activate            # Windows  (Linux/macOS : source .venv/bin/activate)
+pip install -r requirements.txt
+# Windows uniquement : installer aussi la roue GDAL (voir la documentation, section 11.3)
+
+# 3. Configuration
+copy .env.exemple .env            # Linux/macOS : cp .env.exemple .env
+#   puis éditer .env : SECRET_KEY, DEBUG=True, DB_PASSWORD=1234, DB_HOST=127.0.0.1, DB_PORT=5440
+
+# 4. Base, données, compte admin
+python manage.py migrate
+python manage.py loaddata cartotheque/fixtures/initial_domaines.json
+python manage.py import_blitta2   # couches du géoportail à partir de données ouvertes
+python manage.py createsuperuser
+
+# 5. Lancer
+python manage.py runserver
+```
+
+Puis ouvrir :
+
+| Page | Adresse |
+|---|---|
+| Géoportail (carte de la commune) | http://127.0.0.1:8000/geoportail/ |
+| Module agriculture | http://127.0.0.1:8000/agriculture/ |
+| Administration | http://127.0.0.1:8000/admin/ |
+| API cartothèque | http://127.0.0.1:8000/api/cartotheque/ |
+
+> La racine `http://127.0.0.1:8000/` ouvre directement le géoportail.
+
+Tests automatisés : `python manage.py test agriculture geoportail`.
+
+---
+
+## Technologies
+
+Django 6 · Django REST Framework · PostgreSQL + PostGIS · GDAL · Leaflet ·
+Turf.js · Google Earth Engine · CHIRPS / CHIRPS-GEFS · Open-Meteo.
+
+## Données
+
+Les données de terrain d'origine (relevés de l'équipe du projet) ne sont pas
+dans ce dépôt. La commande `import_blitta2` reconstruit les couches à partir de
+sources ouvertes : limites **OCHA COD-AB**, décret de création des communes
+(**Journal officiel du 08/01/2018**), infrastructures **OpenStreetMap**
+(© contributeurs OpenStreetMap, licence ODbL) et inventaire **OMS/KEMRI** des
+formations sanitaires. Voir [la section « Données et sources »](DOCUMENTATION.md#27-données-et-sources)
+de la documentation.

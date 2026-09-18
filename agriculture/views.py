@@ -26,10 +26,18 @@ logger = logging.getLogger(__name__)
 User = get_user_model()
 
 
+SAFE_METHODS = {'GET', 'HEAD', 'OPTIONS'}
+
+
 def _token_user(request):
-    """Retourne l'utilisateur de session ou du header Authorization: Token."""
+    """Retourne l'utilisateur du header Authorization: Token (ou de session en lecture).
+
+    Les vues de l'API sont exemptées de CSRF : accepter la session du navigateur
+    sur une requête d'écriture permettrait à un autre site d'agir au nom de
+    l'utilisateur connecté. La session n'est donc acceptée qu'en lecture.
+    """
     current = getattr(request, 'user', None)
-    if current is not None and current.is_authenticated:
+    if request.method in SAFE_METHODS and current is not None and current.is_authenticated:
         return current
     header = request.META.get('HTTP_AUTHORIZATION', '')
     scheme, _, key = header.partition(' ')
@@ -47,6 +55,20 @@ def require_api_user(view):
         user = _token_user(request)
         if user is None:
             return JsonResponse({'success': False, 'error': 'Authentification requise.'}, status=401)
+        request.user = user
+        return view(request, *args, **kwargs)
+    return wrapped
+
+
+def require_staff_user(view):
+    """Réserve une vue d'écriture aux administrateurs (is_staff) authentifiés par jeton."""
+    @wraps(view)
+    def wrapped(request, *args, **kwargs):
+        user = _token_user(request)
+        if user is None:
+            return JsonResponse({'success': False, 'error': 'Authentification requise.'}, status=401)
+        if not (user.is_staff or user.is_superuser):
+            return JsonResponse({'success': False, 'error': 'Action réservée aux administrateurs.'}, status=403)
         request.user = user
         return view(request, *args, **kwargs)
     return wrapped
@@ -76,7 +98,7 @@ def region_geojson(request):
         geometry_field='geom',
         fields=('id', 'region')  # <--- AJOUTEZ 'id' ici
     )
-    return HttpResponse(data, content_type='application/json')
+    return HttpResponse(data, content_type='application/json; charset=utf-8')
 
 def prefecture_geojson(request):
     qs = Prefecture.objects.all()
@@ -86,7 +108,7 @@ def prefecture_geojson(request):
         geometry_field='geom',
         fields=('id', 'prefecture')  # <--- AJOUTEZ 'id' ici
     )
-    return HttpResponse(data, content_type='application/json')
+    return HttpResponse(data, content_type='application/json; charset=utf-8')
 
 def commune_geojson(request):
     qs = Commune.objects.all()
@@ -96,7 +118,7 @@ def commune_geojson(request):
         geometry_field='geom',
         fields=('id', 'commune', 'prefecture')  # <--- AJOUTEZ 'id' ici
     )
-    return HttpResponse(data, content_type='application/json')
+    return HttpResponse(data, content_type='application/json; charset=utf-8')
 # --- Vues Google Earth Engine ---
 @csrf_exempt
 @require_http_methods(["GET"])
@@ -284,7 +306,7 @@ def champs_geojson(request):
         geometry_field='geom',
         fields=('id', 'nom', 'type_culture', 'proprietaire')
     )
-    return HttpResponse(data, content_type='application/json')
+    return HttpResponse(data, content_type='application/json; charset=utf-8')
 
 # --- Vue API pour créer un champ (Simplifiée pour l'exemple) ---
 @csrf_exempt
@@ -505,6 +527,7 @@ def get_crop_calendar(request):
 # MISE À JOUR : Ajout/Create
 @csrf_exempt
 @require_http_methods(["POST"])
+@require_staff_user
 def add_crop_calendar(request):
     try:
         data = json.loads(request.body)
@@ -522,12 +545,15 @@ def add_crop_calendar(request):
             other_activities=data.get('other_activities', '')
         )
         return JsonResponse({'success': True, 'id': item.id})
+    except (KeyError, ValueError) as e:  # champ manquant ou JSON invalide
+        return JsonResponse({'success': False, 'error': f'Données invalides : {e}'}, status=400)
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
 
 # MISE À JOUR : Update
 @csrf_exempt
 @require_http_methods(["POST"])
+@require_staff_user
 def update_crop_calendar(request, pk):
     try:
         data = json.loads(request.body)
@@ -546,6 +572,10 @@ def update_crop_calendar(request, pk):
         item.other_activities = data.get('other_activities', item.other_activities)
         item.save()
         return JsonResponse({'success': True})
+    except CropCalendar.DoesNotExist:
+        return JsonResponse({'success': False, 'error': 'Culture introuvable'}, status=404)
+    except ValueError as e:  # JSON invalide
+        return JsonResponse({'success': False, 'error': f'Données invalides : {e}'}, status=400)
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
 
@@ -984,6 +1014,7 @@ def field_realtime_status(request):
 
 @csrf_exempt
 @require_http_methods(["POST", "DELETE"])
+@require_staff_user
 def delete_crop_calendar(request, pk):
     """Supprime une entrée du calendrier"""
     try:

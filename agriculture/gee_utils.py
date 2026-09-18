@@ -5,13 +5,19 @@ import ee
 import pandas as pd
 from datetime import datetime  # <-- IMPORT AJOUTÉ
 import os
+from django.conf import settings
 from google.oauth2 import service_account
 import logging
 
 logger = logging.getLogger(__name__)
 
-# Chemin vers votre fichier clé
-SERVICE_ACCOUNT_KEY_FILE = 'ee-koutoumbogajules-c99000ca569e.json'
+# Chemin vers le fichier clé du compte de service : variable GEE_SERVICE_ACCOUNT_KEY
+# (.env), sinon le fichier historique à la racine du projet. Le chemin est absolu :
+# il ne dépend plus du dossier depuis lequel le serveur est lancé.
+SERVICE_ACCOUNT_KEY_FILE = os.environ.get('GEE_SERVICE_ACCOUNT_KEY') or os.path.join(
+    settings.BASE_DIR, 'ee-koutoumbogajules-c99000ca569e.json')
+# Projet Google Cloud enregistré pour Earth Engine (facultatif : sinon celui de la clé)
+GEE_PROJECT = os.environ.get('GEE_PROJECT') or None
 
 
 def initialize_ee():
@@ -22,7 +28,7 @@ def initialize_ee():
                 SERVICE_ACCOUNT_KEY_FILE,
                 scopes=["https://www.googleapis.com/auth/earthengine"]
             )
-            ee.Initialize(credentials)
+            ee.Initialize(credentials, project=GEE_PROJECT)
             print("Earth Engine initialisé avec succès via Service Account.")
         else:
             print(f"ERREUR: Le fichier clé '{SERVICE_ACCOUNT_KEY_FILE}' est introuvable.")

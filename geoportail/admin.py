@@ -1,8 +1,6 @@
 from django.contrib import admin
-from django.contrib.gis.admin import OSMGeoAdmin
 from django.utils.html import format_html
 from .models import marche
-from django.utils.html import format_html
 
 @admin.register(marche)
 class MarcheAdmin(admin.ModelAdmin):

@@ -1,14 +1,16 @@
 // ==============================
 // --- Carte Leaflet ---
 // ==============================
-const map = L.map('map').setView([6.23461, 1.59096], 14);
+// Centrée sur la commune de Blitta 2 (préfecture de Blitta)
+const map = L.map('map').setView([8.15, 1.12], 11);
 
 // ==============================
-// --- Basemaps --- 
+// --- Basemaps ---
 // ==============================
 const osm = L.tileLayer(
-    'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-    { maxZoom: 22, attribution: '© OpenStreetMap' }
+    'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+    // OSM refuse les tuiles demandées sans Referer (Django envoie "same-origin" par défaut)
+    { maxZoom: 22, maxNativeZoom: 19, referrerPolicy: 'strict-origin-when-cross-origin', attribution: '© OpenStreetMap' }
 ).addTo(map);
 
 const satellite = L.tileLayer(
@@ -20,10 +22,16 @@ const hybride = L.tileLayer(
     'http://mt0.google.com/vt/lyrs=y&hl=en&x={x}&y={y}&z={z}',
     { maxZoom: 22, attribution: '© Google' }
 );
-const url = "http://localhost:8089/geoserver/horicommune/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=horicommune:canton_lac1&outputFormat=application/json&srsName=EPSG:4326";
-// Contrôle des couches
 
-
+// Échappe le texte avant de l'insérer dans une bulle (valeurs issues de la base)
+function escapeHtml(value) {
+    return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
 
 // ==============================
 // --- Couches Django ---
@@ -33,7 +41,7 @@ const url = "http://localhost:8089/geoserver/horicommune/ows?service=WFS&version
 const prefectureLayer = L.geoJSON(null, {
     style: { color: "green", weight: 2 },
     onEachFeature: function (feature, layer) {
-        layer.bindPopup("Préfecture: " + feature.properties.prefecture);
+        layer.bindPopup("Préfecture : " + escapeHtml(feature.properties.prefecture));
     }
 });
 
@@ -41,7 +49,7 @@ const prefectureLayer = L.geoJSON(null, {
 const regionLayer = L.geoJSON(null, {
     style: { color: "blue", weight: 2 },
     onEachFeature: function (feature, layer) {
-        layer.bindPopup("Région: " + feature.properties.region);
+        layer.bindPopup("Région : " + escapeHtml(feature.properties.region));
     }
 });
 
@@ -50,8 +58,8 @@ const communeLayer = L.geoJSON(null, {
     style: { color: "orange", weight: 1 },
     onEachFeature: function (feature, layer) {
         layer.bindPopup(
-            "Commune: " + feature.properties.commune +
-            "<br>Préfecture: " + feature.properties.prefecture
+            "Commune : " + escapeHtml(feature.properties.commune) +
+            "<br>Préfecture : " + escapeHtml(feature.properties.prefecture)
         );
     }
 });
@@ -60,25 +68,25 @@ const communeLayer = L.geoJSON(null, {
 // --- Fetch Django ---
 // ==============================
 
-fetch('/agriculture/geojson/prefecture/')
-    .then(res => res.json())
-    .then(data => prefectureLayer.addData(data));
+function loadLayer(url, layer) {
+    return fetch(url)
+        .then(res => {
+            if (!res.ok) throw new Error(`${url} : HTTP ${res.status}`);
+            return res.json();
+        })
+        .then(data => layer.addData(data))
+        .catch(err => console.error("Erreur chargement couche :", err));
+}
 
-fetch('/agriculture/geojson/region/')
-    .then(res => res.json())
-    .then(data => {
-        regionLayer.addData(data);
-        map.fitBounds(regionLayer.getBounds()); // zoom auto
-    });
-
-fetch('/agriculture/geojson/commune/')
-    .then(res => res.json())
-    .then(data => {
-        console.log("COMMUNE DATA:", data); // 👈 AJOUTE ÇA
-        communeLayer.addData(data);
-    });
-    
-
+loadLayer('/agriculture/api/prefectures/', prefectureLayer);
+loadLayer('/agriculture/api/regions/', regionLayer);
+loadLayer('/agriculture/api/communes/', communeLayer).then(() => {
+    // Zoom sur les communes chargées (Blitta 2), si la couche n'est pas vide
+    if (communeLayer.getLayers().length) {
+        communeLayer.addTo(map);
+        map.fitBounds(communeLayer.getBounds(), { padding: [20, 20] });
+    }
+});
 
 L.control.layers(
     {
@@ -92,7 +100,3 @@ L.control.layers(
         "Commune": communeLayer
     }
 ).addTo(map);
-L.tileLayer('https://earthengine.googleapis.com/v1/projects/ee-koutoumbogajules/maps/4283efe60ae4e59ecba2fb0ba980f209-067211dcf325c448e16ee8a4b601575c/tiles/{z}/{x}/{y}', {
-  attribution: 'Google Earth Engine',
-  opacity: 0.7
-}).addTo(map);

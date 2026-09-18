@@ -20,8 +20,11 @@ from django.urls import path
 from django.urls import include, path
 from django.conf import settings
 from django.conf.urls.static import static
+from django.views.generic import RedirectView
 
 urlpatterns = [
+    # Pas de page d'accueil dédiée : la racine ouvre le géoportail
+    path('', RedirectView.as_view(url='/geoportail/', permanent=False)),
     path('admin/', admin.site.urls),
     path('auth/', include('authentication.urls')),
     path('geoportail/', include('geoportail.urls')),
