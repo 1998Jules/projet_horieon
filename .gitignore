@@ -1,2 +1,18 @@
+# Clés de service Google Earth Engine
 ee-koutoumbogajules-baa273e324a1.json
 ee-koutoumbogajules-c99000ca569e.json
+ee-*.json
+
+# Secrets / configuration locale
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Django
+db.sqlite3
+staticfiles/
+*.log

@@ -1,104 +1,69 @@
 """
 Django settings for horison project.
+
+Les valeurs sensibles (clé secrète, mots de passe, SMTP…) sont lues depuis
+les variables d'environnement ou depuis un fichier `.env` à la racine du
+projet (voir `.env.exemple`).
 """
 import os
 import sys
 from pathlib import Path
-from django.conf import settings
-from django.conf.urls.static import static
 
+from dotenv import load_dotenv
 
-# ============================================
-# CONFIGURATION GIS CRITIQUE (DOIT ÊTRE EN HAUT)
-# ============================================
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# 1. DÉSACTIVER LES FONCTIONNALITÉS PROBABLES
-os.environ['PROJ_NETWORK'] = 'OFF'
-os.environ['PROJ_DEBUG'] = '0'
+load_dotenv(BASE_DIR / '.env')
 
-# 2. UTILISER PROJ DE VOTRE VENV (GDAL 3.11.4)
-# Le chemin devrait être dans votre venv
-venv_path = r"D:\Horison\.venv"
 
-# Chercher proj.db dans le venv
-proj_paths_to_try = [
-    os.path.join(venv_path, "Lib", "site-packages", "osgeo", "data", "proj"),
-    os.path.join(venv_path, "Lib", "site-packages", "osgeo", "proj"),
-    os.path.join(venv_path, "Lib", "site-packages", "pyproj", "proj_dir", "share", "proj"),
-    os.path.join(venv_path, "share", "proj"),
-]
+def env_bool(name, default=False):
+    return os.environ.get(name, str(default)).strip().lower() in ('1', 'true', 'yes', 'on')
 
-for proj_path in proj_paths_to_try:
-    proj_db_path = os.path.join(proj_path, "proj.db")
-    if os.path.exists(proj_db_path):
-        os.environ['PROJ_LIB'] = proj_path
-        print(f"✓ PROJ_LIB trouvé: {proj_path}")
-        break
-else:
-    # Si non trouvé, désactiver la recherche automatique
-    os.environ['PROJ_LIB'] = r'D:\Horison\.venv\Lib\site-packages\osgeo\data\proj'
-    print(f"⚠ PROJ_LIB configuré par défaut")
 
-# 3. CONFIGURER GDAL_DATA
-gdal_data_paths = [
-    os.path.join(venv_path, "Lib", "site-packages", "osgeo", "data", "gdal"),
-    os.path.join(venv_path, "share", "gdal"),
-]
+def env_list(name, default=''):
+    return [item.strip() for item in os.environ.get(name, default).split(',') if item.strip()]
 
-for gdal_path in gdal_data_paths:
-    if os.path.exists(gdal_path):
-        os.environ['GDAL_DATA'] = gdal_path
-        print(f"✓ GDAL_DATA trouvé: {gdal_path}")
-        break
 
-# 4. AJOUTER OSGEO AU PATH
-osgeo_path = os.path.join(venv_path, "Lib", "site-packages", "osgeo")
-if os.path.exists(osgeo_path):
-    # Ajouter au début du PATH pour priorité
-    os.environ["PATH"] = osgeo_path + ";" + os.environ["PATH"]
-    print(f"✓ OSGeo ajouté au PATH: {osgeo_path}")
+# ============================================
+# CONFIGURATION GIS (DOIT ÊTRE EN HAUT)
+# ============================================
+# Sous Windows, GDAL/GEOS/PROJ sont fournis par la roue Python "GDAL"
+# installée dans le venv (dossier site-packages/osgeo). Sous Linux (serveur),
+# Django trouve les bibliothèques système tout seul : on ne touche à rien.
 
-# 5. CONFIGURER LES CHEMINS DES LIBRAIRIES
-GDAL_LIBRARY_PATH = os.path.join(osgeo_path, "gdal.dll")
-GEOS_LIBRARY_PATH = os.path.join(osgeo_path, "geos_c.dll")
+os.environ.setdefault('PROJ_NETWORK', 'OFF')
 
-# Vérifier l'existence
-if not os.path.exists(GDAL_LIBRARY_PATH):
-    print(f"❌ GDAL library introuvable: {GDAL_LIBRARY_PATH}")
-    # Chercher dans d'autres emplacements
-    for root, dirs, files in os.walk(venv_path):
-        for file in files:
-            if file == "gdal.dll":
-                GDAL_LIBRARY_PATH = os.path.join(root, file)
-                print(f"✓ GDAL trouvé: {GDAL_LIBRARY_PATH}")
-                break
+if os.name == 'nt':
+    osgeo_path = Path(sys.prefix) / 'Lib' / 'site-packages' / 'osgeo'
 
-if not os.path.exists(GEOS_LIBRARY_PATH):
-    print(f"❌ GEOS library introuvable: {GEOS_LIBRARY_PATH}")
-    for root, dirs, files in os.walk(venv_path):
-        for file in files:
-            if file == "geos_c.dll":
-                GEOS_LIBRARY_PATH = os.path.join(root, file)
-                print(f"✓ GEOS trouvé: {GEOS_LIBRARY_PATH}")
-                break
+    proj_path = osgeo_path / 'data' / 'proj'
+    if (proj_path / 'proj.db').exists():
+        os.environ['PROJ_LIB'] = str(proj_path)
 
-print("=" * 50)
-print("CONFIGURATION GIS:")
-print(f"  GDAL_LIBRARY_PATH: {GDAL_LIBRARY_PATH}")
-print(f"  GEOS_LIBRARY_PATH: {GEOS_LIBRARY_PATH}")
-print(f"  PROJ_LIB: {os.environ.get('PROJ_LIB', 'Non défini')}")
-print(f"  GDAL_DATA: {os.environ.get('GDAL_DATA', 'Non défini')}")
-print("=" * 50)
+    gdal_data_path = osgeo_path / 'data' / 'gdal'
+    if gdal_data_path.exists():
+        os.environ['GDAL_DATA'] = str(gdal_data_path)
+
+    if osgeo_path.exists():
+        os.environ['PATH'] = str(osgeo_path) + os.pathsep + os.environ['PATH']
+
+    if (osgeo_path / 'gdal.dll').exists():
+        GDAL_LIBRARY_PATH = str(osgeo_path / 'gdal.dll')
+    if (osgeo_path / 'geos_c.dll').exists():
+        GEOS_LIBRARY_PATH = str(osgeo_path / 'geos_c.dll')
+
+# ============================================
+# SÉCURITÉ
+# ============================================
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-668s^s2k9$u3_zs8mps1+1dy5-)+%*dlmr3*yp-phgep2&!!vp'
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-dev-only-a-remplacer-en-production')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = env_bool('DEBUG', False)
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = env_list('ALLOWED_HOSTS', 'localhost,127.0.0.1')
 
 # ============================================
 # APPLICATION DEFINITION
@@ -205,11 +170,11 @@ WSGI_APPLICATION = 'horison.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.contrib.gis.db.backends.postgis',
-        'NAME': 'Ecommune',
-        'USER': 'postgres',
-        'PASSWORD': '1234',
-        'HOST': 'localhost',
-        'PORT': '5432',
+        'NAME': os.environ.get('DB_NAME', 'Ecommune'),
+        'USER': os.environ.get('DB_USER', 'postgres'),
+        'PASSWORD': os.environ.get('DB_PASSWORD', '1234'),
+        'HOST': os.environ.get('DB_HOST', 'localhost'),
+        'PORT': os.environ.get('DB_PORT', '5432'),
     }
 }
 
@@ -263,16 +228,16 @@ REST_FRAMEWORK = {
 }
 
  # --- CONFIGURATION EMAIL (Pour les alertes) ---
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'koutoumbogajules@gmail.com'  # Votre email d'envoi
-EMAIL_HOST_PASSWORD = 'cspz cfsx dhox wadj'  # Votre mot de passe d'application Gmail
-DEFAULT_FROM_EMAIL = 'koutoumbogajules@gmail.com'
+EMAIL_BACKEND = os.environ.get('EMAIL_BACKEND', 'django.core.mail.backends.smtp.EmailBackend')
+EMAIL_HOST = os.environ.get('EMAIL_HOST', 'smtp.gmail.com')
+EMAIL_PORT = int(os.environ.get('EMAIL_PORT', '587'))
+EMAIL_USE_TLS = env_bool('EMAIL_USE_TLS', True)
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')  # Votre email d'envoi
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')  # Mot de passe d'application Gmail
+DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', EMAIL_HOST_USER)
 
 # L'adresse email qui reçoit les alertes (Contrôlée par vous)
-ALERT_RECIPIENT_EMAIL = 'koutoumbogabakota@gmail.com' 
+ALERT_RECIPIENT_EMAIL = os.environ.get('ALERT_RECIPIENT_EMAIL', '')
 
 # Seuil NDVI pour déclencher une alerte (ex: < 0.35 = Stress hydrique sévère)
 NDVI_ALERT_THRESHOLD = 0.35
