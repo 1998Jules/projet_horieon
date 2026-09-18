@@ -1,16 +1,28 @@
 # E-commune Horison — Géoportail de la commune de Blitta 2 (Togo)
 
-> 📄 **Lire la documentation complète en PDF (43 pages, mise en page) :
-> [docs/Documentation_E-commune.pdf](docs/Documentation_E-commune.pdf)**
-
 **E-commune** est une application web qui affiche sur une carte interactive les
 infrastructures d'une commune togolaise (écoles, centres de santé, marchés,
 points d'eau, routes…) et qui aide les agriculteurs à **surveiller leurs champs
 par satellite** (santé de la végétation, sécheresse, pluie, alertes par e-mail).
+Développée avec **Django 6**, **Django REST Framework** et **PostGIS**.
 
 La commune couverte est **Blitta 2** (préfecture de Blitta, région Centrale),
 formée des cantons d'**Agbandi** (chef-lieu), **Langabou**, **Koffiti** et
 **Tcharè-Baou**.
+
+> Une documentation détaillée, destinée aussi bien aux non-développeurs
+> (présentation, lexique, installation pas à pas, problèmes fréquents) qu'aux
+> développeurs (architecture, base de données, API, système d'alertes, limites
+> connues et pistes d'amélioration), est disponible dans
+> [DOCUMENTATION.md](DOCUMENTATION.md). Elle existe aussi en PDF :
+> [docs/Documentation_E-commune.pdf](docs/Documentation_E-commune.pdf).
+
+## Sommaire
+
+1. [En deux phrases, pour tout le monde](#en-deux-phrases-pour-tout-le-monde)
+2. [Démarrage rapide](#démarrage-rapide)
+3. [Technologies](#technologies)
+4. [Données](#données)
 
 ---
 
@@ -27,10 +39,10 @@ formée des cantons d'**Agbandi** (chef-lieu), **Langabou**, **Koffiti** et
 
 ---
 
-## Démarrage rapide (développeurs)
+## Démarrage rapide
 
 Prérequis : Python 3.12+, Docker, Git. Détails pas à pas, y compris pour les
-débutants : [docs/2-INSTALLER-ET-LANCER.md](docs/2-INSTALLER-ET-LANCER.md).
+débutants : [Partie 2 de la documentation](DOCUMENTATION.md#partie-2--installer-et-lancer-le-projet).
 
 ```bash
 git clone https://github.com/1998Jules/projet_horieon.git
@@ -44,7 +56,7 @@ docker run -d --name horieon-postgis -e POSTGRES_PASSWORD=1234 -e POSTGRES_DB=Ec
 python -m venv .venv
 .venv\Scripts\activate            # Windows  (Linux/macOS : source .venv/bin/activate)
 pip install -r requirements.txt
-# Windows uniquement : installer aussi la roue GDAL (voir le guide d'installation)
+# Windows uniquement : installer aussi la roue GDAL (voir la documentation, section 11.3)
 
 # 3. Configuration
 copy .env.exemple .env            # Linux/macOS : cp .env.exemple .env
@@ -74,21 +86,6 @@ Puis ouvrir :
 
 ---
 
-## Documentation
-
-📄 **Version PDF prête à lire ou à imprimer** :
-[docs/Documentation_E-commune.pdf](docs/Documentation_E-commune.pdf)
-(regénérée par `python docs/generer_pdf.py`).
-
-| Guide | Pour qui | Contenu |
-|---|---|---|
-| [1. Comprendre le projet](docs/1-COMPRENDRE.md) | Tout le monde | À quoi sert l'application, comment l'utiliser, lexique (NDVI, SPI, SIG…) |
-| [2. Installer et lancer](docs/2-INSTALLER-ET-LANCER.md) | Débutants et développeurs | Installation pas à pas sous Windows et Linux, dépannage |
-| [3. Architecture technique](docs/3-ARCHITECTURE.md) | Développeurs | Structure du code, base de données, API, système d'alertes, configuration |
-| [4. Améliorer le projet](docs/4-AMELIORER.md) | Contributeurs | Proposer une modification, ajouter une couche, limites connues, feuille de route |
-
----
-
 ## Technologies
 
 Django 6 · Django REST Framework · PostgreSQL + PostGIS · GDAL · Leaflet ·
@@ -101,4 +98,5 @@ dans ce dépôt. La commande `import_blitta2` reconstruit les couches à partir 
 sources ouvertes : limites **OCHA COD-AB**, décret de création des communes
 (**Journal officiel du 08/01/2018**), infrastructures **OpenStreetMap**
 (© contributeurs OpenStreetMap, licence ODbL) et inventaire **OMS/KEMRI** des
-formations sanitaires. Voir [docs/3-ARCHITECTURE.md](docs/3-ARCHITECTURE.md#7-données-et-sources).
+formations sanitaires. Voir [la section « Données et sources »](DOCUMENTATION.md#27-données-et-sources)
+de la documentation.

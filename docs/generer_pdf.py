@@ -1,4 +1,4 @@
-"""Génère docs/Documentation_E-commune.pdf à partir de README.md et docs/*.md.
+"""Génère docs/Documentation_E-commune.pdf (et docs/index.html) à partir de README.md et DOCUMENTATION.md.
 
 Le Markdown est converti en une page HTML mise en forme (page de garde,
 sommaire, pages A4 blanches, diagrammes Mermaid), puis imprimée en PDF par
@@ -36,14 +36,19 @@ CHROME = next((c for c in CHROME_CANDIDATES if c and os.path.exists(c)), None)
 if CHROME is None:
     sys.exit("Chrome ou Edge introuvable : définissez la variable CHROME_PATH.")
 
-DOCS = [  # (fichier, id, libellé de chapitre)
-    ("README.md", "doc0", "Présentation"),
-    ("docs/1-COMPRENDRE.md", "doc1", "Partie 1"),
-    ("docs/2-INSTALLER-ET-LANCER.md", "doc2", "Partie 2"),
-    ("docs/3-ARCHITECTURE.md", "doc3", "Partie 3"),
-    ("docs/4-AMELIORER.md", "doc4", "Partie 4"),
-]
-FILE_IDS = {os.path.basename(f): i for f, i, _ in DOCS}
+FILE_IDS = {"README.md": "doc0", "DOCUMENTATION.md": "doc1"}
+
+
+def read(name):
+    return open(os.path.join(ROOT, name), encoding="utf-8").read()
+
+
+# Chapitres : le README, puis chaque « # Partie N : … » de DOCUMENTATION.md (le
+# préambule et le sommaire du fichier sont remplacés par la page de garde et le
+# sommaire du PDF). Les parties partagent le même préfixe d'ancres (doc1).
+DOCS = [(read("README.md"), "doc0", "Présentation")]
+for n, part in enumerate(re.split(r"(?m)^(?=# Partie \d)", read("DOCUMENTATION.md"))[1:], start=1):
+    DOCS.append((re.sub(r"\n---\s*$", "\n", part), "doc1", f"Partie {n}"))
 
 
 def slugify(value, separator="-"):
@@ -57,8 +62,7 @@ def mermaid_fence(source, language, css_class, options, md, **kwargs):
     return f'<div class="mermaid">{html.escape(source)}</div>'
 
 
-def convert(path, doc_id):
-    text = open(os.path.join(ROOT, path), encoding="utf-8").read()
+def convert(text, doc_id):
     # <details> : toujours ouvert à l'impression, et Markdown interprété à l'intérieur
     text = text.replace("<details>", '<details open markdown="1">')
     md = markdown.Markdown(tab_length=2, extensions=[
@@ -97,22 +101,26 @@ def toc_entries(body, doc_id):
 
 
 chapters, toc = [], []
-for path, doc_id, label in DOCS:
-    body = convert(path, doc_id)
+for text, doc_id, label in DOCS:
+    body = convert(text, doc_id)
     entries = toc_entries(body, doc_id)
-    title = entries[0][2] if entries else path
-    toc.append((doc_id, label, title, [e for e in entries if e[0] == 2 and "sommaire" not in e[1]]))
+    first_id, title = (entries[0][1], entries[0][2]) if entries else (doc_id, label)
+    title = re.sub(r"^Partie \d+ : ", "", title)
+    toc.append((first_id, label, title, [e for e in entries if e[0] == 2 and "sommaire" not in e[1]]))
+    chapter_label = f'<div class="chapter-label">{label}</div>' if doc_id == "doc0" else ""
+    # id du chapitre : doc0 / doc1 pour les liens vers un fichier sans ancre (1re partie)
+    section_id = doc_id if label in ("Présentation", "Partie 1") else first_id + "-chapitre"
     chapters.append(f"""
-<section class="chapter" id="{doc_id}">
-  <div class="chapter-label">{label}</div>
+<section class="chapter" id="{section_id}">
+  {chapter_label}
   {body}
 </section>""")
 
 toc_html = "".join(
-    f'<li><a href="#{doc_id}"><span class="toc-label">{label}</span>{html.escape(title)}</a>'
+    f'<li><a href="#{first_id}"><span class="toc-label">{label}</span>{html.escape(title)}</a>'
     + ("<ol>" + "".join(f'<li><a href="#{hid}">{html.escape(t)}</a></li>' for _, hid, t in subs) + "</ol>" if subs else "")
     + "</li>"
-    for doc_id, label, title, subs in toc
+    for first_id, label, title, subs in toc
 )
 
 CSS = r"""
