@@ -7,8 +7,9 @@ const map = L.map('map').setView([6.23461, 1.59096], 14);
 // --- Basemaps --- 
 // ==============================
 const osm = L.tileLayer(
-    'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-    { maxZoom: 22, attribution: '© OpenStreetMap' }
+    'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+    // OSM refuse les tuiles demandées sans Referer (Django envoie "same-origin" par défaut)
+    { maxZoom: 22, maxNativeZoom: 19, referrerPolicy: 'strict-origin-when-cross-origin', attribution: '© OpenStreetMap' }
 ).addTo(map);
 
 const satellite = L.tileLayer(

@@ -21,7 +21,7 @@ let allRoute = [];
 // --- Basemaps --- 
 // ==============================
 const baseLayers = {
-    "OpenStreetMap": L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:22, attribution:'© OpenStreetMap'}).addTo(map),
+    "OpenStreetMap": L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:22, maxNativeZoom:19, referrerPolicy:'strict-origin-when-cross-origin', attribution:'© OpenStreetMap'}).addTo(map),
     "Satellite": L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:22, attribution:'© Esri'}),
     "Hybride": L.tileLayer('http://mt0.google.com/vt/lyrs=y&hl=en&x={x}&y={y}&z={z}',{maxZoom:22, attribution:'© Google'})
 };
