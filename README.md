@@ -81,8 +81,9 @@ Puis ouvrir :
 | Administration | http://127.0.0.1:8000/admin/ |
 | API cartothèque | http://127.0.0.1:8000/api/cartotheque/ |
 
-> La racine `http://127.0.0.1:8000/` affiche une erreur 404 : c'est normal, il
-> n'y a pas de page d'accueil. Utilisez les adresses ci-dessus.
+> La racine `http://127.0.0.1:8000/` ouvre directement le géoportail.
+
+Tests automatisés : `python manage.py test agriculture geoportail`.
 
 ---
 

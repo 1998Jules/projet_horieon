@@ -17,6 +17,9 @@ urlpatterns = [
     path('geojson/bornefontaine/', views.borne_geojson, name='borne_geojson'),
     path('geojson/chateau/', views.chateau_geojson, name='chateau_geojson'),
     path('geojson/hopitale/', views.hopital_geojson, name='hopital_geojson'),
+    path('geojson/terrain/', views.terrain_geojson, name='terrain_geojson'),
+    path('geojson/cooperative/', views.cooperative_geojson, name='cooperative_geojson'),
+    path('geojson/magasin/', views.magazin_geojson, name='magazin_geojson'),
     path('api/layers/', views.get_all_layers, name='get_all_layers'),
     path('api/search/', views.search_entities, name='search_entities'),
    

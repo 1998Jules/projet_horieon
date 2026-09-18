@@ -26,7 +26,9 @@ $ErrorActionPreference = "Stop"
 
 # --- Configuration ---
 $TaskName = "AlertesAgricoles_Auto"
-$BatchPath = "D:\Horison\horison\run_alerts.bat"
+# Chemins déduits de l'emplacement de ce script (racine du projet)
+$ProjectDir = $PSScriptRoot
+$BatchPath = Join-Path $ProjectDir "run_alerts.bat"
 
 Write-Host "============================================================" -ForegroundColor Cyan
 Write-Host " Installation de la tache planifiee - Alertes Agricoles   " -ForegroundColor Cyan
@@ -88,7 +90,7 @@ if ($Test) {
 # --- Création de la tâche planifiée ---
 Write-Host "`n[3/4] Creation de la tache planifiee..." -ForegroundColor Yellow
 
-$Action = New-ScheduledTaskAction -Execute $BatchPath -WorkingDirectory "D:\Horison\horison"
+$Action = New-ScheduledTaskAction -Execute $BatchPath -WorkingDirectory $ProjectDir
 
 # Déterminer le déclencheur
 if ($Interval -gt 0) {
@@ -150,7 +152,7 @@ if ($Interval -gt 0) {
 }
 Write-Host "Prochaine exec : $($taskInfo.NextRunTime)"
 Write-Host "Derniere exec : $($taskInfo.LastRunTime)"
-Write-Host "Log           : D:\Horison\horison\alerts.log"
+Write-Host "Log           : $(Join-Path $ProjectDir 'alerts.log')"
 Write-Host ""
 Write-Host "Commandes utiles :" -ForegroundColor Cyan
 Write-Host "  - Tester maintenant    : Start-ScheduledTask -TaskName '$TaskName'"

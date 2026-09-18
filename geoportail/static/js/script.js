@@ -63,6 +63,18 @@ function styleCommune(feature) {
     };
 }
 
+// Échappe le texte avant de l'insérer dans une bulle : les valeurs viennent de
+// la base (données importées d'OpenStreetMap, saisies…) et ne doivent jamais
+// être interprétées comme du HTML.
+function escapeHtml(value) {
+    return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
 function normalize(str) {
     return str
         ?.toLowerCase()
@@ -138,9 +150,9 @@ function onEachFeature(feature, layer, layerType) {
     const bounds = layer.getBounds();
     const center = bounds.getCenter();
 
-    let popupContent = `<div class="feature-popup"><h3>${layerType}</h3>`;
+    let popupContent = `<div class="feature-popup"><h3>${escapeHtml(layerType)}</h3>`;
     for (const [key, value] of Object.entries(feature.properties)) {
-        popupContent += `<p><strong>${key}:</strong> ${value}</p>`;
+        popupContent += `<p><strong>${escapeHtml(key)}:</strong> ${escapeHtml(value)}</p>`;
     }
     popupContent += `<hr><p><strong>Coordonnées centre:</strong><br>
         Lat: ${center.lat.toFixed(6)}<br>
@@ -201,9 +213,9 @@ function onEachInfra(feature, layer, typeName) {
 
         const center = layer.getLatLng();
 
-        let content = `<div class="feature-popup"><h3>${typeName}</h3>`;
+        let content = `<div class="feature-popup"><h3>${escapeHtml(typeName)}</h3>`;
         for (const [k, v] of Object.entries(feature.properties)) {
-            if (v) content += `<p><strong>${k}:</strong> ${v}</p>`;
+            if (v) content += `<p><strong>${escapeHtml(k)}:</strong> ${escapeHtml(v)}</p>`;
         }
         content += '</div>';
 
@@ -223,9 +235,9 @@ function onEachEau(feature, layer, typeName) {
 
         const center = layer.getLatLng();
 
-        let content = `<div class="feature-popup"><h3>${typeName}</h3>`;
+        let content = `<div class="feature-popup"><h3>${escapeHtml(typeName)}</h3>`;
         for (const [k, v] of Object.entries(feature.properties)) {
-            if (v) content += `<p><strong>${k}:</strong> ${v}</p>`;
+            if (v) content += `<p><strong>${escapeHtml(k)}:</strong> ${escapeHtml(v)}</p>`;
         }
         content += '</div>';
 
@@ -357,6 +369,23 @@ geoLayers["Formation sanitaire"] = L.geoJSON(null, {
     onEachFeature: (f, l) => onEachEau(f, l, "Formation sanitaire")
 });
 
+// Sport et agriculture : pas d'icône dédiée, on utilise des formes colorées
+geoLayers["Terrains de sport"] = L.geoJSON(null, {
+    style: { color: '#2e7d32', weight: 2, fillColor: '#66bb6a', fillOpacity: 0.35 },
+    onEachFeature: (f, l) => onEachFeature(f, l, 'Terrain de sport')
+});
+
+geoLayers["Coopératives"] = L.geoJSON(null, {
+    pointToLayer: (f, latlng) =>
+        L.circleMarker(latlng, { radius: 7, color: '#6d4c41', weight: 2, fillColor: '#a1887f', fillOpacity: 0.9 }),
+    onEachFeature: (f, l) => onEachInfra(f, l, 'Coopérative')
+});
+
+geoLayers["Magasins d'intrants"] = L.geoJSON(null, {
+    pointToLayer: (f, latlng) =>
+        L.circleMarker(latlng, { radius: 7, color: '#ef6c00', weight: 2, fillColor: '#ffb74d', fillOpacity: 0.9 }),
+    onEachFeature: (f, l) => onEachInfra(f, l, "Magasin d'intrants")
+});
 // ==============================
 // --- Charger GeoJSON --- 
 // ==============================
@@ -395,17 +424,16 @@ function populateCantonSelect(features) {
     
     // Ajouter chaque canton
     features.forEach(feature => {
-        if (feature.properties && feature.properties.cant) {
+        if (feature.properties && feature.properties.canton) {
             const option = document.createElement("option");
-            option.value = feature.properties.cant;
-            option.textContent = feature.properties.cant;
+            option.value = feature.properties.canton;
+            option.textContent = feature.properties.canton;
             option.dataset.geom = JSON.stringify(feature.geometry);
             cantonSelect.appendChild(option);
         }
     });
     
     console.log(`${features.length} cantons ajoutés au select`);
-   console.log(features.map(f => f.properties.route_type));
 
 
 
@@ -429,7 +457,10 @@ async function initMap() {
         loadGeoJSON("/geoportail/geojson/Marches/", geoLayers["marches"]),
         loadGeoJSON("/geoportail/geojson/bornefontaine/", geoLayers["borne_fontaine"]),
         loadGeoJSON("/geoportail/geojson/chateau/", geoLayers["chateau"]),
-        loadGeoJSON("/geoportail/geojson/hopitale/", geoLayers["Formation sanitaire"])
+        loadGeoJSON("/geoportail/geojson/hopitale/", geoLayers["Formation sanitaire"]),
+        loadGeoJSON("/geoportail/geojson/terrain/", geoLayers["Terrains de sport"]),
+        loadGeoJSON("/geoportail/geojson/cooperative/", geoLayers["Coopératives"]),
+        loadGeoJSON("/geoportail/geojson/magasin/", geoLayers["Magasins d'intrants"])
     ]);
 
     // Peupler le filtre canton et mettre à jour les stats
@@ -449,6 +480,11 @@ document.getElementById("Canton-select").addEventListener("change", function(){
     if(!sel?.dataset.geom) return;
 
     const cantonFeature = turf.feature(JSON.parse(sel.dataset.geom));
+
+    // Zoom sur le canton choisi, surligné
+    if (hoverLayer) map.removeLayer(hoverLayer);
+    hoverLayer = L.geoJSON(cantonFeature, { style: { color: '#cc5200', weight: 3, fillOpacity: 0.05 } }).addTo(map);
+    map.fitBounds(hoverLayer.getBounds(), { padding: [30, 30] });
     const quartierSelect = document.getElementById("quartier-select");
     quartierSelect.innerHTML='<option value="">-- Choisir un quartier --</option>';
 
@@ -499,12 +535,12 @@ document.getElementById("quartier-select").addEventListener("change", function()
     const center = bounds.getCenter();
     
     let popupContent = `<div class="quartier-popup">`;
-    popupContent += `<h3>Quartier: ${sel.text}</h3>`;
+    popupContent += `<h3>Quartier: ${escapeHtml(sel.text)}</h3>`;
     
     // Afficher toutes les propriétés
     for (const [key, value] of Object.entries(properties)) {
         if (value) {
-            popupContent += `<p><strong>${key}:</strong> ${value}</p>`;
+            popupContent += `<p><strong>${escapeHtml(key)}:</strong> ${escapeHtml(value)}</p>`;
         }
     }
     
@@ -558,8 +594,8 @@ function updateLayerList(theme){
         "transport":["Route"],
         "infrastructure": ["Lycées", "Collèges", "Jardins","marches"],
         "sante": ["Formation sanitaire"],
-        "agriculture": [""],
-        "sport": [""],
+        "agriculture": ["Coopératives", "Magasins d'intrants"],
+        "sport": ["Terrains de sport"],
     
 
     };

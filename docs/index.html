@@ -228,9 +228,9 @@ python manage.py runserver</code></pre>
 </tbody>
 </table>
 <blockquote>
-<p>La racine <code>http://127.0.0.1:8000/</code> affiche une erreur 404 : c'est normal, il
-n'y a pas de page d'accueil. Utilisez les adresses ci-dessus.</p>
+<p>La racine <code>http://127.0.0.1:8000/</code> ouvre directement le géoportail.</p>
 </blockquote>
+<p>Tests automatisés : <code>python manage.py test agriculture geoportail</code>.</p>
 <hr>
 <h2 id="doc0-technologies">Technologies</h2>
 <p>Django 6 · Django REST Framework · PostgreSQL + PostGIS · GDAL · Leaflet ·
@@ -500,17 +500,14 @@ passe créés lors de l'installation).</p>
 <h2 id="doc1-6-ce-que-lapplication-ne-fait-pas-encore">6. Ce que l'application ne fait pas (encore)</h2>
 <p>Pour être transparent sur l'état actuel :</p>
 <ul>
-<li><strong>Pas de page d'accueil</strong> : l'adresse racine du site affiche « Page non
-  trouvée ». Il faut aller directement sur <code>/geoportail/</code>.</li>
 <li><strong>Données de terrain incomplètes</strong> sur une nouvelle installation : jours de
   marché, dates d'ouverture des écoles, points d'eau, châteaux d'eau,
   coopératives… ne sont pas dans les sources publiques.</li>
-<li><strong>La carte du module agriculture</strong> est encore centrée sur Aného et utilise un
-  serveur cartographique (GeoServer) présent seulement sur l'ordinateur de
-  l'auteur.</li>
-<li><strong>Les listes « Choisir canton » et « Choisir un quartier »</strong> en haut de la
-  carte restent vides (petit défaut du code, et pas de données de quartiers).
-  Utilisez plutôt le filtre <strong>Canton</strong> du panneau <em>Filtres &amp; Stats</em>.</li>
+<li><strong>Pas de quartiers</strong> : la liste « Choisir un quartier » reste vide tant
+  qu'aucune couche de quartiers n'existe. La liste « Choisir canton », elle,
+  fonctionne et zoome sur le canton choisi.</li>
+<li><strong>Module agriculture limité à Blitta 2</strong> : la carte affiche les régions et
+  les préfectures de tout le Togo, mais une seule commune (Blitta 2).</li>
 <li><strong>Pas d'alerte par SMS ou WhatsApp</strong> : seulement par e-mail (le numéro
   WhatsApp est enregistré mais pas encore utilisé).</li>
 </ul>
@@ -919,13 +916,14 @@ Engine</strong>, gratuit pour un usage non commercial (recherche, ONG, collectiv
 <li>Ouvrez ce compte de service, onglet <em>Clés</em>, puis <em>Ajouter une clé › JSON</em>.
    Un fichier <code>.json</code> est téléchargé.</li>
 <li>
-<p><strong>Copiez ce fichier à la racine du projet</strong> (à côté de <code>manage.py</code>) sous le
-   nom attendu par le code :</p>
-<pre class="highlight"><code>ee-koutoumbogajules-c99000ca569e.json</code></pre>
-<p>Ce nom est codé en dur dans <code>agriculture/gee_utils.py</code> (constante
- <code>SERVICE_ACCOUNT_KEY_FILE</code>). Le fichier est déjà exclu de Git par le
- <code>.gitignore</code>. Le serveur doit être lancé <strong>depuis la racine du projet</strong>,
- car le chemin est relatif.</p>
+<p>Indiquez l'emplacement de ce fichier dans <code>.env</code> (chemin complet) et,
+   si besoin, le projet Google Cloud :</p>
+<pre class="highlight"><code class="language-ini">GEE_SERVICE_ACCOUNT_KEY=C:\chemin\vers\ma-cle-earth-engine.json
+GEE_PROJECT=mon-projet-cloud</code></pre>
+<p>Sans <code>GEE_SERVICE_ACCOUNT_KEY</code>, le code cherche le fichier
+ <code>ee-koutoumbogajules-c99000ca569e.json</code> à la racine du projet (à côté de
+ <code>manage.py</code>). Les fichiers <code>ee-*.json</code> sont exclus de Git par le
+ <code>.gitignore</code>.</p>
 </li>
 </ol>
 <blockquote class="warn">
@@ -965,11 +963,10 @@ python manage.py evaluate_field_alerts --dry-run       # simulation
 python manage.py evaluate_field_alerts --no-collect    # sans réinterroger les satellites
 python manage.py evaluate_field_alerts --no-email      # sans envoyer d'e-mail</code></pre>
 <p><strong>Windows</strong> : <code>install_alerts_task.ps1</code> crée une tâche planifiée qui lance
-<code>run_alerts.bat</code> chaque jour à 6 h. ⚠️ Ces deux fichiers contiennent des
-chemins propres à l'ordinateur de l'auteur (<code>D:\Horison\...</code>) : <strong>adaptez
-d'abord</strong> <code>$BatchPath</code> dans <code>install_alerts_task.ps1</code>, ainsi que les lignes
-<code>cd /d</code>, <code>call ...\activate.bat</code> et le chemin du journal dans <code>run_alerts.bat</code>.
-Lancez ensuite PowerShell <strong>en administrateur</strong> :</p>
+<code>run_alerts.bat</code> chaque jour à 6 h. Les deux scripts trouvent seuls le dossier
+du projet ; <code>run_alerts.bat</code> utilise le venv <code>.venv</code> du projet, ou celui
+indiqué dans la variable d'environnement <code>HORIEON_VENV</code>, et écrit son journal
+dans <code>alerts.log</code>. Lancez PowerShell <strong>en administrateur</strong> :</p>
 <pre class="highlight"><code class="language-powershell">.\install_alerts_task.ps1                 # tous les jours à 06:00
 .\install_alerts_task.ps1 -Time "08:30"   # autre heure
 .\install_alerts_task.ps1 -Interval 6     # toutes les 6 heures
@@ -1031,11 +1028,6 @@ un hébergeur comme Render. En production :</p>
 </thead>
 <tbody>
 <tr>
-<td><code>Page not found (404)</code> sur <code>http://127.0.0.1:8000/</code></td>
-<td>Pas de page d'accueil</td>
-<td>Aller sur <code>/geoportail/</code></td>
-</tr>
-<tr>
 <td><code>Error: That port is already in use</code></td>
 <td>Un autre programme utilise le port 8000</td>
 <td><code>python manage.py runserver 127.0.0.1:8002</code></td>
@@ -1077,8 +1069,13 @@ un hébergeur comme Render. En production :</p>
 </tr>
 <tr>
 <td>Erreur 500 sur <code>/agriculture/api/regions/</code>, <code>/prefectures/</code> ou <code>/communes/</code></td>
-<td>Tables <code>region</code>, <code>couche_prefecture_utm</code>, <code>communes_togo_utm</code> absentes (importées à la main par l'auteur)</td>
-<td>Voir <a href="#doc1-33-limites-connues">la section « Limites connues »</a></td>
+<td>Tables <code>region</code>, <code>couche_prefecture_utm</code>, <code>communes_togo_utm</code> absentes</td>
+<td><code>python manage.py import_blitta2</code> (les crée et les remplit)</td>
+</tr>
+<tr>
+<td>Erreur 401 ou 403 en modifiant le calendrier cultural</td>
+<td>Ajout, modification et suppression réservés aux administrateurs, avec jeton</td>
+<td>Envoyer l'en-tête <code>Authorization: Token &lt;clé&gt;</code> d'un compte <code>is_staff</code></td>
 </tr>
 <tr>
 <td>Fond de carte remplacé par des cases « Access blocked »</td>
@@ -1091,9 +1088,9 @@ un hébergeur comme Render. En production :</p>
 <td>Icône orange en haut à droite, puis choisir un thème</td>
 </tr>
 <tr>
-<td><code>ERREUR: Le fichier clé 'ee-…json' est introuvable</code></td>
-<td>Clé Earth Engine absente</td>
-<td><a href="#doc1-15-activer-le-module-agriculture-google-earth-engine">Étape 15</a> ; lancer le serveur depuis la racine du projet</td>
+<td><code>ERREUR: Le fichier clé '…json' est introuvable</code></td>
+<td>Clé Earth Engine absente ou mauvais chemin</td>
+<td><a href="#doc1-15-activer-le-module-agriculture-google-earth-engine">Étape 15</a> ; vérifier <code>GEE_SERVICE_ACCOUNT_KEY</code> dans <code>.env</code></td>
 </tr>
 <tr>
 <td><code>SMTPAuthenticationError</code></td>
@@ -1171,7 +1168,7 @@ Pré-requis : connaître les bases de Django.</p>
 ├── requirements.txt             # dépendances pip (UTF-8)
 ├── .env.exemple                 # modèle de configuration (copier en .env)
 ├── build.sh                     # build de déploiement : pip install, collectstatic, migrate
-├── run_alerts.bat               # lanceur Windows de evaluate_field_alerts (chemins à adapter)
+├── run_alerts.bat               # lanceur Windows de evaluate_field_alerts
 ├── install_alerts_task.ps1      # crée la tâche planifiée Windows
 ├── commune.geojson              # ancien fichier de test (zone d'Aného, EPSG:32631), inutilisé
 ├── model.py                     # brouillon de modèles, inutilisé
@@ -1179,7 +1176,7 @@ Pré-requis : connaître les bases de Django.</p>
 │
 ├── horison/                     # le « projet » Django
 │   ├── settings.py              # configuration (lit .env) + détection GDAL sous Windows
-│   ├── urls.py                  # routes racine
+│   ├── urls.py                  # routes racine (/ redirige vers /geoportail/)
 │   ├── wsgi.py / asgi.py
 │
 ├── geoportail/                  # carte communale
@@ -1465,22 +1462,22 @@ shapefiles avec QGIS ou <code>shp2pgsql</code>). <code>migrate</code> ne les cr�
 <td><code>agriculture.Region</code></td>
 <td><code>region</code></td>
 <td>MultiPolygon</td>
-<td>region</td>
-<td>❌</td>
+<td>region (5 régions du Togo)</td>
+<td>✅</td>
 </tr>
 <tr>
 <td><code>agriculture.Prefecture</code></td>
 <td><code>couche_prefecture_utm</code></td>
 <td>MultiPolygon</td>
-<td>prefecture</td>
-<td>❌</td>
+<td>prefecture (40 préfectures)</td>
+<td>✅</td>
 </tr>
 <tr>
 <td><code>agriculture.Commune</code></td>
 <td><code>communes_togo_utm</code></td>
 <td>MultiPolygon</td>
-<td>commune, prefecture</td>
-<td>❌</td>
+<td>commune, prefecture (Blitta 2 uniquement)</td>
+<td>✅</td>
 </tr>
 </tbody>
 </table>
@@ -1494,7 +1491,7 @@ dans <code>geoportail/static/js/script.js</code>).</p>
 </blockquote>
 <hr>
 <h2 id="doc1-25-api-et-routes">25. API et routes</h2>
-<p>Routes racine (<code>horison/urls.py</code>) : <code>admin/</code>, <code>auth/</code>, <code>geoportail/</code>,
+<p>Routes racine (<code>horison/urls.py</code>) : <code>/</code> (redirige vers <code>/geoportail/</code>), <code>admin/</code>, <code>auth/</code>, <code>geoportail/</code>,
 <code>agriculture/</code>, <code>api/cartotheque/</code>, plus le service des fichiers <code>media/</code> en
 mode <code>DEBUG</code>.</p>
 <h3 id="doc1-251-authentification--auth">25.1 Authentification — <code>/auth/</code></h3>
@@ -1588,6 +1585,11 @@ mode <code>DEBUG</code>.</p>
 </tr>
 <tr>
 <td>GET</td>
+<td><code>/geoportail/geojson/terrain/</code>, <code>cooperative/</code>, <code>magasin/</code></td>
+<td>terrains de sport, coopératives, magasins d'intrants</td>
+</tr>
+<tr>
+<td>GET</td>
 <td><code>/geoportail/api/layers/</code></td>
 <td>toutes les couches en un seul appel</td>
 </tr>
@@ -1598,11 +1600,13 @@ mode <code>DEBUG</code>.</p>
 </tr>
 </tbody>
 </table>
-<p>Les vues <code>terrain_geojson</code>, <code>cooperative_geojson</code> et <code>magazin_geojson</code> existent
-dans <code>views.py</code> mais <strong>ne sont pas routées</strong> dans <code>urls.py</code>.</p>
+<p>Les réponses GeoJSON sont en UTF-8 (<code>Content-Type: application/json; charset=utf-8</code>).</p>
 <h3 id="doc1-253-agriculture--agriculture">25.3 Agriculture — <code>/agriculture/</code></h3>
 <p>Sauf mention contraire, les POST attendent un corps JSON. 🔒 = jeton requis ;
-l'utilisateur ne voit que <strong>ses</strong> champs (ou tous s'il est <code>staff</code>).</p>
+l'utilisateur ne voit que <strong>ses</strong> champs (ou tous s'il est <code>staff</code>). 🔒 admin =
+jeton d'un compte <code>is_staff</code>.</p>
+<p>Ces vues étant exemptées de CSRF, la <strong>session du navigateur n'est acceptée
+qu'en lecture</strong> (GET) : toute écriture exige l'en-tête <code>Authorization: Token</code>.</p>
 <table>
 <thead>
 <tr>
@@ -1730,13 +1734,13 @@ l'utilisateur ne voit que <strong>ses</strong> champs (ou tous s'il est <code>st
 <tr>
 <td>POST</td>
 <td><code>api/crop-calendar/add/</code>, <code>update/&lt;pk&gt;/</code></td>
-<td>⚠️ aucun</td>
+<td>🔒 admin</td>
 <td>créer / modifier</td>
 </tr>
 <tr>
 <td>POST, DELETE</td>
 <td><code>api/crop-calendar/delete/&lt;pk&gt;/</code></td>
-<td>⚠️ aucun</td>
+<td>🔒 admin</td>
 <td>supprimer</td>
 </tr>
 <tr>
@@ -1986,11 +1990,14 @@ publiée doit mentionner « © contributeurs OpenStreetMap ».</p>
   carte Leaflet centrée sur <code>[8.08, 1.12]</code> (zoom 14), fonds OSM / Esri /
   Google, couches GeoJSON chargées en parallèle (<code>initMap</code>), icônes dans
   <code>static/icone/</code>, outils de dessin et de mesure (Leaflet.draw + Turf),
-  filtres et statistiques par canton.
+  filtres et statistiques par canton, liste « Choisir canton » qui zoome sur
+  le canton choisi. Les valeurs affichées dans les bulles passent par
+  <code>escapeHtml()</code> : elles ne sont jamais interprétées comme du HTML.
   <code>scripts.js</code> est une ancienne version reposant sur un GeoServer local
   (<code>localhost:8089</code>) ; seul <code>script.js</code> est chargé par le gabarit.</li>
 <li><code>agriculture/templates/agriculture/index.html</code> + <code>static/js/main.js</code> :
-  carte simple (centrée sur Aného, couches GeoServer locales).</li>
+  carte simple des régions, préfectures et communes (API <code>/agriculture/api/…</code>),
+  zoomée sur Blitta 2.</li>
 </ul>
 <blockquote>
 <p><strong>Fond OSM</strong> : Django envoie <code>Referrer-Policy: same-origin</code> par défaut. Les
@@ -2023,7 +2030,11 @@ séparée (probablement React), <strong>absente de ce dépôt</strong>, qui cons
 </tr>
 <tr>
 <td><code>python manage.py import_blitta2 [--cache-dir D] [--refresh] [--sans-oms]</code></td>
-<td>reconstruit les couches du géoportail (<strong>écrase</strong> leur contenu)</td>
+<td>reconstruit les couches du géoportail et les limites du module agriculture (<strong>écrase</strong> leur contenu)</td>
+</tr>
+<tr>
+<td><code>python manage.py test agriculture geoportail</code></td>
+<td>tests automatisés (base de test PostGIS créée puis supprimée automatiquement)</td>
 </tr>
 <tr>
 <td><code>python manage.py evaluate_field_alerts [--champ-id N] [--dry-run] [--no-collect] [--no-email]</code></td>
@@ -2048,10 +2059,13 @@ séparée (probablement React), <strong>absente de ce dépôt</strong>, qui cons
 <li><strong>Historique Git</strong> : d'anciens commits contiennent des mots de passe
   d'application Gmail et une <code>SECRET_KEY</code>. Ils doivent être <strong>révoqués</strong>
   (voir la PR n°1). Les retirer du code ne les efface pas de l'historique.</li>
+<li><strong>API agriculture</strong> : les vues sont exemptées de CSRF, donc la session du
+  navigateur n'y est acceptée qu'en lecture ; toute écriture exige un jeton.
+  La modification du calendrier cultural est réservée aux comptes <code>is_staff</code>.</li>
+<li><strong>Affichage</strong> : les données insérées dans les bulles des cartes sont
+  échappées (protection contre l'injection de code HTML/JavaScript).</li>
 <li><strong>Points à durcir</strong> avant une mise en ligne (détails dans
   <a href="#doc1-partie-4--améliorer-le-projet">la partie « Améliorer le projet »</a>) :<ul>
-<li>endpoints <code>crop-calendar</code> add / update / delete sans authentification et
-  exemptés de CSRF ;</li>
 <li><code>CORS_ALLOW_ALL_ORIGINS = True</code> ;</li>
 <li><code>DEBUG</code> doit rester à <code>False</code> en production (c'est la valeur par défaut) ;</li>
 <li>le mot de passe <code>postgres</code> par défaut (<code>1234</code>) doit être changé.</li>
@@ -2080,20 +2094,21 @@ cd projet_horieon
 # 2. Pour chaque amélioration : partir d'une version à jour
 git checkout main
 git pull origin main
-git checkout -b corrige-selection-canton     # nom de branche explicite
+git checkout -b ajoute-couche-quartiers     # nom de branche explicite
 
 # 3. Modifier, puis vérifier (voir la check-list ci-dessous)
 
 # 4. Enregistrer
 git add fichier1 fichier2
-git commit -m "Corrige la liste « Choisir canton » du géoportail"
+git commit -m "Ajoute la couche des quartiers au géoportail"
 
 # 5. Publier et proposer
-git push -u origin corrige-selection-canton    # origin = votre fork
+git push -u origin ajoute-couche-quartiers    # origin = votre fork
 gh pr create --repo 1998Jules/projet_horieon --fill</code></pre>
 <h3 id="doc1-check-list-avant-douvrir-une-pr">Check-list avant d'ouvrir une PR</h3>
 <ul class="task-list">
 <li class="task-list-item"><input type="checkbox" disabled=""> <code>python manage.py check</code> ne signale aucune erreur.</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <code>python manage.py test agriculture geoportail</code> : tous les tests passent.</li>
 <li class="task-list-item"><input type="checkbox" disabled=""> <code>python manage.py makemigrations --check --dry-run</code> : si vous avez
       modifié un modèle, la migration est incluse dans la PR.</li>
 <li class="task-list-item"><input type="checkbox" disabled=""> Les pages touchées ont été testées dans le navigateur, <strong>console
@@ -2222,8 +2237,7 @@ officiel</em> du 8 janvier 2018 (application de la loi n°2017-008).</p>
 </ol>
 <hr>
 <h2 id="doc1-33-limites-connues">33. Limites connues</h2>
-<p>Classées par gravité. Les numéros de ligne correspondent à la version de ce
-document.</p>
+<p>Classées par gravité. Les problèmes déjà corrigés sont listés à la fin, pour mémoire.</p>
 <h3 id="doc1-sécurité">Sécurité</h3>
 <table>
 <thead>
@@ -2242,15 +2256,9 @@ document.</p>
 <td>Les <strong>révoquer</strong> côté Google et en production. Réécrire l'historique (<code>git filter-repo</code>) ne suffit pas si le dépôt a été cloné</td>
 </tr>
 <tr>
-<td>S2</td>
-<td><code>crop-calendar/add</code>, <code>update</code>, <code>delete</code> : <strong>aucune authentification</strong>, CSRF désactivé</td>
-<td><code>agriculture/views.py</code> (<code>add_crop_calendar</code>, <code>update_crop_calendar</code>, <code>delete_crop_calendar</code>)</td>
-<td>Ajouter <code>@require_api_user</code> + vérification <code>is_staff</code></td>
-</tr>
-<tr>
 <td>S3</td>
 <td><code>CORS_ALLOW_ALL_ORIGINS = True</code></td>
-<td><code>horison/settings.py:110</code></td>
+<td><code>horison/settings.py</code></td>
 <td>En production : <code>CORS_ALLOWED_ORIGINS</code> lu depuis <code>.env</code></td>
 </tr>
 <tr>
@@ -2273,75 +2281,27 @@ document.</p>
 </thead>
 <tbody>
 <tr>
-<td>F1</td>
-<td>Pas de page d'accueil (404 sur <code>/</code>)</td>
-<td><code>horison/urls.py</code></td>
-<td><code>path('', RedirectView.as_view(url='/geoportail/'))</code></td>
-</tr>
-<tr>
-<td>F2</td>
-<td>La liste « Choisir canton » reste vide : le code lit <code>properties.cant</code>, l'API renvoie <code>canton</code></td>
-<td><code>geoportail/static/js/script.js:398-401</code></td>
-<td>Lire <code>feature.properties.canton</code> ; faire zoomer la carte sur le canton choisi</td>
-</tr>
-<tr>
 <td>F3</td>
-<td>Pas de couche « quartiers » (<code>allQuartiers</code> jamais rempli)</td>
+<td>Pas de couche « quartiers » (<code>allQuartiers</code> jamais rempli) : la liste « Choisir un quartier » reste vide</td>
 <td><code>script.js</code></td>
 <td>Ajouter une couche quartiers (voir 32.1)</td>
 </tr>
 <tr>
-<td>F4</td>
-<td>Vues <code>terrain_geojson</code>, <code>cooperative_geojson</code>, <code>magazin_geojson</code> non routées</td>
-<td><code>geoportail/urls.py</code></td>
-<td>Ajouter les <code>path(...)</code> et charger les couches dans <code>initMap()</code></td>
-</tr>
-<tr>
 <td>F5</td>
 <td><code>api/champs/</code> pointe vers <code>ndvi_timeseries</code> (copier-coller)</td>
-<td><code>agriculture/urls.py:22</code></td>
+<td><code>agriculture/urls.py</code></td>
 <td>Vérifier l'usage côté frontend, puis corriger ou supprimer</td>
-</tr>
-<tr>
-<td>F6</td>
-<td>Tables <code>region</code>, <code>couche_prefecture_utm</code>, <code>communes_togo_utm</code> absentes : erreur 500 sur <code>api/regions/</code>, <code>prefectures/</code>, <code>communes/</code></td>
-<td><code>agriculture/models.py</code></td>
-<td>Les remplir depuis COD-AB (ADM1, ADM2, communes) avec une commande d'import</td>
-</tr>
-<tr>
-<td>F7</td>
-<td>Carte agriculture centrée sur Aného, couches GeoServer <code>localhost:8089</code></td>
-<td><code>agriculture/static/js/main.js</code></td>
-<td>Centrer sur Blitta 2, servir les couches depuis Django</td>
-</tr>
-<tr>
-<td>F8</td>
-<td>Clé Earth Engine : nom de fichier codé en dur, chemin relatif au dossier de lancement</td>
-<td><code>agriculture/gee_utils.py:14</code></td>
-<td>Variable <code>GEE_SERVICE_ACCOUNT_KEY</code> (chemin absolu) + <code>GEE_PROJECT</code> dans <code>.env</code></td>
-</tr>
-<tr>
-<td>F9</td>
-<td><code>run_alerts.bat</code> et <code>install_alerts_task.ps1</code> contiennent des chemins <code>D:\Horison\...</code></td>
-<td>racine</td>
-<td>Chemins relatifs (<code>%~dp0</code>) et venv <code>.venv</code></td>
-</tr>
-<tr>
-<td>F10</td>
-<td>Réponses GeoJSON sans <code>charset</code></td>
-<td><code>geoportail/views.py</code></td>
-<td><code>content_type='application/json; charset=utf-8'</code></td>
 </tr>
 <tr>
 <td>F11</td>
 <td>Langue et fuseau <code>en-us</code> / <code>UTC</code></td>
-<td><code>settings.py:204</code></td>
+<td><code>settings.py</code></td>
 <td><code>fr-fr</code> et <code>Africa/Lome</code> (même heure qu'UTC)</td>
 </tr>
 <tr>
 <td>F12</td>
 <td><code>X_FRAME_OPTIONS = "ALLOW-FROM ..."</code> obsolète</td>
-<td><code>settings.py:219</code></td>
+<td><code>settings.py</code></td>
 <td>En-tête <code>Content-Security-Policy: frame-ancestors</code></td>
 </tr>
 <tr>
@@ -2349,6 +2309,18 @@ document.</p>
 <td>Alertes seulement par e-mail</td>
 <td><code>notification_services.py</code></td>
 <td>Voir 32.6</td>
+</tr>
+<tr>
+<td>F14</td>
+<td><code>api/ndvi-tiles/</code> renvoie des URL de tuiles Earth Engine écrites en dur, dont les jetons ont expiré</td>
+<td><code>agriculture/views.py</code> (<code>ndvi_tiles</code>)</td>
+<td>Générer les URL à la demande avec <code>get_clipped_ndvi_map</code> et les mettre en cache quelques heures</td>
+</tr>
+<tr>
+<td>F15</td>
+<td>La table <code>communes_togo_utm</code> ne contient que Blitta 2</td>
+<td><code>import_blitta2</code></td>
+<td>Importer les 117 communes depuis une source officielle (composition par cantons du décret de 2018)</td>
 </tr>
 </tbody>
 </table>
@@ -2364,12 +2336,12 @@ document.</p>
 <tbody>
 <tr>
 <td>Q1</td>
-<td><strong>Aucun test automatisé</strong> (<code>tests.py</code> vides)</td>
-<td>Commencer par les vues GeoJSON, <code>risk_engine</code> (fonctions pures, faciles à tester) et <code>import_blitta2</code></td>
+<td>Peu de tests automatisés : seuls le calendrier cultural, la protection CSRF et la redirection d'accueil sont couverts</td>
+<td>Ajouter les vues GeoJSON, <code>risk_engine</code> (fonctions pures, faciles à tester) et <code>import_blitta2</code></td>
 </tr>
 <tr>
 <td>Q2</td>
-<td>Fichiers en double ou inutilisés à la racine : <code>urls.py</code>, <code>wsgi.py</code>, <code>asgi.py</code>, <code>__init__.py</code>, <code>model.py</code>, <code>commune.geojson</code>, et <code>geoportail/static/js/scripts.js</code></td>
+<td>Fichiers en double ou inutilisés à la racine : <code>urls.py</code>, <code>wsgi.py</code>, <code>asgi.py</code>, <code>model.py</code>, <code>commune.geojson</code>, et <code>geoportail/static/js/scripts.js</code></td>
 <td>Vérifier qu'aucun déploiement ne les utilise, puis les supprimer</td>
 </tr>
 <tr>
@@ -2389,6 +2361,83 @@ document.</p>
 </tr>
 </tbody>
 </table>
+<h3 id="doc1-corrigé">Corrigé</h3>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Problème</th>
+<th>Correction</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>S2</td>
+<td>Calendrier cultural modifiable par n'importe qui (sans authentification, CSRF désactivé)</td>
+<td>Écriture réservée aux comptes <code>is_staff</code> avec jeton (<code>require_staff_user</code>) ; tests dans <code>agriculture/tests.py</code></td>
+</tr>
+<tr>
+<td>S5</td>
+<td>Faille CSRF : la session du navigateur suffisait pour écrire via l'API agriculture (vues exemptées de CSRF)</td>
+<td>Session acceptée en lecture seulement ; écriture par jeton</td>
+</tr>
+<tr>
+<td>S6</td>
+<td>Injection de code (XSS) : les valeurs des données étaient insérées telles quelles en HTML dans les bulles des cartes</td>
+<td>Échappement systématique (<code>escapeHtml</code>) dans <code>script.js</code> et <code>main.js</code></td>
+</tr>
+<tr>
+<td>F1</td>
+<td>Pas de page d'accueil (404 sur <code>/</code>)</td>
+<td><code>/</code> redirige vers <code>/geoportail/</code></td>
+</tr>
+<tr>
+<td>F2</td>
+<td>Liste « Choisir canton » vide (<code>properties.cant</code> au lieu de <code>canton</code>)</td>
+<td>Liste remplie ; choisir un canton zoome dessus</td>
+</tr>
+<tr>
+<td>F4</td>
+<td>Terrains, coopératives et magasins d'intrants non routés ; thèmes « Sport » et « Agriculture » vides</td>
+<td>Routes <code>geojson/terrain/</code>, <code>cooperative/</code>, <code>magasin/</code> et couches rattachées aux thèmes</td>
+</tr>
+<tr>
+<td>F6</td>
+<td>Erreur 500 sur <code>api/regions/</code>, <code>prefectures/</code>, <code>communes/</code> (tables absentes)</td>
+<td><code>import_blitta2</code> crée et remplit ces tables (5 régions, 40 préfectures, Blitta 2)</td>
+</tr>
+<tr>
+<td>F7</td>
+<td>Carte agriculture : mauvaises adresses d'API, centrée sur Aného, couche Earth Engine expirée</td>
+<td>Bonnes adresses, zoom sur Blitta 2, couche expirée retirée</td>
+</tr>
+<tr>
+<td>F8</td>
+<td>Clé Earth Engine : chemin relatif au dossier de lancement</td>
+<td>Variables <code>GEE_SERVICE_ACCOUNT_KEY</code> et <code>GEE_PROJECT</code>, chemin par défaut absolu</td>
+</tr>
+<tr>
+<td>F9</td>
+<td><code>run_alerts.bat</code> et <code>install_alerts_task.ps1</code> liés à <code>D:\Horison\...</code></td>
+<td>Chemins déduits de l'emplacement des scripts ; venv <code>.venv</code> ou <code>HORIEON_VENV</code></td>
+</tr>
+<tr>
+<td>F10</td>
+<td>Réponses GeoJSON sans <code>charset</code></td>
+<td><code>application/json; charset=utf-8</code></td>
+</tr>
+<tr>
+<td>F16</td>
+<td>Champs inexistants demandés au sérialiseur (<code>code_canton</code>, <code>type_terrain</code>, <code>nom_locali</code> des bornes) : informations absentes des bulles</td>
+<td>Noms de champs corrigés</td>
+</tr>
+<tr>
+<td>Q6</td>
+<td><code>__init__.py</code> vide à la racine : le projet était importé comme un paquet et les tests ne pouvaient pas se lancer</td>
+<td>Fichier supprimé</td>
+</tr>
+</tbody>
+</table>
 <hr>
 <h2 id="doc1-34-feuille-de-route-proposée">34. Feuille de route proposée</h2>
 <table>
@@ -2404,37 +2453,37 @@ document.</p>
 <tr>
 <td><strong>P0 — urgent</strong></td>
 <td>Sécurité</td>
-<td>S1 (révocation des secrets), S2, S3</td>
+<td>S1 (révocation des secrets), S3, S4</td>
 <td>½ journée</td>
 </tr>
 <tr>
 <td><strong>P1</strong></td>
-<td>Application utilisable partout</td>
-<td>F1, F2, F6, F8, F9</td>
+<td>Données administratives</td>
+<td>F15 (toutes les communes), F14 (tuiles NDVI)</td>
 <td>2 à 3 jours</td>
 </tr>
 <tr>
 <td><strong>P1</strong></td>
 <td>Fiabilité</td>
-<td>Q1 (premiers tests), Q5 (CI)</td>
+<td>Q1 (plus de tests), Q5 (CI)</td>
 <td>2 jours</td>
 </tr>
 <tr>
 <td><strong>P2</strong></td>
 <td>Données</td>
-<td>Campagne de collecte terrain (jours de marché, points d'eau, châteaux d'eau, coopératives) ; contribution à OpenStreetMap ; couche quartiers (F3) ; couches F4</td>
+<td>Campagne de collecte terrain (jours de marché, points d'eau, châteaux d'eau, coopératives) ; contribution à OpenStreetMap ; couche quartiers (F3)</td>
 <td>variable</td>
 </tr>
 <tr>
 <td><strong>P2</strong></td>
 <td>Agriculture</td>
-<td>F7 ; WhatsApp / SMS (F13) ; tableau de bord des alertes dans l'admin</td>
+<td>WhatsApp / SMS (F13) ; tableau de bord des alertes dans l'admin</td>
 <td>1 à 2 semaines</td>
 </tr>
 <tr>
 <td><strong>P3</strong></td>
 <td>Confort</td>
-<td>Page d'accueil, interface mobile, export PDF des cartes de la cartothèque, traduction en langues locales (éwé, kabiyè…)</td>
+<td>Page d'accueil dédiée, interface mobile, export PDF des cartes de la cartothèque, traduction en langues locales (éwé, kabiyè…)</td>
 <td>variable</td>
 </tr>
 </tbody>

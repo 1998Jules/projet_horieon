@@ -12,7 +12,9 @@ REM
 REM  Les logs sont écrits dans alerts.log (rotation manuelle).
 REM ============================================================
 
-cd /d D:\Horison\horison
+REM Se place dans le dossier du projet (celui qui contient ce fichier),
+REM quel que soit l'endroit où le projet est installé.
+cd /d "%~dp0"
 
 REM ============================================================
 REM  IMPORTANT : Forcer l'encodage UTF-8 pour Python.
@@ -27,11 +29,17 @@ set PYTHONIOENCODING=utf-8
 set PYTHONUTF8=1
 set PYTHONLEGACYWINDOWSSTDIO=0
 
-REM Active le venv Python (adapte le chemin si nécessaire)
-call D:\Horison\hori\Scripts\activate.bat
+REM Active le venv Python : .venv du projet par défaut, ou le dossier indiqué
+REM dans la variable d'environnement HORIEON_VENV (ex. D:\Horison\hori).
+if "%HORIEON_VENV%"=="" set "HORIEON_VENV=%~dp0.venv"
+if not exist "%HORIEON_VENV%\Scripts\activate.bat" (
+    echo [ERREUR] venv introuvable : %HORIEON_VENV% >> "%~dp0alerts.log"
+    exit /b 1
+)
+call "%HORIEON_VENV%\Scripts\activate.bat"
 
 REM Lance la commande Django
-python manage.py evaluate_field_alerts >> D:\Horison\horison\alerts.log 2>&1
+python manage.py evaluate_field_alerts >> "%~dp0alerts.log" 2>&1
 
 REM Code de retour pour le Planificateur de tâches
 exit /b %ERRORLEVEL%

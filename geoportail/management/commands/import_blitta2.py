@@ -15,6 +15,9 @@ Usage :
 
 Les tables des couches (modèles non gérés) sont créées si elles n'existent
 pas, puis vidées et rechargées : la commande peut être relancée sans risque.
+Elle remplit aussi les limites du module agriculture (tables region,
+couche_prefecture_utm et communes_togo_utm : régions et préfectures du Togo,
+commune de Blitta 2).
 ATTENTION : elle écrase le contenu actuel des couches du géoportail.
 """
 import io
@@ -47,6 +50,12 @@ POINT_TABLES = ["marches", "jardb2", "collegeb2", "lyc2", "pea", "bornefontaines
                 "cooperativebl2", "magazin_intrantbl2"]
 LOCALI_TABLES = [t for t in POINT_TABLES + ["stade_terrainbl2"] if t not in ("bornefontaines", "magazin_intrantbl2")]
 POINT_SQL = "ST_PointOnSurface(ST_MakeValid(ST_SetSRID(ST_GeomFromGeoJSON(%s), 4326)))"
+
+
+def layer_models():
+    """Modèles non gérés remplis par la commande : couches du géoportail et limites du module agriculture."""
+    agriculture = [m for m in apps.get_app_config("agriculture").get_models() if not m._meta.managed]
+    return list(apps.get_app_config("geoportail").get_models()) + agriculture
 
 
 def sql(query, params=None):
@@ -183,8 +192,9 @@ class Command(BaseCommand):
         archive = self.cached("tgo_admin_boundaries.geojson.zip",
                               lambda: self.hdx_resource("cod-ab-tgo", "tgo_admin_boundaries.geojson.zip"))
         with zipfile.ZipFile(io.BytesIO(archive)) as zf:
-            member = next(n for n in zf.namelist() if n.endswith("tgo_admin3.geojson"))
-            adm3 = json.loads(zf.read(member))
+            def level(n):
+                return json.loads(zf.read(next(m for m in zf.namelist() if m.endswith(f"tgo_admin{n}.geojson"))))
+            adm1, adm2, adm3 = level(1), level(2), level(3)
         cantons = [f for f in adm3["features"] if f["properties"]["adm3_pcode"] in CANTONS]
         if len(cantons) != len(CANTONS):
             raise CommandError("Cantons de Blitta 2 introuvables dans le fichier COD-AB.")
@@ -205,23 +215,24 @@ class Command(BaseCommand):
         self.stdout.write("4/4 Chargement dans la base")
         self.create_tables()
         with transaction.atomic():
-            for model in apps.get_app_config("geoportail").get_models():
+            for model in layer_models():
                 sql(f"TRUNCATE {model._meta.db_table}")
             self.load_boundaries(cantons)
+            self.load_agriculture_boundaries(adm1, adm2)
             places = self.load_osm(osm)
             self.finalize(places)
             if oms is not None:
                 self.enrich_health(oms)
 
         self.stdout.write(self.style.SUCCESS("Import terminé :"))
-        for model in apps.get_app_config("geoportail").get_models():
+        for model in layer_models():
             table = model._meta.db_table
-            self.stdout.write(f"  {table:<20} {sql(f'SELECT count(*) FROM {table}')[0][0]}")
+            self.stdout.write(f"  {table:<22} {sql(f'SELECT count(*) FROM {table}')[0][0]}")
 
     def create_tables(self):
         existing = set(connection.introspection.table_names())
         with connection.schema_editor() as editor:
-            for model in apps.get_app_config("geoportail").get_models():
+            for model in layer_models():
                 if model._meta.db_table not in existing:
                     editor.create_model(model)
                     self.stdout.write(f"  table créée : {model._meta.db_table}")
@@ -284,6 +295,23 @@ class Command(BaseCommand):
                SELECT 'Blitta 2', 10102, 'Centrale', 1, 'Blitta', 101,
                       ST_Multi(ST_CollectionExtract(ST_MakeValid(ST_Union(geom)), 3))
                FROM cant_bli2""")
+
+    @staticmethod
+    def load_agriculture_boundaries(adm1, adm2):
+        """Limites du module agriculture : régions et préfectures du Togo, commune de Blitta 2."""
+        geom = "ST_Multi(ST_CollectionExtract(ST_MakeValid(ST_SetSRID(ST_GeomFromGeoJSON(%s), 4326)), 3))"
+        for f in adm1["features"]:
+            p = f["properties"]
+            sql(f"INSERT INTO region (id, region, geom) VALUES (%s, %s, {geom})",
+                [int(p["adm1_pcode"][2:]), p["adm1_name"], json.dumps(f["geometry"])])
+        for f in adm2["features"]:
+            p = f["properties"]
+            sql(f"INSERT INTO couche_prefecture_utm (id, prefecture, geom) VALUES (%s, %s, {geom})",
+                [int(p["adm2_pcode"][2:]), p["adm2_name"], json.dumps(f["geometry"])])
+        # Seule la composition de Blitta 2 est connue ici (cantons du décret) ; les
+        # autres communes du Togo sont à importer depuis une source officielle.
+        sql("""INSERT INTO communes_togo_utm (id, commune, prefecture, geom)
+               SELECT code_commu, commune, prefecture, geom FROM bl2""")
 
     def load_osm(self, data):
         places = []
