@@ -17,6 +17,10 @@ formée des cantons d'**Agbandi** (chef-lieu), **Langabou**, **Koffiti** et
 > [DOCUMENTATION.md](DOCUMENTATION.md). Elle existe aussi en PDF :
 > [docs/Documentation_E-commune.pdf](docs/Documentation_E-commune.pdf).
 
+Corrections apportées le 18 septembre 2026 (sécurité, installation, cartes,
+données, et ce qu'il reste à faire de votre côté) :
+[RAPPORT-CORRECTIONS-2026-09-18.md](RAPPORT-CORRECTIONS-2026-09-18.md).
+
 ## Sommaire
 
 1. [En deux phrases, pour tout le monde](#en-deux-phrases-pour-tout-le-monde)
