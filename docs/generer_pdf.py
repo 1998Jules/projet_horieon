@@ -237,14 +237,85 @@ page = f"""<!doctype html>
     themeVariables: {{ primaryColor: '#ecf6ef', primaryBorderColor: '#15803d', primaryTextColor: '#1c2420',
                        lineColor: '#5b6b62', secondaryColor: '#fff8e6', tertiaryColor: '#f7faf8', fontSize: '13px' }},
     flowchart: {{ htmlLabels: true, curve: 'basis' }} }});
-  await mermaid.run({{ querySelector: '.mermaid' }});
-  document.title = 'PRET';
+  await document.fonts.ready;  // Mermaid mesure les textes : attendre les polices
+  // Identifiants explicites : ceux de Mermaid dérivent de l'horloge, figée par Chrome
+  // sans interface, et deux diagrammes identifiés pareil se mélangent.
+  let n = 0;
+  for (const el of document.querySelectorAll('.mermaid')) {{
+    const {{ svg }} = await mermaid.render(`diagramme-${{++n}}`, el.textContent);
+    el.innerHTML = svg;
+    el.setAttribute('data-processed', 'true');
+  }}
 </script>
 </body></html>"""
 
+# Version web (docs/index.html, publiable avec GitHub Pages) : mêmes contenus,
+# présentés comme des feuilles A4 blanches sur fond gris, avec un lien vers le PDF.
+SCREEN_CSS = r"""
+@media screen {
+  html, body { background: #e6e9e7; }
+  .topbar { position: sticky; top: 0; z-index: 10; display: flex; justify-content: space-between; align-items: center;
+            gap: 12px; padding: 10px 16px; background: #0f5132; color: #fff; font-size: 14px; }
+  .topbar a { color: #fff; font-weight: 600; background: rgba(255,255,255,.15); padding: 6px 12px; border-radius: 6px; }
+  .cover, .toc, .chapter { width: min(210mm, calc(100% - 32px)); margin: 24px auto;
+                           box-shadow: 0 1px 3px rgba(0,0,0,.12), 0 8px 24px rgba(0,0,0,.08); border-radius: 2px; }
+  .toc, .chapter { background: #fff; }
+  .cover { height: auto; min-height: min(200mm, 80vh); gap: 24px; }
+  .toc, .chapter { padding: 20mm 18mm 22mm; }
+}
+@media screen and (max-width: 700px) {
+  table { display: block; overflow-x: auto; }
+  .toc, .chapter { padding: 20px 16px; }
+  .cover { padding: 40px 20px; }
+  .cover h1 { font-size: 26pt; }
+  .toc ol ol { margin-left: 0; columns: 1; }
+}
+@media print { .topbar { display: none; } }
+"""
+def file_url(path):
+    return "file:///" + path.replace("\\", "/")
+
+
+def render_diagrams(source_html):
+    """Fait dessiner les diagrammes par Chrome et renvoie la page figée (sans script).
+
+    Imprimer directement la page avec son script donne parfois un diagramme vide
+    (impression lancée avant la fin du dessin) : on fige donc le résultat d'abord.
+    """
+    src = os.path.join(tempfile.gettempdir(), "documentation_e-commune_source.html")
+    with open(src, "w", encoding="utf-8", newline="\n") as fh:
+        fh.write(source_html)
+    expected = source_html.count('<div class="mermaid">')
+    for attempt in range(1, 4):
+        dom = subprocess.run(
+            [CHROME, "--headless=new", "--disable-gpu", "--virtual-time-budget=30000",
+             "--window-size=1280,1600", "--dump-dom", file_url(src)],
+            check=True, capture_output=True).stdout.decode("utf-8").replace("\r\n", "\n")
+        svgs = re.findall(r'<div class="mermaid"[^>]*>(<svg[\s\S]*?</svg>)', dom)
+        drawn = [s for s in svgs if s.count("<g") > 3]
+        if len(drawn) == expected:
+            dom = re.sub(r'<script type="module">[\s\S]*?</script>', "", dom)
+            return "<!doctype html>\n" + dom
+        print(f"  diagrammes dessinés : {len(drawn)}/{expected} (essai {attempt}), nouvel essai…")
+    sys.exit("Les diagrammes Mermaid n'ont pas pu être dessinés (connexion internet ?).")
+
+
+static_page = render_diagrams(page)
+
+web_page = static_page.replace(
+    '<meta charset="utf-8">',
+    '<meta charset="utf-8">\n<meta name="viewport" content="width=device-width, initial-scale=1">', 1,
+).replace("</style>", SCREEN_CSS + "</style>", 1).replace(
+    "<body>",
+    '<body>\n<div class="topbar"><span>E-commune · Documentation</span>'
+    '<a href="Documentation_E-commune.pdf">Télécharger le PDF</a></div>', 1)
+with open(os.path.join(ROOT, "docs", "index.html"), "w", encoding="utf-8", newline="\n") as fh:
+    fh.write(web_page)
+print("Web  :", os.path.join(ROOT, "docs", "index.html"))
+
 html_path = os.path.join(tempfile.gettempdir(), "documentation_e-commune.html")
-with open(html_path, "w", encoding="utf-8") as fh:
-    fh.write(page)
+with open(html_path, "w", encoding="utf-8", newline="\n") as fh:
+    fh.write(static_page)
 
 subprocess.run([
     CHROME, "--headless=new", "--disable-gpu", "--no-pdf-header-footer",

@@ -1,0 +1,2537 @@
+<!doctype html>
+<!DOCTYPE html>
+<html lang="fr"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>E-commune — Documentation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&amp;family=JetBrains+Mono:wght@400;600&amp;display=swap" rel="stylesheet">
+<style>
+@page { size: A4; margin: 20mm 18mm 22mm 18mm;
+  @bottom-left { content: "E-commune · Documentation"; font: 8pt Inter, 'Segoe UI', sans-serif; color: #7a8a80; }
+  @bottom-right { content: counter(page) " / " counter(pages); font: 8pt Inter, 'Segoe UI', sans-serif; color: #7a8a80; }
+}
+@page :first { margin: 0; @bottom-left { content: none; } @bottom-right { content: none; } }
+:root { --green: #0f5132; --green-2: #15803d; --green-soft: #ecf6ef; --line: #d8e2dc; --ink: #1c2420; --muted: #5b6b62;
+        --amber-soft: #fff8e6; --amber: #b7791f; }
+* { box-sizing: border-box; }
+html { background: #fff; }
+body { margin: 0; color: var(--ink); background: #fff; font: 10.2pt/1.55 Inter, 'Segoe UI', Roboto, sans-serif;
+       -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
+/* Page de garde */
+.cover { height: 297mm; display: flex; flex-direction: column; justify-content: space-between;
+         padding: 30mm 22mm 24mm; background: linear-gradient(160deg, #0f5132 0%, #146c43 55%, #1f8a55 100%); color: #fff;
+         break-after: page; }
+.cover .kicker { font-size: 10pt; letter-spacing: .18em; text-transform: uppercase; opacity: .8; }
+.cover h1 { font-size: 34pt; line-height: 1.1; margin: 10mm 0 4mm; font-weight: 800; border: 0; color: #fff; }
+.cover .subtitle { font-size: 14pt; opacity: .92; max-width: 140mm; }
+.cover .meta { display: grid; grid-template-columns: auto 1fr; gap: 2mm 8mm; font-size: 10pt; opacity: .95; }
+.cover .meta b { font-weight: 600; opacity: .75; }
+.cover .band { border-top: 1px solid rgba(255,255,255,.35); padding-top: 6mm; }
+
+/* Sommaire */
+.toc { break-after: page; }
+.toc h1 { font-size: 22pt; color: var(--green); margin: 0 0 6mm; border: 0; }
+.toc ol { list-style: none; padding: 0; margin: 0; }
+.toc > ol > li { margin: 0 0 3.2mm; padding: 3mm 4.5mm; background: var(--green-soft); border-radius: 3mm; break-inside: avoid; }
+.toc > ol > li > a { font-weight: 700; font-size: 12pt; color: var(--green); text-decoration: none; display: block; }
+.toc-label { display: inline-block; min-width: 32mm; font-size: 8pt; text-transform: uppercase; letter-spacing: .08em;
+             color: var(--green-2); font-weight: 600; }
+.toc ol ol { margin: 2mm 0 0 32mm; columns: 2; column-gap: 8mm; }
+.toc ol ol li { font-size: 8.6pt; margin: .3mm 0; break-inside: avoid; }
+.toc ol ol a { color: var(--ink); text-decoration: none; }
+
+/* Chapitres */
+.chapter { break-before: page; }
+.chapter-label { font-size: 9pt; text-transform: uppercase; letter-spacing: .16em; color: var(--green-2); font-weight: 700; }
+h1 { font-size: 22pt; line-height: 1.2; color: var(--green); margin: 1mm 0 6mm; padding-bottom: 3mm; border-bottom: 2.5px solid var(--green); }
+h2 { font-size: 14.5pt; color: var(--green); margin: 9mm 0 3mm; padding-bottom: 1.5mm; border-bottom: 1px solid var(--line);
+     break-after: avoid; }
+h3 { font-size: 11.5pt; color: #1d3b2a; margin: 6mm 0 2mm; break-after: avoid; }
+h4 { font-size: 10.5pt; margin: 4mm 0 1.5mm; break-after: avoid; }
+p { margin: 0 0 2.6mm; }
+a { color: var(--green-2); text-decoration: none; }
+strong { color: #10251a; }
+hr { border: 0; border-top: 1px solid var(--line); margin: 6mm 0; }
+ul, ol { margin: 0 0 3mm; padding-left: 6mm; }
+li { margin: .8mm 0; }
+li > p { margin: 0; }
+
+/* Encadrés (citations) */
+blockquote { margin: 3mm 0 4mm; padding: 3mm 4mm; background: var(--green-soft); border-left: 3.5px solid var(--green-2);
+             border-radius: 0 2mm 2mm 0; break-inside: avoid; }
+blockquote p:last-child { margin: 0; }
+blockquote.warn { background: var(--amber-soft); border-left-color: var(--amber); }
+
+/* Code */
+code { font: 8.6pt 'JetBrains Mono', Consolas, monospace; background: #f1f4f2; padding: .3mm 1.2mm; border-radius: 1mm; color: #0b3d25; }
+pre { background: #f6f8f7; border: 1px solid var(--line); border-left: 3px solid var(--green-2); border-radius: 2mm;
+      padding: 3mm 4mm; margin: 2mm 0 4mm; white-space: pre-wrap; word-break: break-word; }
+pre code { background: none; padding: 0; font-size: 8.3pt; line-height: 1.5; color: #1c2420; }
+.highlight { margin: 0; }
+
+/* Tableaux */
+table { width: 100%; border-collapse: collapse; margin: 2mm 0 5mm; font-size: 8.9pt; line-height: 1.42; }
+thead { display: table-header-group; }
+th { background: var(--green); color: #fff; text-align: left; font-weight: 600; padding: 1.8mm 2.4mm; }
+td { padding: 1.6mm 2.4mm; border-bottom: 1px solid var(--line); vertical-align: top; }
+td code, th code { overflow-wrap: anywhere; }
+tbody tr:nth-child(even) td { background: #f7faf8; }
+tr { break-inside: avoid; }
+td code, th code { font-size: 8pt; }
+
+/* Listes de contrôle */
+.task-list-item { list-style: none; margin-left: -5mm; }
+.task-list-item input { margin-right: 2mm; }
+
+/* Diagrammes */
+.mermaid { margin: 3mm 0 5mm; padding: 4mm; border: 1px solid var(--line); border-radius: 2mm; background: #fbfdfc;
+           text-align: center; break-inside: avoid; }
+.mermaid svg { max-width: 100% !important; height: auto; }
+.mermaid svg[aria-roledescription^="flowchart"] { width: 100% !important; max-height: 150mm; }
+
+details { margin: 3mm 0; padding: 3mm 4mm; border: 1px dashed var(--line); border-radius: 2mm; }
+summary { font-weight: 600; color: var(--green); margin-bottom: 2mm; }
+
+@media screen {
+  html, body { background: #e6e9e7; }
+  .topbar { position: sticky; top: 0; z-index: 10; display: flex; justify-content: space-between; align-items: center;
+            gap: 12px; padding: 10px 16px; background: #0f5132; color: #fff; font-size: 14px; }
+  .topbar a { color: #fff; font-weight: 600; background: rgba(255,255,255,.15); padding: 6px 12px; border-radius: 6px; }
+  .cover, .toc, .chapter { width: min(210mm, calc(100% - 32px)); margin: 24px auto;
+                           box-shadow: 0 1px 3px rgba(0,0,0,.12), 0 8px 24px rgba(0,0,0,.08); border-radius: 2px; }
+  .toc, .chapter { background: #fff; }
+  .cover { height: auto; min-height: min(200mm, 80vh); gap: 24px; }
+  .toc, .chapter { padding: 20mm 18mm 22mm; }
+}
+@media screen and (max-width: 700px) {
+  table { display: block; overflow-x: auto; }
+  .toc, .chapter { padding: 20px 16px; }
+  .cover { padding: 40px 20px; }
+  .cover h1 { font-size: 26pt; }
+  .toc ol ol { margin-left: 0; columns: 1; }
+}
+@media print { .topbar { display: none; } }
+</style>
+</head><body>
+<div class="topbar"><span>E-commune · Documentation</span><a href="Documentation_E-commune.pdf">Télécharger le PDF</a></div>
+<div class="cover">
+  <div>
+    <div class="kicker">Documentation du projet</div>
+    <h1>E-commune Horison</h1>
+    <div class="subtitle">Géoportail et surveillance agricole de la commune de Blitta 2 (Togo)</div>
+  </div>
+  <div class="band">
+    <div class="meta">
+      <b>Commune</b><span>Blitta 2 — Agbandi, Langabou, Koffiti, Tcharè-Baou</span>
+      <b>Préfecture</b><span>Blitta, région Centrale</span>
+      <b>Contenu</b><span>Présentation · Comprendre · Installer et lancer · Architecture · Améliorer</span>
+      <b>Dépôt</b><span>github.com/1998Jules/projet_horieon</span>
+      <b>Édition</b><span>Septembre 2026</span>
+    </div>
+  </div>
+</div>
+<div class="toc"><h1>Sommaire</h1><ol><li><a href="#doc0"><span class="toc-label">Présentation</span>E-commune Horison — Géoportail de la commune de Blitta 2 (Togo)</a><ol><li><a href="#doc0-en-deux-phrases-pour-tout-le-monde">En deux phrases, pour tout le monde</a></li><li><a href="#doc0-démarrage-rapide-développeurs">Démarrage rapide (développeurs)</a></li><li><a href="#doc0-documentation">Documentation</a></li><li><a href="#doc0-technologies">Technologies</a></li><li><a href="#doc0-données">Données</a></li></ol></li><li><a href="#doc1"><span class="toc-label">Partie 1</span>1. Comprendre le projet</a><ol><li><a href="#doc1-1-à-quoi-sert-e-commune-">1. À quoi sert E-commune ?</a></li><li><a href="#doc1-2-le-géoportail--la-carte-de-la-commune">2. Le géoportail : la carte de la commune</a></li><li><a href="#doc1-3-le-module-agriculture--surveiller-ses-champs-par-satellite">3. Le module agriculture : surveiller ses champs par satellite</a></li><li><a href="#doc1-4-la-cartothèque--les-cartes-thématiques">4. La cartothèque : les cartes thématiques</a></li><li><a href="#doc1-5-ladministration">5. L'administration</a></li><li><a href="#doc1-6-ce-que-lapplication-ne-fait-pas-encore">6. Ce que l'application ne fait pas (encore)</a></li><li><a href="#doc1-7-lexique">7. Lexique</a></li></ol></li><li><a href="#doc2"><span class="toc-label">Partie 2</span>2. Installer et lancer le projet</a><ol><li><a href="#doc2-1-ce-quil-faut-installer">1. Ce qu'il faut installer</a></li><li><a href="#doc2-2-récupérer-le-code">2. Récupérer le code</a></li><li><a href="#doc2-3-lancer-la-base-de-données">3. Lancer la base de données</a></li><li><a href="#doc2-4-préparer-python">4. Préparer Python</a></li><li><a href="#doc2-5-configurer-le-fichier-env">5. Configurer le fichier .env</a></li><li><a href="#doc2-6-créer-la-base-charger-les-données-créer-un-compte-admin">6. Créer la base, charger les données, créer un compte admin</a></li><li><a href="#doc2-7-lancer-le-serveur">7. Lancer le serveur</a></li><li><a href="#doc2-8-activer-le-module-agriculture-google-earth-engine">8. Activer le module agriculture (Google Earth Engine)</a></li><li><a href="#doc2-9-activer-les-e-mails-dalerte">9. Activer les e-mails d'alerte</a></li><li><a href="#doc2-10-automatiser-les-alertes-quotidiennes">10. Automatiser les alertes quotidiennes</a></li><li><a href="#doc2-11-relancer-le-projet-les-jours-suivants">11. Relancer le projet les jours suivants</a></li><li><a href="#doc2-12-installation-sous-linux">12. Installation sous Linux</a></li><li><a href="#doc2-13-dépannage">13. Dépannage</a></li></ol></li><li><a href="#doc3"><span class="toc-label">Partie 3</span>3. Architecture technique</a><ol><li><a href="#doc3-1-vue-densemble">1. Vue d'ensemble</a></li><li><a href="#doc3-2-arborescence">2. Arborescence</a></li><li><a href="#doc3-3-configuration-settings">3. Configuration (settings)</a></li><li><a href="#doc3-4-base-de-données">4. Base de données</a></li><li><a href="#doc3-5-api-et-routes">5. API et routes</a></li><li><a href="#doc3-6-système-dalertes-agricoles">6. Système d'alertes agricoles</a></li><li><a href="#doc3-7-données-et-sources">7. Données et sources</a></li><li><a href="#doc3-8-front-end">8. Front-end</a></li><li><a href="#doc3-9-commandes-de-gestion">9. Commandes de gestion</a></li><li><a href="#doc3-10-sécurité">10. Sécurité</a></li></ol></li><li><a href="#doc4"><span class="toc-label">Partie 4</span>4. Améliorer le projet</a><ol><li><a href="#doc4-1-proposer-une-modification-fork-et-pull-request">1. Proposer une modification (fork et Pull Request)</a></li><li><a href="#doc4-2-recettes-pas-à-pas">2. Recettes pas à pas</a></li><li><a href="#doc4-3-limites-connues">3. Limites connues</a></li><li><a href="#doc4-4-feuille-de-route-proposée">4. Feuille de route proposée</a></li><li><a href="#doc4-5-contribuer-sans-coder">5. Contribuer sans coder</a></li></ol></li></ol></div>
+
+<section class="chapter" id="doc0">
+  <div class="chapter-label">Présentation</div>
+  <h1 id="doc0-e-commune-horison--géoportail-de-la-commune-de-blitta-2-togo">E-commune Horison — Géoportail de la commune de Blitta 2 (Togo)</h1>
+<blockquote>
+<p>📄 <strong>Lire la documentation complète en PDF (43 pages, mise en page) :
+<a href="docs/Documentation_E-commune.pdf">docs/Documentation_E-commune.pdf</a></strong></p>
+</blockquote>
+<p><strong>E-commune</strong> est une application web qui affiche sur une carte interactive les
+infrastructures d'une commune togolaise (écoles, centres de santé, marchés,
+points d'eau, routes…) et qui aide les agriculteurs à <strong>surveiller leurs champs
+par satellite</strong> (santé de la végétation, sécheresse, pluie, alertes par e-mail).</p>
+<p>La commune couverte est <strong>Blitta 2</strong> (préfecture de Blitta, région Centrale),
+formée des cantons d'<strong>Agbandi</strong> (chef-lieu), <strong>Langabou</strong>, <strong>Koffiti</strong> et
+<strong>Tcharè-Baou</strong>.</p>
+<hr>
+<h2 id="doc0-en-deux-phrases-pour-tout-le-monde">En deux phrases, pour tout le monde</h2>
+<ul>
+<li><strong>Le géoportail</strong> : c'est comme Google Maps, mais pour la mairie. On y voit,
+  sur une carte, où se trouvent les écoles, les centres de santé, les marchés,
+  les points d'eau et les routes de la commune, et on peut cliquer dessus pour
+  avoir des informations.</li>
+<li><strong>Le module agriculture</strong> : un agriculteur dessine son champ sur la carte ;
+  l'application consulte les satellites et la météo, calcule un « score de
+  risque » (sécheresse, manque d'eau, excès de pluie…) et envoie une alerte par
+  e-mail quand la situation se dégrade.</li>
+</ul>
+<hr>
+<h2 id="doc0-démarrage-rapide-développeurs">Démarrage rapide (développeurs)</h2>
+<p>Prérequis : Python 3.12+, Docker, Git. Détails pas à pas, y compris pour les
+débutants : <a href="#doc2">docs/2-INSTALLER-ET-LANCER.md</a>.</p>
+<pre class="highlight"><code class="language-bash">git clone https://github.com/1998Jules/projet_horieon.git
+cd projet_horieon
+
+# 1. Base de données PostGIS (Docker)
+docker run -d --name horieon-postgis -e POSTGRES_PASSWORD=1234 -e POSTGRES_DB=Ecommune \
+  -p 127.0.0.1:5440:5432 -v horieon-pgdata:/var/lib/postgresql/data postgis/postgis:16-3.5
+
+# 2. Environnement Python
+python -m venv .venv
+.venv\Scripts\activate            # Windows  (Linux/macOS : source .venv/bin/activate)
+pip install -r requirements.txt
+# Windows uniquement : installer aussi la roue GDAL (voir le guide d'installation)
+
+# 3. Configuration
+copy .env.exemple .env            # Linux/macOS : cp .env.exemple .env
+#   puis éditer .env : SECRET_KEY, DEBUG=True, DB_PASSWORD=1234, DB_HOST=127.0.0.1, DB_PORT=5440
+
+# 4. Base, données, compte admin
+python manage.py migrate
+python manage.py loaddata cartotheque/fixtures/initial_domaines.json
+python manage.py import_blitta2   # couches du géoportail à partir de données ouvertes
+python manage.py createsuperuser
+
+# 5. Lancer
+python manage.py runserver</code></pre>
+<p>Puis ouvrir :</p>
+<table>
+<thead>
+<tr>
+<th>Page</th>
+<th>Adresse</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Géoportail (carte de la commune)</td>
+<td>http://127.0.0.1:8000/geoportail/</td>
+</tr>
+<tr>
+<td>Module agriculture</td>
+<td>http://127.0.0.1:8000/agriculture/</td>
+</tr>
+<tr>
+<td>Administration</td>
+<td>http://127.0.0.1:8000/admin/</td>
+</tr>
+<tr>
+<td>API cartothèque</td>
+<td>http://127.0.0.1:8000/api/cartotheque/</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>La racine <code>http://127.0.0.1:8000/</code> affiche une erreur 404 : c'est normal, il
+n'y a pas de page d'accueil. Utilisez les adresses ci-dessus.</p>
+</blockquote>
+<hr>
+<h2 id="doc0-documentation">Documentation</h2>
+<p>📄 <strong>Version PDF prête à lire ou à imprimer</strong> :
+<a href="docs/Documentation_E-commune.pdf">docs/Documentation_E-commune.pdf</a>
+(regénérée par <code>python docs/generer_pdf.py</code>).</p>
+<table>
+<thead>
+<tr>
+<th>Guide</th>
+<th>Pour qui</th>
+<th>Contenu</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="#doc1">1. Comprendre le projet</a></td>
+<td>Tout le monde</td>
+<td>À quoi sert l'application, comment l'utiliser, lexique (NDVI, SPI, SIG…)</td>
+</tr>
+<tr>
+<td><a href="#doc2">2. Installer et lancer</a></td>
+<td>Débutants et développeurs</td>
+<td>Installation pas à pas sous Windows et Linux, dépannage</td>
+</tr>
+<tr>
+<td><a href="#doc3">3. Architecture technique</a></td>
+<td>Développeurs</td>
+<td>Structure du code, base de données, API, système d'alertes, configuration</td>
+</tr>
+<tr>
+<td><a href="#doc4">4. Améliorer le projet</a></td>
+<td>Contributeurs</td>
+<td>Proposer une modification, ajouter une couche, limites connues, feuille de route</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="doc0-technologies">Technologies</h2>
+<p>Django 6 · Django REST Framework · PostgreSQL + PostGIS · GDAL · Leaflet ·
+Turf.js · Google Earth Engine · CHIRPS / CHIRPS-GEFS · Open-Meteo.</p>
+<h2 id="doc0-données">Données</h2>
+<p>Les données de terrain d'origine (relevés de l'équipe du projet) ne sont pas
+dans ce dépôt. La commande <code>import_blitta2</code> reconstruit les couches à partir de
+sources ouvertes : limites <strong>OCHA COD-AB</strong>, décret de création des communes
+(<strong>Journal officiel du 08/01/2018</strong>), infrastructures <strong>OpenStreetMap</strong>
+(© contributeurs OpenStreetMap, licence ODbL) et inventaire <strong>OMS/KEMRI</strong> des
+formations sanitaires. Voir <a href="#doc3-7-données-et-sources">docs/3-ARCHITECTURE.md</a>.</p>
+</section>
+<section class="chapter" id="doc1">
+  <div class="chapter-label">Partie 1</div>
+  <h1 id="doc1-1-comprendre-le-projet">1. Comprendre le projet</h1>
+<blockquote>
+<p>Ce guide s'adresse à <strong>tout le monde</strong> : élus, agents municipaux,
+agriculteurs, étudiants, curieux. Aucune connaissance en informatique n'est
+nécessaire.</p>
+</blockquote>
+<h2 id="doc1-sommaire">Sommaire</h2>
+<ol>
+<li><a href="#doc1-1-à-quoi-sert-e-commune-">À quoi sert E-commune ?</a></li>
+<li><a href="#doc1-2-le-géoportail--la-carte-de-la-commune">Le géoportail : la carte de la commune</a></li>
+<li><a href="#doc1-3-le-module-agriculture--surveiller-ses-champs-par-satellite">Le module agriculture : surveiller ses champs par satellite</a></li>
+<li><a href="#doc1-4-la-cartothèque--les-cartes-thématiques">La cartothèque : les cartes thématiques</a></li>
+<li><a href="#doc1-5-ladministration">L'administration</a></li>
+<li><a href="#doc1-6-ce-que-lapplication-ne-fait-pas-encore">Ce que l'application ne fait pas (encore)</a></li>
+<li><a href="#doc1-7-lexique">Lexique</a></li>
+</ol>
+<hr>
+<h2 id="doc1-1-à-quoi-sert-e-commune-">1. À quoi sert E-commune ?</h2>
+<p>Une mairie a besoin de <strong>savoir où se trouvent les choses</strong> sur son territoire
+pour bien décider : où construire une nouvelle école, quel village est loin
+d'un centre de santé, quelle piste mérite d'être réhabilitée, où manque l'eau
+potable…</p>
+<p><strong>E-commune</strong> rassemble ces informations sur <strong>une seule carte</strong>, consultable
+depuis un navigateur internet (Chrome, Firefox, Edge…), sans rien installer
+sur l'ordinateur de l'utilisateur.</p>
+<p>L'application a trois parties :</p>
+<table>
+<thead>
+<tr>
+<th>Partie</th>
+<th>En une phrase</th>
+<th>Pour qui</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Géoportail</strong></td>
+<td>La carte des infrastructures de la commune</td>
+<td>Mairie, services techniques, population</td>
+</tr>
+<tr>
+<td><strong>Agriculture</strong></td>
+<td>La surveillance des champs par satellite, avec des alertes</td>
+<td>Agriculteurs, coopératives, services agricoles</td>
+</tr>
+<tr>
+<td><strong>Cartothèque</strong></td>
+<td>Une bibliothèque de cartes thématiques prêtes à consulter ou imprimer</td>
+<td>Mairie, partenaires, grand public</td>
+</tr>
+</tbody>
+</table>
+<h3 id="doc1-la-commune-couverte--blitta-2">La commune couverte : Blitta 2</h3>
+<p>Blitta 2 est l'une des trois communes de la <strong>préfecture de Blitta</strong> (région
+Centrale du Togo). Elle regroupe quatre <strong>cantons</strong> :</p>
+<table>
+<thead>
+<tr>
+<th>Canton</th>
+<th>Rôle</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Agbandi</strong></td>
+<td>chef-lieu de la commune</td>
+</tr>
+<tr>
+<td><strong>Langabou</strong></td>
+<td>traversé par la route nationale N1</td>
+</tr>
+<tr>
+<td><strong>Koffiti</strong></td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Tcharè-Baou</strong></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>Cette composition est fixée par le décret publié au <em>Journal officiel de la
+République togolaise</em> du 8 janvier 2018.</p>
+<hr>
+<h2 id="doc1-2-le-géoportail--la-carte-de-la-commune">2. Le géoportail : la carte de la commune</h2>
+<p>Adresse : <strong><code>/geoportail/</code></strong> (par exemple http://127.0.0.1:8000/geoportail/ sur
+l'ordinateur où l'application est lancée).</p>
+<h3 id="doc1-ce-quon-voit">Ce qu'on voit</h3>
+<ul>
+<li><strong>Un fond de carte</strong> au choix : <em>OpenStreetMap</em> (plan), <em>Satellite</em> (photo
+  aérienne) ou <em>Hybride</em> (photo + noms).</li>
+<li><strong>Les limites</strong> : le contour de la commune et de ses 4 cantons (en orange).</li>
+<li><strong>Les routes</strong> : la route nationale revêtue en <strong>rouge épais</strong>, les pistes
+  rurales en <strong>pointillés noirs</strong>.</li>
+<li><strong>Les infrastructures</strong>, représentées par des petites icônes :</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>Thème</th>
+<th>Couches</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Infrastructure</td>
+<td>Lycées, collèges, jardins d'enfants, marchés</td>
+</tr>
+<tr>
+<td>Hydrographie</td>
+<td>Points d'eau autonomes (forages, puits), bornes-fontaines, châteaux d'eau</td>
+</tr>
+<tr>
+<td>Santé</td>
+<td>Formations sanitaires (USP, CMS, hôpitaux)</td>
+</tr>
+<tr>
+<td>Sport et loisirs</td>
+<td>Stades et terrains de sport</td>
+</tr>
+<tr>
+<td>Agriculture</td>
+<td>Coopératives, magasins d'intrants</td>
+</tr>
+</tbody>
+</table>
+<h3 id="doc1-comment-lutiliser">Comment l'utiliser</h3>
+<ol>
+<li><strong>Se déplacer</strong> : cliquer-glisser sur la carte. <strong>Zoomer</strong> : molette de la
+   souris ou boutons <code>+</code> / <code>−</code> en bas à droite.</li>
+<li><strong>Afficher des couches</strong> : cliquer sur l'icône orange <strong>« couches »</strong> en haut
+   à droite, puis choisir un <strong>thème</strong> (Santé, Infrastructure…). Changer de
+   fond de carte au même endroit.</li>
+<li><strong>Obtenir des informations</strong> : cliquer sur une icône ou un tracé. Une bulle
+   s'ouvre avec le nom, le canton, la localité, etc.</li>
+<li><strong>Rechercher</strong> : bouton <strong>🔍 Rechercher</strong> en haut, puis taper un nom (par
+   exemple « Agbandi » ou « Lycée »).</li>
+<li><strong>Outils SIG</strong> (panneau de gauche, bouton <code>≡</code>) :<ul>
+<li><strong>📍 Localiser</strong> : centrer la carte sur votre position (si votre appareil
+   le permet) ;</li>
+<li><strong>✏️ Dessiner</strong> : tracer un point, une ligne ou une zone sur la carte ;</li>
+<li><strong>📐 Mesurer</strong> : mesurer une distance ou une surface ;</li>
+<li><strong>Filtres &amp; Stats</strong> : compter les infrastructures par canton et par thème
+   (combien de lycées dans le canton de Langabou ?…).</li>
+</ul>
+</li>
+</ol>
+<h3 id="doc1-doù-viennent-les-informations-">D'où viennent les informations ?</h3>
+<ul>
+<li><strong>À l'origine</strong>, l'équipe du projet a relevé les données sur le terrain
+  (nom des marchés, jour de marché, photos…). Ces données sont dans la base de
+  données de l'auteur du projet, <strong>pas dans le code source</strong>.</li>
+<li><strong>Sur une nouvelle installation</strong>, une commande reconstruit la carte à partir
+  de <strong>sources publiques</strong> : limites officielles des Nations unies (OCHA),
+  <strong>OpenStreetMap</strong> (la « Wikipédia des cartes », alimentée par des bénévoles)
+  et l'inventaire des centres de santé de l'<strong>OMS</strong>.</li>
+</ul>
+<p>Conséquence : certaines informations peuvent manquer ou être incomplètes.
+Quand une donnée n'est pas connue, la carte affiche <strong>« Non renseigné »</strong> au
+lieu d'inventer une valeur. <strong>Chacun peut améliorer OpenStreetMap</strong>
+(https://www.openstreetmap.org) : les ajouts faits là-bas seront repris au
+prochain import.</p>
+<hr>
+<h2 id="doc1-3-le-module-agriculture--surveiller-ses-champs-par-satellite">3. Le module agriculture : surveiller ses champs par satellite</h2>
+<h3 id="doc1-lidée">L'idée</h3>
+<p>Des satellites (Sentinel-2 de l'Agence spatiale européenne, MODIS de la NASA…)
+photographient le Togo tous les quelques jours. En analysant les couleurs de
+ces images, on peut savoir si une plante est <strong>verte et en bonne santé</strong> ou
+<strong>jaunie et stressée</strong>. En y ajoutant les <strong>relevés de pluie</strong> et les
+<strong>prévisions météo</strong>, on peut anticiper une sécheresse ou une inondation.</p>
+<h3 id="doc1-comment-ça-marche-étape-par-étape">Comment ça marche, étape par étape</h3>
+<div class="mermaid" data-processed="true"><svg aria-roledescription="flowchart-v2" role="graphics-document document" viewBox="-8 -8 1000.46875 159.83984375" style="max-width: 1000.46875px;" xmlns="http://www.w3.org/2000/svg" width="100%" id="diagramme-1"><style>#diagramme-1{font-family:Inter,Segoe UI,sans-serif;font-size:13px;fill:#1c2420;}#diagramme-1 .error-icon{fill:#f7faf8;}#diagramme-1 .error-text{fill:#080507;stroke:#080507;}#diagramme-1 .edge-thickness-normal{stroke-width:2px;}#diagramme-1 .edge-thickness-thick{stroke-width:3.5px;}#diagramme-1 .edge-pattern-solid{stroke-dasharray:0;}#diagramme-1 .edge-pattern-dashed{stroke-dasharray:3;}#diagramme-1 .edge-pattern-dotted{stroke-dasharray:2;}#diagramme-1 .marker{fill:#5b6b62;stroke:#5b6b62;}#diagramme-1 .marker.cross{stroke:#5b6b62;}#diagramme-1 svg{font-family:Inter,Segoe UI,sans-serif;font-size:13px;}#diagramme-1 .label{font-family:Inter,Segoe UI,sans-serif;color:#1c2420;}#diagramme-1 .cluster-label text{fill:#080507;}#diagramme-1 .cluster-label span,#diagramme-1 p{color:#080507;}#diagramme-1 .label text,#diagramme-1 span,#diagramme-1 p{fill:#1c2420;color:#1c2420;}#diagramme-1 .node rect,#diagramme-1 .node circle,#diagramme-1 .node ellipse,#diagramme-1 .node polygon,#diagramme-1 .node path{fill:#ecf6ef;stroke:#15803d;stroke-width:1px;}#diagramme-1 .flowchart-label text{text-anchor:middle;}#diagramme-1 .node .katex path{fill:#000;stroke:#000;stroke-width:1px;}#diagramme-1 .node .label{text-align:center;}#diagramme-1 .node.clickable{cursor:pointer;}#diagramme-1 .arrowheadPath{fill:#0b0b0b;}#diagramme-1 .edgePath .path{stroke:#5b6b62;stroke-width:2.0px;}#diagramme-1 .flowchart-link{stroke:#5b6b62;fill:none;}#diagramme-1 .edgeLabel{background-color:#fff8e6;text-align:center;}#diagramme-1 .edgeLabel rect{opacity:0.5;background-color:#fff8e6;fill:#fff8e6;}#diagramme-1 .labelBkg{background-color:rgba(255, 248, 230, 0.5);}#diagramme-1 .cluster rect{fill:#f7faf8;stroke:hsl(140, 0%, 87.4509803922%);stroke-width:1px;}#diagramme-1 .cluster text{fill:#080507;}#diagramme-1 .cluster span,#diagramme-1 p{color:#080507;}#diagramme-1 div.mermaidTooltip{position:absolute;text-align:center;max-width:200px;padding:2px;font-family:Inter,Segoe UI,sans-serif;font-size:12px;background:#f7faf8;border:1px solid hsl(140, 0%, 87.4509803922%);border-radius:2px;pointer-events:none;z-index:100;}#diagramme-1 .flowchartTitleText{text-anchor:middle;font-size:18px;fill:#1c2420;}#diagramme-1 :root{--mermaid-font-family:Inter,Segoe UI,sans-serif;}</style><g><marker orient="auto" markerHeight="12" markerWidth="12" markerUnits="userSpaceOnUse" refY="5" refX="6" viewBox="0 0 10 10" class="marker flowchart" id="diagramme-1_flowchart-pointEnd"><path style="stroke-width: 1; stroke-dasharray: 1, 0;" class="arrowMarkerPath" d="M 0 0 L 10 5 L 0 10 z"></path></marker><marker orient="auto" markerHeight="12" markerWidth="12" markerUnits="userSpaceOnUse" refY="5" refX="4.5" viewBox="0 0 10 10" class="marker flowchart" id="diagramme-1_flowchart-pointStart"><path style="stroke-width: 1; stroke-dasharray: 1, 0;" class="arrowMarkerPath" d="M 0 5 L 10 10 L 10 0 z"></path></marker><marker orient="auto" markerHeight="11" markerWidth="11" markerUnits="userSpaceOnUse" refY="5" refX="11" viewBox="0 0 10 10" class="marker flowchart" id="diagramme-1_flowchart-circleEnd"><circle style="stroke-width: 1; stroke-dasharray: 1, 0;" class="arrowMarkerPath" r="5" cy="5" cx="5"></circle></marker><marker orient="auto" markerHeight="11" markerWidth="11" markerUnits="userSpaceOnUse" refY="5" refX="-1" viewBox="0 0 10 10" class="marker flowchart" id="diagramme-1_flowchart-circleStart"><circle style="stroke-width: 1; stroke-dasharray: 1, 0;" class="arrowMarkerPath" r="5" cy="5" cx="5"></circle></marker><marker orient="auto" markerHeight="11" markerWidth="11" markerUnits="userSpaceOnUse" refY="5.2" refX="12" viewBox="0 0 11 11" class="marker cross flowchart" id="diagramme-1_flowchart-crossEnd"><path style="stroke-width: 2; stroke-dasharray: 1, 0;" class="arrowMarkerPath" d="M 1,1 l 9,9 M 10,1 l -9,9"></path></marker><marker orient="auto" markerHeight="11" markerWidth="11" markerUnits="userSpaceOnUse" refY="5.2" refX="-1" viewBox="0 0 11 11" class="marker cross flowchart" id="diagramme-1_flowchart-crossStart"><path style="stroke-width: 2; stroke-dasharray: 1, 0;" class="arrowMarkerPath" d="M 1,1 l 9,9 M 10,1 l -9,9"></path></marker><g class="root"><g class="clusters"></g><g class="edgePaths"><path marker-end="url(#diagramme-1_flowchart-pointEnd)" style="fill:none;" class="edge-thickness-normal edge-pattern-solid flowchart-link LS-A LE-B" id="L-A-B-0" d="M191.125,75.246L195.292,75.246C199.458,75.246,207.792,75.246,215.242,75.246C222.692,75.246,229.258,75.246,232.542,75.246L235.825,75.246"></path><path marker-end="url(#diagramme-1_flowchart-pointEnd)" style="fill:none;" class="edge-thickness-normal edge-pattern-solid flowchart-link LS-B LE-C" id="L-B-C-0" d="M426.938,75.246L431.104,75.246C435.271,75.246,443.604,75.246,451.054,75.246C458.504,75.246,465.071,75.246,468.354,75.246L471.638,75.246"></path><path marker-end="url(#diagramme-1_flowchart-pointEnd)" style="fill:none;" class="edge-thickness-normal edge-pattern-solid flowchart-link LS-C LE-D" id="L-C-D-0" d="M618.156,75.246L622.323,75.246C626.49,75.246,634.823,75.246,642.356,75.312C649.89,75.378,656.624,75.51,659.99,75.576L663.357,75.642"></path><path marker-end="url(#diagramme-1_flowchart-pointEnd)" style="fill:none;" class="edge-thickness-normal edge-pattern-solid flowchart-link LS-D LE-E" id="L-D-E-0" d="M784.47,54.372L794.045,49.917C803.621,45.462,822.771,36.551,837.56,32.096C852.348,27.641,862.774,27.641,867.987,27.641L873.2,27.641"></path><path marker-end="url(#diagramme-1_flowchart-pointEnd)" style="fill:none;" class="edge-thickness-normal edge-pattern-solid flowchart-link LS-D LE-F" id="L-D-F-0" d="M784.47,97.12L794.045,101.409C803.621,105.697,822.771,114.274,837.642,118.563C852.512,122.852,863.102,122.852,868.397,122.852L873.692,122.852"></path></g><g class="edgeLabels"><g class="edgeLabel"><g transform="translate(0, 0)" class="label"><foreignObject height="0" width="0"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g transform="translate(0, 0)" class="label"><foreignObject height="0" width="0"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g transform="translate(0, 0)" class="label"><foreignObject height="0" width="0"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="edgeLabel"></span></div></foreignObject></g></g><g transform="translate(841.921875, 27.640625)" class="edgeLabel"><g transform="translate(-9.3203125, -10.0703125)" class="label"><foreignObject height="20.140625" width="18.640625"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="edgeLabel">oui</span></div></foreignObject></g></g><g transform="translate(841.921875, 122.8515625)" class="edgeLabel"><g transform="translate(-11.578125, -10.0703125)" class="label"><foreignObject height="20.140625" width="23.15625"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="edgeLabel">non</span></div></foreignObject></g></g></g><g class="nodes"><g transform="translate(95.5625, 75.24609375)" data-id="A" data-node="true" id="flowchart-A-0" class="node default default flowchart-label"><rect height="55.28125" width="191.125" y="-27.640625" x="-95.5625" ry="0" rx="0" style="" class="basic label-container"></rect><g transform="translate(-88.0625, -20.140625)" style="" class="label"><rect></rect><foreignObject height="40.28125" width="176.125"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="nodeLabel">L'agriculteur crée un compte<br>et dessine son champ</span></div></foreignObject></g></g><g transform="translate(334.03125, 75.24609375)" data-id="B" data-node="true" id="flowchart-B-1" class="node default default flowchart-label"><rect height="55.28125" width="185.8125" y="-27.640625" x="-92.90625" ry="0" rx="0" style="" class="basic label-container"></rect><g transform="translate(-85.40625, -20.140625)" style="" class="label"><rect></rect><foreignObject height="40.28125" width="170.8125"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="nodeLabel">Chaque jour, l'application<br>interroge satellites et météo</span></div></foreignObject></g></g><g transform="translate(547.546875, 75.24609375)" data-id="C" data-node="true" id="flowchart-C-3" class="node default default flowchart-label"><rect height="55.28125" width="141.21875" y="-27.640625" x="-70.609375" ry="0" rx="0" style="" class="basic label-container"></rect><g transform="translate(-63.109375, -20.140625)" style="" class="label"><rect></rect><foreignObject height="40.28125" width="126.21875"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="nodeLabel">Elle calcule un score<br>de risque de 0 à 100</span></div></foreignObject></g></g><g transform="translate(736.75, 75.24609375)" data-id="D" data-node="true" id="flowchart-D-5" class="node default default flowchart-label"><polygon style="" transform="translate(-68.59375,68.59375)" class="label-container" points="68.59375,0 137.1875,-68.59375 68.59375,-137.1875 0,-68.59375"></polygon><g transform="translate(-33.453125, -20.140625)" style="" class="label"><rect></rect><foreignObject height="40.28125" width="66.90625"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="nodeLabel">Le niveau<br>a changé ?</span></div></foreignObject></g></g><g transform="translate(931.484375, 27.640625)" data-id="E" data-node="true" id="flowchart-E-7" class="node default default flowchart-label"><rect height="55.28125" width="105.96875" y="-27.640625" x="-52.984375" ry="0" rx="0" style="" class="basic label-container"></rect><g transform="translate(-45.484375, -20.140625)" style="" class="label"><rect></rect><foreignObject height="40.28125" width="90.96875"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="nodeLabel">Alerte + e-mail<br>avec conseils</span></div></foreignObject></g></g><g transform="translate(931.484375, 122.8515625)" data-id="F" data-node="true" id="flowchart-F-9" class="node default default flowchart-label"><rect height="35.140625" width="104.984375" y="-17.5703125" x="-52.4921875" ry="0" rx="0" style="" class="basic label-container"></rect><g transform="translate(-44.9921875, -10.0703125)" style="" class="label"><rect></rect><foreignObject height="20.140625" width="89.984375"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="nodeLabel">Rien à signaler</span></div></foreignObject></g></g></g></g></g></svg></div>
+<ol>
+<li><strong>L'agriculteur crée un compte</strong> et <strong>dessine son champ</strong> sur la carte, en
+   indiquant la culture (maïs, igname…) et la date de semis.</li>
+<li><strong>Chaque jour</strong> (tâche automatique, par défaut à 6 h), l'application
+   récupère pour chaque champ :<ul>
+<li>la <strong>santé de la végétation</strong> (indices NDVI, EVI, MSAVI) ;</li>
+<li>l'<strong>humidité</strong> de la végétation (NDWI) ;</li>
+<li>la <strong>sécheresse</strong> mesurée et prévue (SPI, VCI, TCI, VHI) ;</li>
+<li>la <strong>pluie</strong> tombée (24 h, 72 h) et <strong>prévue</strong> (16 jours).</li>
+</ul>
+</li>
+<li>
+<p>Elle combine ces indicateurs en <strong>un score de risque de 0 à 100</strong> :</p>
+<table>
+<thead>
+<tr>
+<th>Score</th>
+<th>Niveau</th>
+<th>Signification</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0 – 25</td>
+<td>🟢 <strong>Normal</strong></td>
+<td>Tout va bien</td>
+</tr>
+<tr>
+<td>26 – 50</td>
+<td>🟡 <strong>Vigilance</strong></td>
+<td>À surveiller</td>
+</tr>
+<tr>
+<td>51 – 75</td>
+<td>🟠 <strong>Alerte</strong></td>
+<td>Agir est recommandé</td>
+</tr>
+<tr>
+<td>76 – 100</td>
+<td>🔴 <strong>Critique</strong></td>
+<td>Agir en urgence</td>
+</tr>
+</tbody>
+</table>
+</li>
+<li>
+<p><strong>Une alerte n'est envoyée que si le niveau change</strong> (aggravation ou
+   amélioration). On ne reçoit donc pas le même e-mail tous les jours.</p>
+</li>
+<li>L'e-mail explique <strong>ce qui ne va pas</strong> (stress hydrique, sécheresse, excès
+   de pluie…), <strong>quels indicateurs</strong> l'ont révélé, et donne une
+   <strong>recommandation</strong>.</li>
+</ol>
+<h3 id="doc1-le-calendrier-cultural">Le calendrier cultural</h3>
+<p>L'application contient aussi un <strong>calendrier cultural</strong> : pour chaque culture,
+les mois de semis, de sarclage et de récolte, et la durée du cycle. Un
+<strong>simulateur de croissance</strong> indique à quel stade devrait être la culture
+N jours après le semis.</p>
+<h3 id="doc1-à-savoir">À savoir</h3>
+<ul>
+<li>Cette partie a besoin d'un <strong>accès à Google Earth Engine</strong> (service gratuit
+  pour la recherche et l'usage non commercial) et d'une <strong>adresse e-mail
+  d'envoi</strong>. Sans eux, les calculs satellites et les e-mails ne fonctionnent
+  pas. Voir <a href="#doc2-8-activer-le-module-agriculture-google-earth-engine">le guide d'installation</a>.</li>
+<li>L'interface complète pour les agriculteurs (création de compte, dessin des
+  champs, tableau de bord) est une <strong>application séparée</strong> (« frontend »), qui
+  n'est pas dans ce dépôt. Ce dépôt contient le <strong>serveur</strong> (« backend ») qui
+  fait les calculs et fournit les données.</li>
+</ul>
+<hr>
+<h2 id="doc1-4-la-cartothèque--les-cartes-thématiques">4. La cartothèque : les cartes thématiques</h2>
+<p>La cartothèque est une <strong>bibliothèque de cartes</strong> déjà mises en page
+(population, santé, éducation, agriculture…), classées par <strong>domaine</strong>. Chaque
+carte a un titre, une description, une image, une échelle, un auteur, une
+source et un statut (brouillon / publiée). Certaines peuvent être payantes.</p>
+<p>Les cartes s'ajoutent depuis l'<strong>administration</strong> ; elles sont ensuite
+disponibles pour l'application frontend via l'adresse <code>/api/cartotheque/</code>.</p>
+<hr>
+<h2 id="doc1-5-ladministration">5. L'administration</h2>
+<p>Adresse : <strong><code>/admin/</code></strong>. Réservée aux gestionnaires (identifiant et mot de
+passe créés lors de l'installation).</p>
+<p>On peut y :</p>
+<ul>
+<li>gérer les <strong>utilisateurs</strong> (créer, désactiver, changer un mot de passe) ;</li>
+<li>gérer la <strong>cartothèque</strong> (domaines et cartes) ;</li>
+<li>consulter et corriger les <strong>marchés</strong> (avec photo) ;</li>
+<li>consulter les <strong>champs</strong>, les <strong>alertes</strong> envoyées, les <strong>règles d'alerte</strong>
+  et le <strong>calendrier cultural</strong>.</li>
+</ul>
+<hr>
+<h2 id="doc1-6-ce-que-lapplication-ne-fait-pas-encore">6. Ce que l'application ne fait pas (encore)</h2>
+<p>Pour être transparent sur l'état actuel :</p>
+<ul>
+<li><strong>Pas de page d'accueil</strong> : l'adresse racine du site affiche « Page non
+  trouvée ». Il faut aller directement sur <code>/geoportail/</code>.</li>
+<li><strong>Données de terrain incomplètes</strong> sur une nouvelle installation : jours de
+  marché, dates d'ouverture des écoles, points d'eau, châteaux d'eau,
+  coopératives… ne sont pas dans les sources publiques.</li>
+<li><strong>La carte du module agriculture</strong> est encore centrée sur Aného et utilise un
+  serveur cartographique (GeoServer) présent seulement sur l'ordinateur de
+  l'auteur.</li>
+<li><strong>Les listes « Choisir canton » et « Choisir un quartier »</strong> en haut de la
+  carte restent vides (petit défaut du code, et pas de données de quartiers).
+  Utilisez plutôt le filtre <strong>Canton</strong> du panneau <em>Filtres &amp; Stats</em>.</li>
+<li><strong>Pas d'alerte par SMS ou WhatsApp</strong> : seulement par e-mail (le numéro
+  WhatsApp est enregistré mais pas encore utilisé).</li>
+</ul>
+<p>La liste détaillée et les pistes d'amélioration sont dans
+<a href="#doc4-3-limites-connues">4-AMELIORER.md</a>.</p>
+<hr>
+<h2 id="doc1-7-lexique">7. Lexique</h2>
+<table>
+<thead>
+<tr>
+<th>Terme</th>
+<th>Explication simple</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>SIG</strong></td>
+<td><em>Système d'information géographique</em> : un logiciel qui relie des informations à des positions sur une carte.</td>
+</tr>
+<tr>
+<td><strong>Géoportail</strong></td>
+<td>Site web qui présente des cartes et des données géographiques.</td>
+</tr>
+<tr>
+<td><strong>Couche</strong></td>
+<td>Un ensemble d'objets de même nature affichés sur la carte (ex. : la couche « marchés »). On peut l'afficher ou la masquer.</td>
+</tr>
+<tr>
+<td><strong>Fond de carte</strong></td>
+<td>L'image de base sous les couches (plan, photo satellite…).</td>
+</tr>
+<tr>
+<td><strong>Canton</strong></td>
+<td>Subdivision traditionnelle et administrative au Togo, dirigée par un chef canton. Plusieurs cantons forment une commune.</td>
+</tr>
+<tr>
+<td><strong>Commune</strong></td>
+<td>Collectivité locale dirigée par un conseil municipal et un maire (117 communes au Togo depuis 2019).</td>
+</tr>
+<tr>
+<td><strong>USP / CMS</strong></td>
+<td><em>Unité de soins périphérique</em> / <em>Centre médico-social</em> : niveaux de formation sanitaire au Togo.</td>
+</tr>
+<tr>
+<td><strong>EPP / CEG</strong></td>
+<td><em>École primaire publique</em> / <em>Collège d'enseignement général</em>.</td>
+</tr>
+<tr>
+<td><strong>NDVI</strong></td>
+<td>Indice de « verdure » calculé à partir d'images satellites. Proche de 1 : végétation dense et saine. Proche de 0 : sol nu ou plantes en souffrance.</td>
+</tr>
+<tr>
+<td><strong>EVI, MSAVI</strong></td>
+<td>Variantes du NDVI, plus fiables quand la végétation est très dense (EVI) ou clairsemée (MSAVI).</td>
+</tr>
+<tr>
+<td><strong>NDWI</strong></td>
+<td>Indice d'eau dans la végétation : aide à repérer le manque d'eau des plantes.</td>
+</tr>
+<tr>
+<td><strong>SPI</strong></td>
+<td><em>Indice de précipitation standardisé</em> : compare la pluie tombée à la normale des années passées. Négatif = plus sec que d'habitude.</td>
+</tr>
+<tr>
+<td><strong>VCI, TCI, VHI</strong></td>
+<td>Indices de sécheresse : état de la végétation (VCI), température (TCI) et leur combinaison (VHI).</td>
+</tr>
+<tr>
+<td><strong>CHIRPS / CHIRPS-GEFS</strong></td>
+<td>Données de pluie observée (CHIRPS) et prévue (CHIRPS-GEFS) produites par l'Université de Californie et l'USGS.</td>
+</tr>
+<tr>
+<td><strong>Google Earth Engine</strong></td>
+<td>Service de Google qui permet de calculer ces indices sur les images satellites sans les télécharger.</td>
+</tr>
+<tr>
+<td><strong>OpenStreetMap (OSM)</strong></td>
+<td>Carte du monde libre et collaborative, alimentée par des bénévoles.</td>
+</tr>
+<tr>
+<td><strong>API</strong></td>
+<td>« Guichet » informatique par lequel une autre application demande des données au serveur.</td>
+</tr>
+<tr>
+<td><strong>Frontend / backend</strong></td>
+<td>Le frontend est ce que l'utilisateur voit (l'interface) ; le backend est le serveur qui calcule et stocke les données. Ce dépôt est surtout le backend.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section class="chapter" id="doc2">
+  <div class="chapter-label">Partie 2</div>
+  <h1 id="doc2-2-installer-et-lancer-le-projet">2. Installer et lancer le projet</h1>
+<blockquote>
+<p>Ce guide part de zéro. Si vous n'avez jamais installé de logiciel de
+développement, suivez-le dans l'ordre : chaque étape explique <strong>quoi faire</strong>
+et <strong>comment vérifier que ça a marché</strong>. Les développeurs expérimentés
+peuvent sauter directement au <a href="#doc0-démarrage-rapide-développeurs">démarrage rapide du README</a>.</p>
+</blockquote>
+<h2 id="doc2-sommaire">Sommaire</h2>
+<ol>
+<li><a href="#doc2-1-ce-quil-faut-installer">Ce qu'il faut installer</a></li>
+<li><a href="#doc2-2-récupérer-le-code">Récupérer le code</a></li>
+<li><a href="#doc2-3-lancer-la-base-de-données">Lancer la base de données</a></li>
+<li><a href="#doc2-4-préparer-python">Préparer Python</a></li>
+<li><a href="#doc2-5-configurer-le-fichier-env">Configurer le fichier .env</a></li>
+<li><a href="#doc2-6-créer-la-base-charger-les-données-créer-un-compte-admin">Créer la base, charger les données, créer un compte admin</a></li>
+<li><a href="#doc2-7-lancer-le-serveur">Lancer le serveur</a></li>
+<li><a href="#doc2-8-activer-le-module-agriculture-google-earth-engine">Activer le module agriculture (Google Earth Engine)</a></li>
+<li><a href="#doc2-9-activer-les-e-mails-dalerte">Activer les e-mails d'alerte</a></li>
+<li><a href="#doc2-10-automatiser-les-alertes-quotidiennes">Automatiser les alertes quotidiennes</a></li>
+<li><a href="#doc2-11-relancer-le-projet-les-jours-suivants">Relancer le projet les jours suivants</a></li>
+<li><a href="#doc2-12-installation-sous-linux">Installation sous Linux</a></li>
+<li><a href="#doc2-13-dépannage">Dépannage</a></li>
+</ol>
+<hr>
+<h2 id="doc2-1-ce-quil-faut-installer">1. Ce qu'il faut installer</h2>
+<table>
+<thead>
+<tr>
+<th>Logiciel</th>
+<th>À quoi il sert</th>
+<th>Où le trouver</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Python 3.12 ou plus récent</strong></td>
+<td>Le langage dans lequel l'application est écrite</td>
+<td>https://www.python.org/downloads/</td>
+</tr>
+<tr>
+<td><strong>Git</strong></td>
+<td>Télécharger le code et suivre les modifications</td>
+<td>https://git-scm.com/downloads</td>
+</tr>
+<tr>
+<td><strong>Docker Desktop</strong></td>
+<td>Faire tourner la base de données sans l'installer « à la main »</td>
+<td>https://www.docker.com/products/docker-desktop/</td>
+</tr>
+<tr>
+<td>Un éditeur de code (conseillé)</td>
+<td>Modifier les fichiers</td>
+<td>https://code.visualstudio.com/</td>
+</tr>
+</tbody>
+</table>
+<blockquote class="warn">
+<p>⚠️ <strong>Python</strong> : pendant l'installation sous Windows, <strong>cochez la case
+« Add python.exe to PATH »</strong> en bas de la première fenêtre. Django 6 exige
+<strong>Python 3.12 minimum</strong> : les versions 3.10 et 3.11 ne fonctionnent pas.</p>
+</blockquote>
+<h3 id="doc2-ouvrir-un-terminal">Ouvrir un terminal</h3>
+<p>Toutes les commandes de ce guide se tapent dans un <strong>terminal</strong> :</p>
+<ul>
+<li><strong>Windows</strong> : touche Windows, tapez <code>PowerShell</code>, puis Entrée.</li>
+<li><strong>Linux / macOS</strong> : application « Terminal ».</li>
+</ul>
+<h3 id="doc2-vérifier-les-installations">Vérifier les installations</h3>
+<p>Tapez ces commandes une par une. Chacune doit afficher un numéro de version :</p>
+<pre class="highlight"><code class="language-powershell">python --version      # attendu : Python 3.12.x, 3.13.x ou 3.14.x
+git --version
+docker --version</code></pre>
+<p>Si une commande répond « n'est pas reconnu », le logiciel n'est pas installé
+ou n'est pas dans le PATH : réinstallez-le, puis <strong>fermez et rouvrez</strong> le
+terminal.</p>
+<blockquote>
+<p><strong>Plusieurs versions de Python ?</strong> Sous Windows, <code>py -0</code> les liste. Utilisez
+alors <code>py -3.14</code> (ou la version voulue) à la place de <code>python</code> à l'étape 4.</p>
+</blockquote>
+<hr>
+<h2 id="doc2-2-récupérer-le-code">2. Récupérer le code</h2>
+<p>Choisissez un dossier de travail (par exemple <code>Documents\Projets</code>), puis :</p>
+<pre class="highlight"><code class="language-powershell">cd $HOME\Documents
+git clone https://github.com/1998Jules/projet_horieon.git
+cd projet_horieon</code></pre>
+<p>✅ <strong>Vérification</strong> : <code>dir</code> (Windows) ou <code>ls</code> (Linux) affiche notamment
+<code>manage.py</code>, <code>requirements.txt</code>, et les dossiers <code>geoportail</code>, <code>agriculture</code>…</p>
+<blockquote>
+<p><strong>Toutes les commandes suivantes se tapent depuis ce dossier <code>projet_horieon</code>.</strong></p>
+</blockquote>
+<hr>
+<h2 id="doc2-3-lancer-la-base-de-données">3. Lancer la base de données</h2>
+<p>L'application stocke ses données dans <strong>PostgreSQL</strong> avec l'extension
+géographique <strong>PostGIS</strong>. Le plus simple est de la lancer avec Docker.</p>
+<ol>
+<li>Démarrez <strong>Docker Desktop</strong> (l'icône de la baleine doit être stable, pas en
+   train de clignoter).</li>
+<li>Tapez (sur <strong>une seule ligne</strong>) :</li>
+</ol>
+<pre class="highlight"><code class="language-powershell">docker run -d --name horieon-postgis -e POSTGRES_PASSWORD=1234 -e POSTGRES_DB=Ecommune -p 127.0.0.1:5440:5432 -v horieon-pgdata:/var/lib/postgresql/data --restart unless-stopped postgis/postgis:16-3.5</code></pre>
+<p>Ce que fait cette commande :</p>
+<table>
+<thead>
+<tr>
+<th>Élément</th>
+<th>Signification</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>--name horieon-postgis</code></td>
+<td>Nom du conteneur, pour le retrouver</td>
+</tr>
+<tr>
+<td><code>POSTGRES_PASSWORD=1234</code></td>
+<td>Mot de passe de l'utilisateur <code>postgres</code> (<strong>changez-le</strong> si l'ordinateur est partagé ou exposé sur un réseau)</td>
+</tr>
+<tr>
+<td><code>POSTGRES_DB=Ecommune</code></td>
+<td>Crée directement la base <code>Ecommune</code></td>
+</tr>
+<tr>
+<td><code>-p 127.0.0.1:5440:5432</code></td>
+<td>La base est accessible sur le <strong>port 5440</strong> de votre ordinateur, uniquement en local. On évite le port 5432, souvent déjà pris par un PostgreSQL installé</td>
+</tr>
+<tr>
+<td><code>-v horieon-pgdata:…</code></td>
+<td>Les données sont conservées même si le conteneur est supprimé</td>
+</tr>
+<tr>
+<td><code>--restart unless-stopped</code></td>
+<td>La base redémarre toute seule avec Docker</td>
+</tr>
+</tbody>
+</table>
+<p>✅ <strong>Vérification</strong> :</p>
+<pre class="highlight"><code class="language-powershell">docker exec horieon-postgis psql -U postgres -d Ecommune -c "select postgis_version();"</code></pre>
+<p>doit afficher une ligne commençant par <code>3.5</code>.</p>
+<details open="open">
+<summary><strong>Alternative sans Docker</strong> (PostgreSQL installé sur Windows)</summary>
+<ol>
+<li>Installez PostgreSQL depuis https://www.postgresql.org/download/windows/.</li>
+<li>Lancez <strong>Application Stack Builder</strong> (menu Démarrer › PostgreSQL), puis
+   choisissez <em>Spatial Extensions › PostGIS</em>.</li>
+<li>Créez la base : <code>psql -U postgres -c "CREATE DATABASE \"Ecommune\";"</code>.</li>
+<li>Dans <code>.env</code> (étape 5), mettez <code>DB_PORT=5432</code> et votre mot de passe
+   <code>postgres</code>.</li>
+</ol>
+</details>
+<hr>
+<h2 id="doc2-4-préparer-python">4. Préparer Python</h2>
+<h3 id="doc2-41-créer-un-environnement-virtuel">4.1 Créer un environnement virtuel</h3>
+<p>Un <strong>environnement virtuel</strong> (<code>.venv</code>) est un dossier qui contient les
+bibliothèques du projet, sans rien mélanger avec le reste de l'ordinateur.</p>
+<pre class="highlight"><code class="language-powershell">python -m venv .venv
+.venv\Scripts\activate</code></pre>
+<p>✅ <strong>Vérification</strong> : le début de la ligne du terminal affiche <code>(.venv)</code>.</p>
+<blockquote>
+<p><strong>PowerShell refuse d'activer</strong> (« l'exécution de scripts est désactivée ») ?
+Tapez une fois <code>Set-ExecutionPolicy -Scope CurrentUser RemoteSigned</code>, répondez
+<code>O</code>, puis relancez <code>.venv\Scripts\activate</code>.</p>
+</blockquote>
+<h3 id="doc2-42-installer-les-bibliothèques">4.2 Installer les bibliothèques</h3>
+<pre class="highlight"><code class="language-powershell">python -m pip install --upgrade pip
+pip install -r requirements.txt</code></pre>
+<p>Cela prend quelques minutes (Django, pandas, rasterio, Earth Engine…).</p>
+<h3 id="doc2-43-installer-gdal-windows-uniquement">4.3 Installer GDAL (Windows uniquement)</h3>
+<p>Django a besoin de <strong>GDAL</strong> et <strong>GEOS</strong>, deux bibliothèques de calcul
+géographique. Sous Windows, on les installe avec une « roue » précompilée :</p>
+<ol>
+<li>Allez sur https://github.com/cgohlke/geospatial-wheels/releases (dernière
+   version).</li>
+<li>Dans la liste des fichiers (<em>Assets</em>), repérez celui qui commence par
+   <code>gdal-</code> et qui correspond à <strong>votre version de Python</strong> :
+   <code>cp312</code> = Python 3.12, <code>cp313</code> = 3.13, <code>cp314</code> = 3.14, et se termine par
+   <code>win_amd64.whl</code>.
+   Exemple : <code>gdal-3.13.3-cp314-cp314-win_amd64.whl</code>.</li>
+<li>Installez-le directement depuis son lien :</li>
+</ol>
+<pre class="highlight"><code class="language-powershell">pip install https://github.com/cgohlke/geospatial-wheels/releases/download/v2026.8.20/gdal-3.13.3-cp314-cp314-win_amd64.whl</code></pre>
+<p>(adaptez le lien au fichier choisi).</p>
+<p>✅ <strong>Vérification</strong> :</p>
+<pre class="highlight"><code class="language-powershell">python -c "from osgeo import gdal; print(gdal.__version__)"</code></pre>
+<p>Le fichier <code>horison/settings.py</code> trouve ensuite tout seul <code>gdal.dll</code>,
+<code>geos_c.dll</code> et les données PROJ dans le dossier <code>.venv</code>.</p>
+<hr>
+<h2 id="doc2-5-configurer-le-fichier-env">5. Configurer le fichier .env</h2>
+<p>Le fichier <strong><code>.env</code></strong> contient les réglages propres à votre ordinateur et
+<strong>les secrets</strong> (mots de passe). Il n'est <strong>jamais</strong> envoyé sur GitHub.</p>
+<pre class="highlight"><code class="language-powershell">copy .env.exemple .env        # Linux/macOS : cp .env.exemple .env</code></pre>
+<p>Générez une clé secrète :</p>
+<pre class="highlight"><code class="language-powershell">python -c "from django.core.management.utils import get_random_secret_key as g; print(g())"</code></pre>
+<p>Puis ouvrez <code>.env</code> avec un éditeur (<code>notepad .env</code>) et remplissez :</p>
+<pre class="highlight"><code class="language-ini">SECRET_KEY=la-cle-generee-ci-dessus
+DEBUG=True
+ALLOWED_HOSTS=localhost,127.0.0.1
+
+DB_NAME=Ecommune
+DB_USER=postgres
+DB_PASSWORD=1234
+DB_HOST=127.0.0.1
+DB_PORT=5440</code></pre>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Rôle</th>
+<th>Valeur par défaut si absente</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>SECRET_KEY</code></td>
+<td>Clé de chiffrement des sessions. <strong>Unique et secrète en production.</strong></td>
+<td>clé de développement non sûre</td>
+</tr>
+<tr>
+<td><code>DEBUG</code></td>
+<td><code>True</code> affiche les erreurs détaillées et sert les fichiers statiques. <strong><code>False</code> en production.</strong></td>
+<td><code>False</code></td>
+</tr>
+<tr>
+<td><code>ALLOWED_HOSTS</code></td>
+<td>Noms de domaine autorisés, séparés par des virgules</td>
+<td><code>localhost,127.0.0.1</code></td>
+</tr>
+<tr>
+<td><code>DB_NAME</code> / <code>DB_USER</code> / <code>DB_PASSWORD</code> / <code>DB_HOST</code> / <code>DB_PORT</code></td>
+<td>Connexion à PostgreSQL</td>
+<td><code>Ecommune</code> / <code>postgres</code> / <code>1234</code> / <code>localhost</code> / <code>5432</code></td>
+</tr>
+<tr>
+<td><code>EMAIL_HOST</code>, <code>EMAIL_PORT</code>, <code>EMAIL_USE_TLS</code></td>
+<td>Serveur d'envoi des e-mails</td>
+<td><code>smtp.gmail.com</code>, <code>587</code>, <code>True</code></td>
+</tr>
+<tr>
+<td><code>EMAIL_HOST_USER</code> / <code>EMAIL_HOST_PASSWORD</code></td>
+<td>Compte et mot de passe d'envoi (voir <a href="#doc2-9-activer-les-e-mails-dalerte">étape 9</a>)</td>
+<td>vide (pas d'envoi)</td>
+</tr>
+<tr>
+<td><code>DEFAULT_FROM_EMAIL</code></td>
+<td>Expéditeur affiché</td>
+<td>= <code>EMAIL_HOST_USER</code></td>
+</tr>
+<tr>
+<td><code>ALERT_RECIPIENT_EMAIL</code></td>
+<td>Adresse de contrôle qui reçoit les alertes</td>
+<td>vide</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>Une variable d'environnement définie dans le terminal <strong>est prioritaire</strong> sur
+la valeur du fichier <code>.env</code>.</p>
+</blockquote>
+<hr>
+<h2 id="doc2-6-créer-la-base-charger-les-données-créer-un-compte-admin">6. Créer la base, charger les données, créer un compte admin</h2>
+<p></p><pre class="highlight"><code class="language-powershell">python manage.py migrate</code></pre>
+Crée les tables de l'application. ✅ Se termine par une série de <code>OK</code>.<p></p>
+<p></p><pre class="highlight"><code class="language-powershell">python manage.py loaddata cartotheque/fixtures/initial_domaines.json</code></pre>
+Charge les 14 domaines de la cartothèque. ✅ <code>Installed 14 object(s)</code>.<p></p>
+<p></p><pre class="highlight"><code class="language-powershell">python manage.py import_blitta2</code></pre>
+Télécharge les données ouvertes (limites officielles, OpenStreetMap,
+inventaire OMS) et <strong>remplit les couches du géoportail</strong>. Il faut une connexion
+internet ; comptez une à deux minutes. ✅ Se termine par <code>Import terminé</code> et le
+nombre d'objets par table.<p></p>
+<blockquote class="warn">
+<p>⚠️ Cette commande <strong>efface et remplace</strong> le contenu des couches du
+géoportail. Ne la lancez pas sur une base qui contient les relevés de
+terrain d'origine.</p>
+</blockquote>
+<p></p><pre class="highlight"><code class="language-powershell">python manage.py createsuperuser</code></pre>
+Crée votre compte administrateur : choisissez un identifiant, une adresse
+e-mail et un mot de passe (rien ne s'affiche pendant la saisie du mot de
+passe, c'est normal).<p></p>
+<hr>
+<h2 id="doc2-7-lancer-le-serveur">7. Lancer le serveur</h2>
+<pre class="highlight"><code class="language-powershell">python manage.py runserver</code></pre>
+<p>✅ Le terminal affiche <code>Starting development server at http://127.0.0.1:8000/</code>.
+<strong>Laissez ce terminal ouvert</strong> tant que vous utilisez l'application
+(<code>Ctrl + C</code> pour l'arrêter).</p>
+<p>Ouvrez votre navigateur :</p>
+<table>
+<thead>
+<tr>
+<th>Page</th>
+<th>Adresse</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Géoportail</td>
+<td>http://127.0.0.1:8000/geoportail/</td>
+</tr>
+<tr>
+<td>Module agriculture</td>
+<td>http://127.0.0.1:8000/agriculture/</td>
+</tr>
+<tr>
+<td>Administration</td>
+<td>http://127.0.0.1:8000/admin/</td>
+</tr>
+<tr>
+<td>API cartothèque</td>
+<td>http://127.0.0.1:8000/api/cartotheque/</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Le port 8000 est déjà utilisé ?</strong> Lancez sur un autre port :
+<code>python manage.py runserver 127.0.0.1:8002</code>, puis utilisez
+<code>http://127.0.0.1:8002/...</code>.</p>
+</blockquote>
+<hr>
+<h2 id="doc2-8-activer-le-module-agriculture-google-earth-engine">8. Activer le module agriculture (Google Earth Engine)</h2>
+<p>Les calculs satellites (NDVI, sécheresse…) passent par <strong>Google Earth
+Engine</strong>, gratuit pour un usage non commercial (recherche, ONG, collectivités).</p>
+<ol>
+<li>Avec un compte Google, créez un projet sur https://console.cloud.google.com/
+   (menu <em>Sélectionner un projet › Nouveau projet</em>).</li>
+<li>Enregistrez ce projet pour Earth Engine sur
+   https://code.earthengine.google.com/register : choisissez <em>usage non
+   commercial</em> puis le projet créé.</li>
+<li>Dans la console Cloud : <em>API et services › Bibliothèque</em>, puis activez
+   <strong>Google Earth Engine API</strong>.</li>
+<li><em>IAM et administration › Comptes de service › Créer un compte de service</em>.
+   Donnez-lui le rôle <strong>Earth Engine Resource Writer</strong> (ou <em>Viewer</em> pour la
+   lecture seule) et <strong>Service Usage Consumer</strong>.</li>
+<li>Ouvrez ce compte de service, onglet <em>Clés</em>, puis <em>Ajouter une clé › JSON</em>.
+   Un fichier <code>.json</code> est téléchargé.</li>
+<li>
+<p><strong>Copiez ce fichier à la racine du projet</strong> (à côté de <code>manage.py</code>) sous le
+   nom attendu par le code :</p>
+<pre class="highlight"><code>ee-koutoumbogajules-c99000ca569e.json</code></pre>
+<p>Ce nom est codé en dur dans <code>agriculture/gee_utils.py</code> (constante
+ <code>SERVICE_ACCOUNT_KEY_FILE</code>). Le fichier est déjà exclu de Git par le
+ <code>.gitignore</code>. Le serveur doit être lancé <strong>depuis la racine du projet</strong>,
+ car le chemin est relatif.</p>
+</li>
+</ol>
+<blockquote class="warn">
+<p>⚠️ Ce fichier donne accès à votre compte Google Cloud : <strong>ne le partagez
+jamais</strong> et ne le commitez pas.</p>
+</blockquote>
+<hr>
+<h2 id="doc2-9-activer-les-e-mails-dalerte">9. Activer les e-mails d'alerte</h2>
+<p>Exemple avec Gmail :</p>
+<ol>
+<li>Activez la <strong>validation en deux étapes</strong> sur le compte Google d'envoi.</li>
+<li>Créez un <strong>mot de passe d'application</strong> sur
+   https://myaccount.google.com/apppasswords (nom : « E-commune »). Google
+   affiche 16 caractères.</li>
+<li>Complétez <code>.env</code> :</li>
+</ol>
+<pre class="highlight"><code class="language-ini">EMAIL_HOST_USER=adresse.envoi@gmail.com
+EMAIL_HOST_PASSWORD=les16caracteres
+DEFAULT_FROM_EMAIL=adresse.envoi@gmail.com
+ALERT_RECIPIENT_EMAIL=adresse.de.controle@exemple.com</code></pre>
+<ol start="4">
+<li>Redémarrez le serveur.</li>
+</ol>
+<p>✅ <strong>Test</strong> : <code>python manage.py evaluate_field_alerts --dry-run</code> calcule les
+alertes sans rien enregistrer ni envoyer.</p>
+<blockquote>
+<p>Pour tester sans vrai envoi, ajoutez
+<code>EMAIL_BACKEND=django.core.mail.backends.console.EmailBackend</code> dans <code>.env</code> :
+les e-mails s'affichent alors dans le terminal.</p>
+</blockquote>
+<hr>
+<h2 id="doc2-10-automatiser-les-alertes-quotidiennes">10. Automatiser les alertes quotidiennes</h2>
+<p>La commande qui fait tout (collecte des indicateurs, score, alertes, e-mails) :</p>
+<pre class="highlight"><code class="language-powershell">python manage.py evaluate_field_alerts                 # tous les champs
+python manage.py evaluate_field_alerts --champ-id 5    # un seul champ
+python manage.py evaluate_field_alerts --dry-run       # simulation
+python manage.py evaluate_field_alerts --no-collect    # sans réinterroger les satellites
+python manage.py evaluate_field_alerts --no-email      # sans envoyer d'e-mail</code></pre>
+<p><strong>Windows</strong> : <code>install_alerts_task.ps1</code> crée une tâche planifiée qui lance
+<code>run_alerts.bat</code> chaque jour à 6 h. ⚠️ Ces deux fichiers contiennent des
+chemins propres à l'ordinateur de l'auteur (<code>D:\Horison\...</code>) : <strong>adaptez
+d'abord</strong> <code>$BatchPath</code> dans <code>install_alerts_task.ps1</code>, ainsi que les lignes
+<code>cd /d</code>, <code>call ...\activate.bat</code> et le chemin du journal dans <code>run_alerts.bat</code>.
+Lancez ensuite PowerShell <strong>en administrateur</strong> :</p>
+<pre class="highlight"><code class="language-powershell">.\install_alerts_task.ps1                 # tous les jours à 06:00
+.\install_alerts_task.ps1 -Time "08:30"   # autre heure
+.\install_alerts_task.ps1 -Interval 6     # toutes les 6 heures
+.\install_alerts_task.ps1 -Test           # lancer immédiatement
+.\install_alerts_task.ps1 -Uninstall      # supprimer la tâche</code></pre>
+<p><strong>Linux</strong> : ajoutez une ligne dans <code>crontab -e</code> :</p>
+<pre class="highlight"><code class="language-cron">0 6 * * * cd /chemin/vers/projet_horieon &amp;&amp; .venv/bin/python manage.py evaluate_field_alerts &gt;&gt; alerts.log 2&gt;&amp;1</code></pre>
+<hr>
+<h2 id="doc2-11-relancer-le-projet-les-jours-suivants">11. Relancer le projet les jours suivants</h2>
+<pre class="highlight"><code class="language-powershell">cd $HOME\Documents\projet_horieon
+.venv\Scripts\activate
+python manage.py runserver</code></pre>
+<p>Docker Desktop doit être démarré (la base redémarre toute seule grâce à
+<code>--restart unless-stopped</code>). Si ce n'est pas le cas :
+<code>docker start horieon-postgis</code>.</p>
+<p>Après avoir récupéré des modifications (<code>git pull</code>), pensez à :</p>
+<pre class="highlight"><code class="language-powershell">pip install -r requirements.txt
+python manage.py migrate</code></pre>
+<hr>
+<h2 id="doc2-12-installation-sous-linux">12. Installation sous Linux</h2>
+<p>Testé sur Debian/Ubuntu :</p>
+<pre class="highlight"><code class="language-bash">sudo apt update
+sudo apt install -y python3 python3-venv python3-dev gdal-bin libgdal-dev git docker.io
+sudo usermod -aG docker $USER      # puis se déconnecter / reconnecter
+
+git clone https://github.com/1998Jules/projet_horieon.git &amp;&amp; cd projet_horieon
+docker run -d --name horieon-postgis -e POSTGRES_PASSWORD=1234 -e POSTGRES_DB=Ecommune \
+  -p 127.0.0.1:5440:5432 -v horieon-pgdata:/var/lib/postgresql/data --restart unless-stopped postgis/postgis:16-3.5
+
+python3 -m venv .venv &amp;&amp; source .venv/bin/activate
+pip install -r requirements.txt
+cp .env.exemple .env &amp;&amp; nano .env
+python manage.py migrate
+python manage.py loaddata cartotheque/fixtures/initial_domaines.json
+python manage.py import_blitta2
+python manage.py createsuperuser
+python manage.py runserver</code></pre>
+<p>Sous Linux, <strong>pas besoin de la roue GDAL</strong> : Django utilise la bibliothèque
+système installée par <code>apt</code>.</p>
+<h3 id="doc2-mise-en-production-aperçu">Mise en production (aperçu)</h3>
+<p>Le script <code>build.sh</code> (installation, <code>collectstatic</code>, <code>migrate</code>) est prévu pour
+un hébergeur comme Render. En production :</p>
+<ul>
+<li><code>DEBUG=False</code>, une vraie <code>SECRET_KEY</code>, <code>ALLOWED_HOSTS=mon-domaine.tg</code> ;</li>
+<li>servir l'application avec <strong>gunicorn</strong> :
+  <code>gunicorn horison.wsgi:application --bind 0.0.0.0:8000</code> ;</li>
+<li>servir <code>staticfiles/</code> et <code>media/</code> par le serveur web (Nginx…) ;</li>
+<li>une base PostGIS gérée, avec des sauvegardes (<code>pg_dump</code>).</li>
+</ul>
+<hr>
+<h2 id="doc2-13-dépannage">13. Dépannage</h2>
+<table>
+<thead>
+<tr>
+<th>Symptôme</th>
+<th>Cause probable</th>
+<th>Solution</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Page not found (404)</code> sur <code>http://127.0.0.1:8000/</code></td>
+<td>Pas de page d'accueil</td>
+<td>Aller sur <code>/geoportail/</code></td>
+</tr>
+<tr>
+<td><code>Error: That port is already in use</code></td>
+<td>Un autre programme utilise le port 8000</td>
+<td><code>python manage.py runserver 127.0.0.1:8002</code></td>
+</tr>
+<tr>
+<td><code>connection refused</code> / <code>could not connect to server</code></td>
+<td>La base ne tourne pas</td>
+<td>Démarrer Docker Desktop, puis <code>docker start horieon-postgis</code></td>
+</tr>
+<tr>
+<td><code>password authentication failed for user</code></td>
+<td>Mauvais mot de passe ou mauvais port dans <code>.env</code></td>
+<td>Vérifier <code>DB_PASSWORD</code> et <code>DB_PORT</code> (5440 pour le conteneur)</td>
+</tr>
+<tr>
+<td><code>UnicodeDecodeError: 'utf-8' codec can't decode byte 0xe9</code> au démarrage</td>
+<td>Échec de connexion à un PostgreSQL configuré en français : le message d'erreur accentué fait planter <code>psycopg2</code></td>
+<td>C'est en réalité l'erreur ci-dessus : vérifier <code>DB_*</code> dans <code>.env</code></td>
+</tr>
+<tr>
+<td><code>Could not find the GDAL library</code> / <code>OSError: [WinError 126]</code></td>
+<td>Roue GDAL absente ou pour une autre version de Python</td>
+<td>Refaire l'<a href="#doc2-43-installer-gdal-windows-uniquement">étape 4.3</a> avec le bon <code>cpXXX</code></td>
+</tr>
+<tr>
+<td><code>Django requires Python 3.12 or later</code></td>
+<td>Python trop ancien</td>
+<td>Installer Python 3.12+ et recréer le <code>.venv</code></td>
+</tr>
+<tr>
+<td><code>Invalid requirement: 'D\x00j\x00a…'</code></td>
+<td>Ancien <code>requirements.txt</code> encodé en UTF-16</td>
+<td>Récupérer la version actuelle du dépôt (<code>git pull</code>)</td>
+</tr>
+<tr>
+<td><code>relation "bl2" does not exist</code> (erreur 500 sur les couches)</td>
+<td>Tables du géoportail absentes</td>
+<td><code>python manage.py import_blitta2</code></td>
+</tr>
+<tr>
+<td>Erreur 500 sur <code>/agriculture/api/regions/</code>, <code>/prefectures/</code> ou <code>/communes/</code></td>
+<td>Tables <code>region</code>, <code>couche_prefecture_utm</code>, <code>communes_togo_utm</code> absentes (importées à la main par l'auteur)</td>
+<td>Voir <a href="#doc4-3-limites-connues">4-AMELIORER.md</a></td>
+</tr>
+<tr>
+<td>Fond de carte remplacé par des cases « Access blocked »</td>
+<td>Ancienne version des fichiers JavaScript (tuiles OSM sans Referer)</td>
+<td>Récupérer la version actuelle et vider le cache du navigateur (<code>Ctrl + Maj + R</code>)</td>
+</tr>
+<tr>
+<td>La carte est vide mais sans erreur</td>
+<td>Couches non activées</td>
+<td>Icône orange en haut à droite, puis choisir un thème</td>
+</tr>
+<tr>
+<td><code>ERREUR: Le fichier clé 'ee-…json' est introuvable</code></td>
+<td>Clé Earth Engine absente</td>
+<td><a href="#doc2-8-activer-le-module-agriculture-google-earth-engine">Étape 8</a> ; lancer le serveur depuis la racine du projet</td>
+</tr>
+<tr>
+<td><code>SMTPAuthenticationError</code></td>
+<td>Mot de passe Gmail normal au lieu d'un mot de passe d'application</td>
+<td><a href="#doc2-9-activer-les-e-mails-dalerte">Étape 9</a></td>
+</tr>
+<tr>
+<td><code>.venv\Scripts\activate</code> refusé</td>
+<td>Politique d'exécution PowerShell</td>
+<td><code>Set-ExecutionPolicy -Scope CurrentUser RemoteSigned</code></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section class="chapter" id="doc3">
+  <div class="chapter-label">Partie 3</div>
+  <h1 id="doc3-3-architecture-technique">3. Architecture technique</h1>
+<blockquote>
+<p>Pour les <strong>développeurs</strong>. Ce document décrit l'organisation du code, la
+base de données, les API, le système d'alertes et la configuration.
+Pré-requis : connaître les bases de Django.</p>
+</blockquote>
+<h2 id="doc3-sommaire">Sommaire</h2>
+<ol>
+<li><a href="#doc3-1-vue-densemble">Vue d'ensemble</a></li>
+<li><a href="#doc3-2-arborescence">Arborescence</a></li>
+<li><a href="#doc3-3-configuration-settings">Configuration (settings)</a></li>
+<li><a href="#doc3-4-base-de-données">Base de données</a></li>
+<li><a href="#doc3-5-api-et-routes">API et routes</a></li>
+<li><a href="#doc3-6-système-dalertes-agricoles">Système d'alertes agricoles</a></li>
+<li><a href="#doc3-7-données-et-sources">Données et sources</a></li>
+<li><a href="#doc3-8-front-end">Front-end</a></li>
+<li><a href="#doc3-9-commandes-de-gestion">Commandes de gestion</a></li>
+<li><a href="#doc3-10-sécurité">Sécurité</a></li>
+</ol>
+<hr>
+<h2 id="doc3-1-vue-densemble">1. Vue d'ensemble</h2>
+<div class="mermaid" data-processed="true"><svg aria-roledescription="flowchart-v2" role="graphics-document document" viewBox="-8 -8 1165.84375 443.19677734375" style="max-width: 1165.84375px;" xmlns="http://www.w3.org/2000/svg" width="100%" id="diagramme-2"><style>#diagramme-2{font-family:Inter,Segoe UI,sans-serif;font-size:13px;fill:#1c2420;}#diagramme-2 .error-icon{fill:#f7faf8;}#diagramme-2 .error-text{fill:#080507;stroke:#080507;}#diagramme-2 .edge-thickness-normal{stroke-width:2px;}#diagramme-2 .edge-thickness-thick{stroke-width:3.5px;}#diagramme-2 .edge-pattern-solid{stroke-dasharray:0;}#diagramme-2 .edge-pattern-dashed{stroke-dasharray:3;}#diagramme-2 .edge-pattern-dotted{stroke-dasharray:2;}#diagramme-2 .marker{fill:#5b6b62;stroke:#5b6b62;}#diagramme-2 .marker.cross{stroke:#5b6b62;}#diagramme-2 svg{font-family:Inter,Segoe UI,sans-serif;font-size:13px;}#diagramme-2 .label{font-family:Inter,Segoe UI,sans-serif;color:#1c2420;}#diagramme-2 .cluster-label text{fill:#080507;}#diagramme-2 .cluster-label span,#diagramme-2 p{color:#080507;}#diagramme-2 .label text,#diagramme-2 span,#diagramme-2 p{fill:#1c2420;color:#1c2420;}#diagramme-2 .node rect,#diagramme-2 .node circle,#diagramme-2 .node ellipse,#diagramme-2 .node polygon,#diagramme-2 .node path{fill:#ecf6ef;stroke:#15803d;stroke-width:1px;}#diagramme-2 .flowchart-label text{text-anchor:middle;}#diagramme-2 .node .katex path{fill:#000;stroke:#000;stroke-width:1px;}#diagramme-2 .node .label{text-align:center;}#diagramme-2 .node.clickable{cursor:pointer;}#diagramme-2 .arrowheadPath{fill:#0b0b0b;}#diagramme-2 .edgePath .path{stroke:#5b6b62;stroke-width:2.0px;}#diagramme-2 .flowchart-link{stroke:#5b6b62;fill:none;}#diagramme-2 .edgeLabel{background-color:#fff8e6;text-align:center;}#diagramme-2 .edgeLabel rect{opacity:0.5;background-color:#fff8e6;fill:#fff8e6;}#diagramme-2 .labelBkg{background-color:rgba(255, 248, 230, 0.5);}#diagramme-2 .cluster rect{fill:#f7faf8;stroke:hsl(140, 0%, 87.4509803922%);stroke-width:1px;}#diagramme-2 .cluster text{fill:#080507;}#diagramme-2 .cluster span,#diagramme-2 p{color:#080507;}#diagramme-2 div.mermaidTooltip{position:absolute;text-align:center;max-width:200px;padding:2px;font-family:Inter,Segoe UI,sans-serif;font-size:12px;background:#f7faf8;border:1px solid hsl(140, 0%, 87.4509803922%);border-radius:2px;pointer-events:none;z-index:100;}#diagramme-2 .flowchartTitleText{text-anchor:middle;font-size:18px;fill:#1c2420;}#diagramme-2 :root{--mermaid-font-family:Inter,Segoe UI,sans-serif;}</style><g><marker orient="auto" markerHeight="12" markerWidth="12" markerUnits="userSpaceOnUse" refY="5" refX="6" viewBox="0 0 10 10" class="marker flowchart" id="diagramme-2_flowchart-pointEnd"><path style="stroke-width: 1; stroke-dasharray: 1, 0;" class="arrowMarkerPath" d="M 0 0 L 10 5 L 0 10 z"></path></marker><marker orient="auto" markerHeight="12" markerWidth="12" markerUnits="userSpaceOnUse" refY="5" refX="4.5" viewBox="0 0 10 10" class="marker flowchart" id="diagramme-2_flowchart-pointStart"><path style="stroke-width: 1; stroke-dasharray: 1, 0;" class="arrowMarkerPath" d="M 0 5 L 10 10 L 10 0 z"></path></marker><marker orient="auto" markerHeight="11" markerWidth="11" markerUnits="userSpaceOnUse" refY="5" refX="11" viewBox="0 0 10 10" class="marker flowchart" id="diagramme-2_flowchart-circleEnd"><circle style="stroke-width: 1; stroke-dasharray: 1, 0;" class="arrowMarkerPath" r="5" cy="5" cx="5"></circle></marker><marker orient="auto" markerHeight="11" markerWidth="11" markerUnits="userSpaceOnUse" refY="5" refX="-1" viewBox="0 0 10 10" class="marker flowchart" id="diagramme-2_flowchart-circleStart"><circle style="stroke-width: 1; stroke-dasharray: 1, 0;" class="arrowMarkerPath" r="5" cy="5" cx="5"></circle></marker><marker orient="auto" markerHeight="11" markerWidth="11" markerUnits="userSpaceOnUse" refY="5.2" refX="12" viewBox="0 0 11 11" class="marker cross flowchart" id="diagramme-2_flowchart-crossEnd"><path style="stroke-width: 2; stroke-dasharray: 1, 0;" class="arrowMarkerPath" d="M 1,1 l 9,9 M 10,1 l -9,9"></path></marker><marker orient="auto" markerHeight="11" markerWidth="11" markerUnits="userSpaceOnUse" refY="5.2" refX="-1" viewBox="0 0 11 11" class="marker cross flowchart" id="diagramme-2_flowchart-crossStart"><path style="stroke-width: 2; stroke-dasharray: 1, 0;" class="arrowMarkerPath" d="M 1,1 l 9,9 M 10,1 l -9,9"></path></marker><g class="root"><g class="clusters"><g id="Django" class="cluster default flowchart-label"><rect height="105.28125" width="1118.0078125" y="175.421875" x="0" ry="0" rx="0" style=""></rect><g transform="translate(482.40234375, 175.421875)" class="cluster-label"><foreignObject height="20.140625" width="153.203125"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="nodeLabel">Django 6 (projet horison)</span></div></foreignObject></g></g><g id="Clients" class="cluster default flowchart-label"><rect height="105.28125" width="849.38671875" y="0" x="23.90234375" ry="0" rx="0" style=""></rect><g transform="translate(427.572265625, 0)" class="cluster-label"><foreignObject height="20.140625" width="42.046875"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="nodeLabel">Clients</span></div></foreignObject></g></g></g><g class="edgePaths"><path marker-end="url(#diagramme-2_flowchart-pointEnd)" style="fill:none;" class="edge-thickness-normal edge-pattern-solid flowchart-link LS-B1 LE-G" id="L-B1-G-0" d="M141.806,80.281L134.98,84.448C128.154,88.615,114.503,96.948,107.677,106.96C100.852,116.971,100.852,128.661,100.852,140.352C100.852,152.042,100.852,163.732,100.852,172.86C100.852,181.989,100.852,188.555,100.852,191.839L100.852,195.122"></path><path marker-end="url(#diagramme-2_flowchart-pointEnd)" style="fill:none;" class="edge-thickness-normal edge-pattern-solid flowchart-link LS-B1 LE-A" id="L-B1-A-0" d="M265.984,62.741L321.371,69.831C376.758,76.921,487.531,91.101,542.918,104.036C598.305,116.971,598.305,128.661,598.305,140.352C598.305,152.042,598.305,163.732,615.709,174.361C633.114,184.99,667.924,194.558,685.329,199.343L702.733,204.127"></path><path marker-end="url(#diagramme-2_flowchart-pointEnd)" style="fill:none;" class="edge-thickness-normal edge-pattern-solid flowchart-link LS-B2 LE-U" id="L-B2-U-0" d="M453.504,80.281L451.55,84.448C449.596,88.615,445.689,96.948,443.735,106.96C441.781,116.971,441.781,128.661,441.781,140.352C441.781,152.042,441.781,163.732,441.781,172.86C441.781,181.989,441.781,188.555,441.781,191.839L441.781,195.122"></path><path marker-end="url(#diagramme-2_flowchart-pointEnd)" style="fill:none;" class="edge-thickness-normal edge-pattern-solid flowchart-link LS-B2 LE-A" id="L-B2-A-0" d="M555.395,64.743L605.044,71.499C654.693,78.255,753.991,91.768,803.64,104.37C853.289,116.971,853.289,128.661,853.289,140.352C853.289,152.042,853.289,163.732,848.945,173.18C844.6,182.627,835.911,189.833,831.567,193.436L827.223,197.039"></path><path marker-end="url(#diagramme-2_flowchart-pointEnd)" style="fill:none;" class="edge-thickness-normal edge-pattern-solid flowchart-link LS-B2 LE-C" id="L-B2-C-0" d="M377.535,76.955L360.268,81.676C343,86.397,308.465,95.839,291.197,106.405C273.93,116.971,273.93,128.661,273.93,140.352C273.93,152.042,273.93,163.732,273.93,172.86C273.93,181.989,273.93,188.555,273.93,191.839L273.93,195.122"></path><path marker-end="url(#diagramme-2_flowchart-pointEnd)" style="fill:none;" class="edge-thickness-normal edge-pattern-solid flowchart-link LS-G LE-DB" id="L-G-DB-0" d="M100.852,255.703L100.852,259.87C100.852,264.036,100.852,272.37,100.852,280.703C100.852,289.036,100.852,297.37,110.573,308.801C120.294,320.231,139.737,334.759,149.459,342.023L159.18,349.287"></path><path marker-end="url(#diagramme-2_flowchart-pointEnd)" style="fill:none;" class="edge-thickness-normal edge-pattern-solid flowchart-link LS-A LE-DB" id="L-A-DB-0" d="M707.844,235.225L621.102,242.805C534.359,250.384,360.875,265.544,274.133,277.29C187.391,289.036,187.391,297.37,189.87,305.217C192.35,313.065,197.31,320.427,199.79,324.108L202.27,327.788"></path><path marker-end="url(#diagramme-2_flowchart-pointEnd)" style="fill:none;" class="edge-thickness-normal edge-pattern-solid flowchart-link LS-C LE-DB" id="L-C-DB-0" d="M273.93,255.703L273.93,259.87C273.93,264.036,273.93,272.37,273.93,280.703C273.93,289.036,273.93,297.37,272.347,305.002C270.765,312.635,267.6,319.566,266.017,323.032L264.435,326.498"></path><path marker-end="url(#diagramme-2_flowchart-pointEnd)" style="fill:none;" class="edge-thickness-normal edge-pattern-solid flowchart-link LS-U LE-DB" id="L-U-DB-0" d="M441.781,255.703L441.781,259.87C441.781,264.036,441.781,272.37,441.781,280.703C441.781,289.036,441.781,297.37,421.631,308.839C401.48,320.308,361.179,334.913,341.028,342.215L320.877,349.518"></path><path marker-end="url(#diagramme-2_flowchart-pointEnd)" style="fill:none;" class="edge-thickness-normal edge-pattern-solid flowchart-link LS-A LE-GEE" id="L-A-GEE-0" d="M707.844,245.908L681.206,251.707C654.568,257.506,601.292,269.105,574.654,279.071C548.016,289.036,548.016,297.37,548.016,308.254C548.016,319.139,548.016,332.574,548.016,339.292L548.016,346.009"></path><path marker-end="url(#diagramme-2_flowchart-pointEnd)" style="fill:none;" class="edge-thickness-normal edge-pattern-solid flowchart-link LS-A LE-CG" id="L-A-CG-0" d="M789.813,255.703L789.813,259.87C789.813,264.036,789.813,272.37,789.813,280.703C789.813,289.036,789.813,297.37,789.813,308.254C789.813,319.139,789.813,332.574,789.813,339.292L789.813,346.009"></path><path marker-end="url(#diagramme-2_flowchart-pointEnd)" style="fill:none;" class="edge-thickness-normal edge-pattern-solid flowchart-link LS-A LE-OM" id="L-A-OM-0" d="M871.781,255.2L884.62,259.451C897.458,263.701,923.135,272.202,935.974,280.619C948.813,289.036,948.813,297.37,948.813,308.254C948.813,319.139,948.813,332.574,948.813,339.292L948.813,346.009"></path><path marker-end="url(#diagramme-2_flowchart-pointEnd)" style="fill:none;" class="edge-thickness-normal edge-pattern-solid flowchart-link LS-A LE-SMTP" id="L-A-SMTP-0" d="M871.781,242.063L909.486,248.503C947.19,254.943,1022.599,267.823,1060.303,278.43C1098.008,289.036,1098.008,297.37,1098.008,309.933C1098.008,322.495,1098.008,339.287,1098.008,347.684L1098.008,356.08"></path></g><g class="edgeLabels"><g class="edgeLabel"><g transform="translate(0, 0)" class="label"><foreignObject height="0" width="0"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g transform="translate(0, 0)" class="label"><foreignObject height="0" width="0"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="edgeLabel"></span></div></foreignObject></g></g><g transform="translate(441.78125, 140.3515625)" class="edgeLabel"><g transform="translate(-55.703125, -10.0703125)" class="label"><foreignObject height="20.140625" width="111.40625"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="edgeLabel">Token auth, CORS</span></div></foreignObject></g></g><g transform="translate(853.2890625, 140.3515625)" class="edgeLabel"><g transform="translate(-55.703125, -10.0703125)" class="label"><foreignObject height="20.140625" width="111.40625"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="edgeLabel">Token auth, CORS</span></div></foreignObject></g></g><g transform="translate(273.9296875, 140.3515625)" class="edgeLabel"><g transform="translate(-55.703125, -10.0703125)" class="label"><foreignObject height="20.140625" width="111.40625"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="edgeLabel">Token auth, CORS</span></div></foreignObject></g></g><g class="edgeLabel"><g transform="translate(0, 0)" class="label"><foreignObject height="0" width="0"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g transform="translate(0, 0)" class="label"><foreignObject height="0" width="0"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g transform="translate(0, 0)" class="label"><foreignObject height="0" width="0"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g transform="translate(0, 0)" class="label"><foreignObject height="0" width="0"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g transform="translate(0, 0)" class="label"><foreignObject height="0" width="0"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g transform="translate(0, 0)" class="label"><foreignObject height="0" width="0"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g transform="translate(0, 0)" class="label"><foreignObject height="0" width="0"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="edgeLabel"></span></div></foreignObject></g></g><g class="edgeLabel"><g transform="translate(0, 0)" class="label"><foreignObject height="0" width="0"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="edgeLabel"></span></div></foreignObject></g></g></g><g class="nodes"><g transform="translate(100.8515625, 228.0625)" data-id="G" data-node="true" id="flowchart-G-12" class="node default default flowchart-label"><rect height="55.28125" width="131.703125" y="-27.640625" x="-65.8515625" ry="0" rx="0" style="" class="basic label-container"></rect><g transform="translate(-58.3515625, -20.140625)" style="" class="label"><rect></rect><foreignObject height="40.28125" width="116.703125"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="nodeLabel">geoportail<br>couches GeoJSON</span></div></foreignObject></g></g><g transform="translate(789.8125, 228.0625)" data-id="A" data-node="true" id="flowchart-A-13" class="node default default flowchart-label"><rect height="55.28125" width="163.9375" y="-27.640625" x="-81.96875" ry="0" rx="0" style="" class="basic label-container"></rect><g transform="translate(-74.46875, -20.140625)" style="" class="label"><rect></rect><foreignObject height="40.28125" width="148.9375"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="nodeLabel">agriculture<br>champs, indices, alertes</span></div></foreignObject></g></g><g transform="translate(273.9296875, 228.0625)" data-id="C" data-node="true" id="flowchart-C-14" class="node default default flowchart-label"><rect height="55.28125" width="114.453125" y="-27.640625" x="-57.2265625" ry="0" rx="0" style="" class="basic label-container"></rect><g transform="translate(-49.7265625, -20.140625)" style="" class="label"><rect></rect><foreignObject height="40.28125" width="99.453125"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="nodeLabel">cartotheque<br>API REST cartes</span></div></foreignObject></g></g><g transform="translate(441.78125, 228.0625)" data-id="U" data-node="true" id="flowchart-U-15" class="node default default flowchart-label"><rect height="55.28125" width="121.25" y="-27.640625" x="-60.625" ry="0" rx="0" style="" class="basic label-container"></rect><g transform="translate(-53.125, -20.140625)" style="" class="label"><rect></rect><foreignObject height="40.28125" width="106.25"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="nodeLabel">authentication<br>comptes + jetons</span></div></foreignObject></g></g><g transform="translate(187.0859375, 52.640625)" data-id="B1" data-node="true" id="flowchart-B1-10" class="node default default flowchart-label"><rect height="55.28125" width="157.796875" y="-27.640625" x="-78.8984375" ry="0" rx="0" style="" class="basic label-container"></rect><g transform="translate(-71.3984375, -20.140625)" style="" class="label"><rect></rect><foreignObject height="40.28125" width="142.796875"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="nodeLabel">Navigateur<br>pages Django + Leaflet</span></div></foreignObject></g></g><g transform="translate(466.46484375, 52.640625)" data-id="B2" data-node="true" id="flowchart-B2-11" class="node default default flowchart-label"><rect height="55.28125" width="177.859375" y="-27.640625" x="-88.9296875" ry="0" rx="0" style="" class="basic label-container"></rect><g transform="translate(-81.4296875, -20.140625)" style="" class="label"><rect></rect><foreignObject height="40.28125" width="162.859375"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="nodeLabel">Frontend externe<br>localhost:3001, hors dépôt</span></div></foreignObject></g></g><g transform="translate(239.66015625, 378.94995880126953)" data-id="DB" data-node="true" id="flowchart-DB-16" class="node default default flowchart-label"><path transform="translate(-76.234375,-48.24683065378985)" d="M 0,13.737470435859896 a 76.234375,13.737470435859896 0,0,0 152.46875 0 a 76.234375,13.737470435859896 0,0,0 -152.46875 0 l 0,69.0187204358599 a 76.234375,13.737470435859896 0,0,0 152.46875 0 l 0,-69.0187204358599" style=""></path><g transform="translate(-68.734375, -20.140625)" style="" class="label"><rect></rect><foreignObject height="40.28125" width="137.46875"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="nodeLabel">PostgreSQL + PostGIS<br>base Ecommune</span></div></foreignObject></g></g><g transform="translate(548.015625, 378.94995880126953)" data-id="GEE" data-node="true" id="flowchart-GEE-17" class="node default default flowchart-label"><rect height="55.28125" width="260.3125" y="-27.640625" x="-130.15625" ry="0" rx="0" style="" class="basic label-container"></rect><g transform="translate(-122.65625, -20.140625)" style="" class="label"><rect></rect><foreignObject height="40.28125" width="245.3125"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="nodeLabel">Google Earth Engine<br>Sentinel-2, MODIS, CHIRPS, ERA5, GPM</span></div></foreignObject></g></g><g transform="translate(789.8125, 378.94995880126953)" data-id="CG" data-node="true" id="flowchart-CG-18" class="node default default flowchart-label"><rect height="55.28125" width="123.28125" y="-27.640625" x="-61.640625" ry="0" rx="0" style="" class="basic label-container"></rect><g transform="translate(-54.140625, -20.140625)" style="" class="label"><rect></rect><foreignObject height="40.28125" width="108.28125"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="nodeLabel">CHIRPS-GEFS<br>prévision de pluie</span></div></foreignObject></g></g><g transform="translate(948.8125, 378.94995880126953)" data-id="OM" data-node="true" id="flowchart-OM-19" class="node default default flowchart-label"><rect height="55.28125" width="94.71875" y="-27.640625" x="-47.359375" ry="0" rx="0" style="" class="basic label-container"></rect><g transform="translate(-39.859375, -20.140625)" style="" class="label"><rect></rect><foreignObject height="40.28125" width="79.71875"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="nodeLabel">Open-Meteo<br>prévision 16 j</span></div></foreignObject></g></g><g transform="translate(1098.0078125, 378.94995880126953)" data-id="SMTP" data-node="true" id="flowchart-SMTP-20" class="node default default flowchart-label"><rect height="35.140625" width="103.671875" y="-17.5703125" x="-51.8359375" ry="0" rx="0" style="" class="basic label-container"></rect><g transform="translate(-44.3359375, -10.0703125)" style="" class="label"><rect></rect><foreignObject height="20.140625" width="88.671875"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="nodeLabel">Serveur SMTP</span></div></foreignObject></g></g></g></g></g></svg></div>
+<table>
+<thead>
+<tr>
+<th>Couche</th>
+<th>Technologie</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Langage / framework</td>
+<td>Python 3.12+, Django 6.0</td>
+</tr>
+<tr>
+<td>API REST</td>
+<td>Django REST Framework 3.x, <code>rest_framework.authtoken</code>, <code>django-filter</code></td>
+</tr>
+<tr>
+<td>SIG serveur</td>
+<td><code>django.contrib.gis</code> (GeoDjango), GDAL/GEOS/PROJ</td>
+</tr>
+<tr>
+<td>Base de données</td>
+<td>PostgreSQL 16 + PostGIS 3.5</td>
+</tr>
+<tr>
+<td>Cartographie navigateur</td>
+<td>Leaflet 1.9, Leaflet.draw, Turf.js 6, proj4js</td>
+</tr>
+<tr>
+<td>Télédétection</td>
+<td>Google Earth Engine (<code>earthengine-api</code>), <code>rasterio</code>, <code>scipy</code></td>
+</tr>
+<tr>
+<td>Météo</td>
+<td>CHIRPS / CHIRPS-GEFS (UCSB), Open-Meteo</td>
+</tr>
+<tr>
+<td>CORS</td>
+<td><code>django-cors-headers</code></td>
+</tr>
+<tr>
+<td>Déploiement</td>
+<td><code>build.sh</code> (Render), <code>gunicorn</code></td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="doc3-2-arborescence">2. Arborescence</h2>
+<pre class="highlight"><code>projet_horieon/
+├── manage.py                    # point d'entrée Django (DJANGO_SETTINGS_MODULE=horison.settings)
+├── requirements.txt             # dépendances pip (UTF-8)
+├── .env.exemple                 # modèle de configuration (copier en .env)
+├── build.sh                     # build de déploiement : pip install, collectstatic, migrate
+├── run_alerts.bat               # lanceur Windows de evaluate_field_alerts (chemins à adapter)
+├── install_alerts_task.ps1      # crée la tâche planifiée Windows
+├── commune.geojson              # ancien fichier de test (zone d'Aného, EPSG:32631), inutilisé
+├── model.py                     # brouillon de modèles, inutilisé
+├── urls.py, wsgi.py, asgi.py    # doublons historiques de horison/, inutilisés
+│
+├── horison/                     # le « projet » Django
+│   ├── settings.py              # configuration (lit .env) + détection GDAL sous Windows
+│   ├── urls.py                  # routes racine
+│   ├── wsgi.py / asgi.py
+│
+├── geoportail/                  # carte communale
+│   ├── models.py                # 14 couches (modèles NON gérés, managed=False)
+│   ├── views.py                 # endpoints GeoJSON, recherche, toutes couches
+│   ├── urls.py
+│   ├── admin.py                 # admin des marchés (aperçu photo)
+│   ├── management/commands/import_blitta2.py   # reconstruction des couches (données ouvertes)
+│   ├── templates/index.html     # page du géoportail
+│   └── static/                  # js/script.js (carte), css/, icone/*.png, images/
+│
+├── agriculture/                 # suivi des champs et alertes
+│   ├── models.py                # Champ, CropCalendar, FieldIndicatorSnapshot, AlertRule,
+│   │                            # FarmerAlert, RiskAssessment, AlertDelivery (+ 3 couches non gérées)
+│   ├── views.py                 # ~25 endpoints JSON
+│   ├── gee_utils.py             # tous les calculs Earth Engine (NDVI, SPI, VHI, ERA5, GPM…)
+│   ├── chirps_gefs.py           # prévision de pluie CHIRPS-GEFS (rasterio)
+│   ├── weather_forecast.py      # prévision Open-Meteo (sécheresse / inondation à venir)
+│   ├── indicator_collector.py   # 1. collecte → FieldIndicatorSnapshot
+│   ├── risk_engine.py           # 2. score de risque 0-100
+│   ├── alert_services.py        # 3. création des alertes si le niveau change
+│   ├── notification_services.py # 4. e-mails HTML
+│   ├── management/commands/evaluate_field_alerts.py  # orchestre 1 → 4
+│   ├── migrations/0008_default_alert_rules.py        # règles d'alerte par défaut
+│   ├── templates/agriculture/index.html
+│   └── static/js/main.js
+│
+├── authentication/              # inscription / connexion par jeton
+│   ├── models.py                # UserProfile (secteur, WhatsApp, alertes oui/non)
+│   ├── serializers.py, views.py, urls.py
+│
+├── cartotheque/                 # bibliothèque de cartes thématiques
+│   ├── models.py                # DomaineCarte, CarteTheematique
+│   ├── views.py                 # ViewSets DRF
+│   ├── api_urls.py              # router DRF
+│   └── fixtures/initial_domaines.json
+│
+├── media/                       # fichiers envoyés (photos de marchés, images de cartes)
+└── docs/                        # cette documentation</code></pre>
+<hr>
+<h2 id="doc3-3-configuration-settings">3. Configuration (settings)</h2>
+<p>Fichier : <code>horison/settings.py</code>.</p>
+<h3 id="doc3-chargement">Chargement</h3>
+<ol>
+<li><code>BASE_DIR</code> = racine du dépôt.</li>
+<li><code>load_dotenv(BASE_DIR / '.env')</code> : les variables du fichier <code>.env</code> sont
+   chargées <strong>sans écraser</strong> celles déjà définies dans l'environnement.</li>
+<li>Fonctions utilitaires <code>env_bool()</code> et <code>env_list()</code>.</li>
+</ol>
+<h3 id="doc3-gdal--geos--proj">GDAL / GEOS / PROJ</h3>
+<ul>
+<li><strong>Windows</strong> (<code>os.name == 'nt'</code>) : le code cherche la roue Python GDAL dans
+  <code>sys.prefix/Lib/site-packages/osgeo</code> (le venv courant) et, si les fichiers
+  existent, définit <code>GDAL_LIBRARY_PATH</code>, <code>GEOS_LIBRARY_PATH</code>, <code>PROJ_LIB</code>,
+  <code>GDAL_DATA</code> et ajoute <code>osgeo</code> au <code>PATH</code>.</li>
+<li><strong>Linux</strong> : rien n'est forcé ; GeoDjango trouve <code>libgdal</code> / <code>libgeos_c</code>
+  installés par le système.</li>
+<li><code>PROJ_NETWORK=OFF</code> : PROJ n'essaie pas de télécharger de grilles.</li>
+</ul>
+<h3 id="doc3-paramètres-lus-depuis-lenvironnement">Paramètres lus depuis l'environnement</h3>
+<p>Voir le tableau complet dans <a href="#doc2-5-configurer-le-fichier-env">2-INSTALLER-ET-LANCER.md › étape 5</a>.</p>
+<h3 id="doc3-autres-réglages-notables">Autres réglages notables</h3>
+<table>
+<thead>
+<tr>
+<th>Réglage</th>
+<th>Valeur</th>
+<th>Remarque</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>REST_FRAMEWORK</code></td>
+<td><code>TokenAuthentication</code>, <code>AllowAny</code></td>
+<td>Chaque vue restreint elle-même si besoin</td>
+</tr>
+<tr>
+<td><code>CORS_ALLOW_ALL_ORIGINS</code></td>
+<td><code>True</code></td>
+<td>Pratique en développement, <strong>à restreindre en production</strong> (<code>CORS_ALLOWED_ORIGINS</code>)</td>
+</tr>
+<tr>
+<td><code>CORS_ALLOW_CREDENTIALS</code></td>
+<td><code>True</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>X_FRAME_OPTIONS</code></td>
+<td><code>ALLOW-FROM http://localhost:3001</code></td>
+<td>Directive obsolète, ignorée par les navigateurs récents</td>
+</tr>
+<tr>
+<td><code>STATIC_ROOT</code> / <code>MEDIA_ROOT</code></td>
+<td><code>staticfiles/</code> / <code>media/</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>LANGUAGE_CODE</code> / <code>TIME_ZONE</code></td>
+<td><code>en-us</code> / <code>UTC</code></td>
+<td></td>
+</tr>
+<tr>
+<td><code>NDVI_ALERT_THRESHOLD</code></td>
+<td><code>0.35</code></td>
+<td>Seuil historique de stress hydrique</td>
+</tr>
+<tr>
+<td><code>DEFAULT_AUTO_FIELD</code></td>
+<td><code>BigAutoField</code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="doc3-4-base-de-données">4. Base de données</h2>
+<p>Base PostgreSQL <strong><code>Ecommune</code></strong> avec l'extension <strong>PostGIS</strong>. Toutes les
+géométries sont en <strong>WGS 84 (EPSG:4326)</strong>.</p>
+<h3 id="doc3-41-tables-gérées-par-les-migrations">4.1 Tables gérées par les migrations</h3>
+<div class="mermaid" data-processed="true"><svg aria-roledescription="flowchart-v2" role="graphics-document document" viewBox="-8 -8 1121.84375 366.703125" style="max-width: 1121.84375px;" xmlns="http://www.w3.org/2000/svg" width="100%" id="diagramme-3"><style>#diagramme-3{font-family:Inter,Segoe UI,sans-serif;font-size:13px;fill:#1c2420;}#diagramme-3 .error-icon{fill:#f7faf8;}#diagramme-3 .error-text{fill:#080507;stroke:#080507;}#diagramme-3 .edge-thickness-normal{stroke-width:2px;}#diagramme-3 .edge-thickness-thick{stroke-width:3.5px;}#diagramme-3 .edge-pattern-solid{stroke-dasharray:0;}#diagramme-3 .edge-pattern-dashed{stroke-dasharray:3;}#diagramme-3 .edge-pattern-dotted{stroke-dasharray:2;}#diagramme-3 .marker{fill:#5b6b62;stroke:#5b6b62;}#diagramme-3 .marker.cross{stroke:#5b6b62;}#diagramme-3 svg{font-family:Inter,Segoe UI,sans-serif;font-size:13px;}#diagramme-3 .label{font-family:Inter,Segoe UI,sans-serif;color:#1c2420;}#diagramme-3 .cluster-label text{fill:#080507;}#diagramme-3 .cluster-label span,#diagramme-3 p{color:#080507;}#diagramme-3 .label text,#diagramme-3 span,#diagramme-3 p{fill:#1c2420;color:#1c2420;}#diagramme-3 .node rect,#diagramme-3 .node circle,#diagramme-3 .node ellipse,#diagramme-3 .node polygon,#diagramme-3 .node path{fill:#ecf6ef;stroke:#15803d;stroke-width:1px;}#diagramme-3 .flowchart-label text{text-anchor:middle;}#diagramme-3 .node .katex path{fill:#000;stroke:#000;stroke-width:1px;}#diagramme-3 .node .label{text-align:center;}#diagramme-3 .node.clickable{cursor:pointer;}#diagramme-3 .arrowheadPath{fill:#0b0b0b;}#diagramme-3 .edgePath .path{stroke:#5b6b62;stroke-width:2.0px;}#diagramme-3 .flowchart-link{stroke:#5b6b62;fill:none;}#diagramme-3 .edgeLabel{background-color:#fff8e6;text-align:center;}#diagramme-3 .edgeLabel rect{opacity:0.5;background-color:#fff8e6;fill:#fff8e6;}#diagramme-3 .labelBkg{background-color:rgba(255, 248, 230, 0.5);}#diagramme-3 .cluster rect{fill:#f7faf8;stroke:hsl(140, 0%, 87.4509803922%);stroke-width:1px;}#diagramme-3 .cluster text{fill:#080507;}#diagramme-3 .cluster span,#diagramme-3 p{color:#080507;}#diagramme-3 div.mermaidTooltip{position:absolute;text-align:center;max-width:200px;padding:2px;font-family:Inter,Segoe UI,sans-serif;font-size:12px;background:#f7faf8;border:1px solid hsl(140, 0%, 87.4509803922%);border-radius:2px;pointer-events:none;z-index:100;}#diagramme-3 .flowchartTitleText{text-anchor:middle;font-size:18px;fill:#1c2420;}#diagramme-3 :root{--mermaid-font-family:Inter,Segoe UI,sans-serif;}</style><g><marker orient="auto" markerHeight="12" markerWidth="12" markerUnits="userSpaceOnUse" refY="5" refX="6" viewBox="0 0 10 10" class="marker flowchart" id="diagramme-3_flowchart-pointEnd"><path style="stroke-width: 1; stroke-dasharray: 1, 0;" class="arrowMarkerPath" d="M 0 0 L 10 5 L 0 10 z"></path></marker><marker orient="auto" markerHeight="12" markerWidth="12" markerUnits="userSpaceOnUse" refY="5" refX="4.5" viewBox="0 0 10 10" class="marker flowchart" id="diagramme-3_flowchart-pointStart"><path style="stroke-width: 1; stroke-dasharray: 1, 0;" class="arrowMarkerPath" d="M 0 5 L 10 10 L 10 0 z"></path></marker><marker orient="auto" markerHeight="11" markerWidth="11" markerUnits="userSpaceOnUse" refY="5" refX="11" viewBox="0 0 10 10" class="marker flowchart" id="diagramme-3_flowchart-circleEnd"><circle style="stroke-width: 1; stroke-dasharray: 1, 0;" class="arrowMarkerPath" r="5" cy="5" cx="5"></circle></marker><marker orient="auto" markerHeight="11" markerWidth="11" markerUnits="userSpaceOnUse" refY="5" refX="-1" viewBox="0 0 10 10" class="marker flowchart" id="diagramme-3_flowchart-circleStart"><circle style="stroke-width: 1; stroke-dasharray: 1, 0;" class="arrowMarkerPath" r="5" cy="5" cx="5"></circle></marker><marker orient="auto" markerHeight="11" markerWidth="11" markerUnits="userSpaceOnUse" refY="5.2" refX="12" viewBox="0 0 11 11" class="marker cross flowchart" id="diagramme-3_flowchart-crossEnd"><path style="stroke-width: 2; stroke-dasharray: 1, 0;" class="arrowMarkerPath" d="M 1,1 l 9,9 M 10,1 l -9,9"></path></marker><marker orient="auto" markerHeight="11" markerWidth="11" markerUnits="userSpaceOnUse" refY="5.2" refX="-1" viewBox="0 0 11 11" class="marker cross flowchart" id="diagramme-3_flowchart-crossStart"><path style="stroke-width: 2; stroke-dasharray: 1, 0;" class="arrowMarkerPath" d="M 1,1 l 9,9 M 10,1 l -9,9"></path></marker><g class="root"><g class="clusters"></g><g class="edgePaths"><path marker-end="url(#diagramme-3_flowchart-pointEnd)" style="fill:none;" class="edge-thickness-normal edge-pattern-solid flowchart-link LS-User LE-UserProfile" id="L-User-UserProfile-0" d="M73.445,86.682L89.26,75.163C105.076,63.645,136.706,40.608,166.252,29.089C195.798,17.57,223.261,17.57,236.992,17.57L250.723,17.57"></path><path marker-end="url(#diagramme-3_flowchart-pointEnd)" style="fill:none;" class="edge-thickness-normal edge-pattern-solid flowchart-link LS-User LE-Champ" id="L-User-Champ-0" d="M73.445,102.711L89.26,102.711C105.076,102.711,136.706,102.711,168.322,102.711C199.939,102.711,231.542,102.711,247.344,102.711L263.145,102.711"></path><path marker-end="url(#diagramme-3_flowchart-pointEnd)" style="fill:none;" class="edge-thickness-normal edge-pattern-solid flowchart-link LS-Champ LE-FieldIndicatorSnapshot" id="L-Champ-FieldIndicatorSnapshot-0" d="M324.856,85.141L342.155,73.879C359.454,62.617,394.051,40.094,421.585,28.832C449.119,17.57,469.589,17.57,479.824,17.57L490.059,17.57"></path><path marker-end="url(#diagramme-3_flowchart-pointEnd)" style="fill:none;" class="edge-thickness-normal edge-pattern-solid flowchart-link LS-Champ LE-RiskAssessment" id="L-Champ-RiskAssessment-0" d="M327.289,102.711L344.182,102.711C361.076,102.711,394.862,102.711,425.401,102.711C455.939,102.711,483.23,102.711,496.875,102.711L510.52,102.711"></path><path marker-end="url(#diagramme-3_flowchart-pointEnd)" style="fill:none;" class="edge-thickness-normal edge-pattern-solid flowchart-link LS-Champ LE-FarmerAlert" id="L-Champ-FarmerAlert-0" d="M313.416,120.281L332.622,141.983C351.827,163.685,390.238,207.089,433.59,228.79C476.943,250.492,525.237,250.492,578.341,250.492C631.445,250.492,689.359,250.492,733.367,248.731C777.376,246.969,807.478,243.446,822.529,241.685L837.58,239.923"></path><path marker-end="url(#diagramme-3_flowchart-pointEnd)" style="fill:none;" class="edge-thickness-normal edge-pattern-solid flowchart-link LS-User LE-FarmerAlert" id="L-User-FarmerAlert-0" d="M62.986,120.281L80.544,146.995C98.103,173.708,133.219,227.135,172.366,253.849C211.513,280.563,254.69,280.563,298.076,280.563C341.461,280.563,385.055,280.563,430.999,280.563C476.943,280.563,525.237,280.563,578.341,280.563C631.445,280.563,689.359,280.563,733.407,275.535C777.454,270.508,807.635,260.454,822.725,255.427L837.815,250.4"></path><path marker-end="url(#diagramme-3_flowchart-pointEnd)" style="fill:none;" class="edge-thickness-normal edge-pattern-solid flowchart-link LS-AlertRule LE-FarmerAlert" id="L-AlertRule-FarmerAlert-0" d="M608.945,187.852L632,187.852C655.055,187.852,701.164,187.852,739.309,192.879C777.454,197.906,807.635,207.96,822.725,212.987L837.815,218.014"></path><path marker-end="url(#diagramme-3_flowchart-pointEnd)" style="fill:none;" class="edge-thickness-normal edge-pattern-solid flowchart-link LS-RiskAssessment LE-FarmerAlert" id="L-RiskAssessment-FarmerAlert-0" d="M631.242,102.711L650.581,102.711C669.919,102.711,708.596,102.711,747.385,121.092C786.175,139.473,825.076,176.235,844.526,194.616L863.977,212.996"></path><path marker-end="url(#diagramme-3_flowchart-pointEnd)" style="fill:none;" class="edge-thickness-normal edge-pattern-solid flowchart-link LS-FarmerAlert LE-AlertDelivery" id="L-FarmerAlert-AlertDelivery-0" d="M930,234.207L936.792,234.207C943.583,234.207,957.167,234.207,969.867,234.207C982.567,234.207,994.383,234.207,1000.292,234.207L1006.2,234.207"></path><path marker-end="url(#diagramme-3_flowchart-pointEnd)" style="fill:none;" class="edge-thickness-normal edge-pattern-solid flowchart-link LS-DomaineCarte LE-CarteTheematique" id="L-DomaineCarte-CarteTheematique-0" d="M102.875,333.133L113.785,333.133C124.695,333.133,146.516,333.133,167.453,333.133C188.39,333.133,208.443,333.133,218.47,333.133L228.497,333.133"></path></g><g class="edgeLabels"><g transform="translate(168.3359375, 17.5703125)" class="edgeLabel"><g transform="translate(-21.671875, -10.0703125)" class="label"><foreignObject height="20.140625" width="43.34375"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="edgeLabel">1 → 0..1</span></div></foreignObject></g></g><g transform="translate(168.3359375, 102.7109375)" class="edgeLabel"><g transform="translate(-40.4609375, -10.0703125)" class="label"><foreignObject height="20.140625" width="80.921875"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="edgeLabel">1 → n · owner</span></div></foreignObject></g></g><g transform="translate(428.6484375, 17.5703125)" class="edgeLabel"><g transform="translate(-15.75, -10.0703125)" class="label"><foreignObject height="20.140625" width="31.5"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="edgeLabel">1 → n</span></div></foreignObject></g></g><g transform="translate(428.6484375, 102.7109375)" class="edgeLabel"><g transform="translate(-15.75, -10.0703125)" class="label"><foreignObject height="20.140625" width="31.5"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="edgeLabel">1 → n</span></div></foreignObject></g></g><g transform="translate(573.53125, 250.4921875)" class="edgeLabel"><g transform="translate(-15.75, -10.0703125)" class="label"><foreignObject height="20.140625" width="31.5"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="edgeLabel">1 → n</span></div></foreignObject></g></g><g transform="translate(428.6484375, 280.5625)" class="edgeLabel"><g transform="translate(-41.7109375, -10.0703125)" class="label"><foreignObject height="20.140625" width="83.421875"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="edgeLabel">1 → n · farmer</span></div></foreignObject></g></g><g transform="translate(747.2734375, 187.8515625)" class="edgeLabel"><g transform="translate(-22.875, -10.0703125)" class="label"><foreignObject height="20.140625" width="45.75"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="edgeLabel">0..1 → n</span></div></foreignObject></g></g><g transform="translate(747.2734375, 102.7109375)" class="edgeLabel"><g transform="translate(-70.5703125, -10.0703125)" class="label"><foreignObject height="20.140625" width="141.140625"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="edgeLabel">n ↔ n · triggered_alerts</span></div></foreignObject></g></g><g transform="translate(970.75, 234.20703125)" class="edgeLabel"><g transform="translate(-15.75, -10.0703125)" class="label"><foreignObject height="20.140625" width="31.5"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="edgeLabel">1 → n</span></div></foreignObject></g></g><g transform="translate(168.3359375, 333.1328125)" class="edgeLabel"><g transform="translate(-15.75, -10.0703125)" class="label"><foreignObject height="20.140625" width="31.5"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="edgeLabel">1 → n</span></div></foreignObject></g></g></g><g class="nodes"><g transform="translate(51.4375, 102.7109375)" data-id="User" data-node="true" id="flowchart-User-41" class="node default default flowchart-label"><rect height="35.140625" width="44.015625" y="-17.5703125" x="-22.0078125" ry="0" rx="0" style="" class="basic label-container"></rect><g transform="translate(-14.5078125, -10.0703125)" style="" class="label"><rect></rect><foreignObject height="20.140625" width="29.015625"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="nodeLabel">User</span></div></foreignObject></g></g><g transform="translate(297.8671875, 17.5703125)" data-id="UserProfile" data-node="true" id="flowchart-UserProfile-42" class="node default default flowchart-label"><rect height="35.140625" width="83.6875" y="-17.5703125" x="-41.84375" ry="0" rx="0" style="" class="basic label-container"></rect><g transform="translate(-34.34375, -10.0703125)" style="" class="label"><rect></rect><foreignObject height="20.140625" width="68.6875"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="nodeLabel">UserProfile</span></div></foreignObject></g></g><g transform="translate(297.8671875, 102.7109375)" data-id="Champ" data-node="true" id="flowchart-Champ-44" class="node default default flowchart-label"><rect height="35.140625" width="58.84375" y="-17.5703125" x="-29.421875" ry="0" rx="0" style="" class="basic label-container"></rect><g transform="translate(-21.921875, -10.0703125)" style="" class="label"><rect></rect><foreignObject height="20.140625" width="43.84375"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="nodeLabel">Champ</span></div></foreignObject></g></g><g transform="translate(573.53125, 17.5703125)" data-id="FieldIndicatorSnapshot" data-node="true" id="flowchart-FieldIndicatorSnapshot-46" class="node default default flowchart-label"><rect height="35.140625" width="156.34375" y="-17.5703125" x="-78.171875" ry="0" rx="0" style="" class="basic label-container"></rect><g transform="translate(-70.671875, -10.0703125)" style="" class="label"><rect></rect><foreignObject height="20.140625" width="141.34375"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="nodeLabel">FieldIndicatorSnapshot</span></div></foreignObject></g></g><g transform="translate(573.53125, 102.7109375)" data-id="RiskAssessment" data-node="true" id="flowchart-RiskAssessment-48" class="node default default flowchart-label"><rect height="35.140625" width="115.421875" y="-17.5703125" x="-57.7109375" ry="0" rx="0" style="" class="basic label-container"></rect><g transform="translate(-50.2109375, -10.0703125)" style="" class="label"><rect></rect><foreignObject height="20.140625" width="100.421875"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="nodeLabel">RiskAssessment</span></div></foreignObject></g></g><g transform="translate(886.421875, 234.20703125)" data-id="FarmerAlert" data-node="true" id="flowchart-FarmerAlert-50" class="node default default flowchart-label"><rect height="35.140625" width="87.15625" y="-17.5703125" x="-43.578125" ry="0" rx="0" style="" class="basic label-container"></rect><g transform="translate(-36.078125, -10.0703125)" style="" class="label"><rect></rect><foreignObject height="20.140625" width="72.15625"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="nodeLabel">FarmerAlert</span></div></foreignObject></g></g><g transform="translate(573.53125, 187.8515625)" data-id="AlertRule" data-node="true" id="flowchart-AlertRule-53" class="node default default flowchart-label"><rect height="35.140625" width="70.828125" y="-17.5703125" x="-35.4140625" ry="0" rx="0" style="" class="basic label-container"></rect><g transform="translate(-27.9140625, -10.0703125)" style="" class="label"><rect></rect><foreignObject height="20.140625" width="55.828125"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="nodeLabel">AlertRule</span></div></foreignObject></g></g><g transform="translate(1058.671875, 234.20703125)" data-id="AlertDelivery" data-node="true" id="flowchart-AlertDelivery-58" class="node default default flowchart-label"><rect height="35.140625" width="94.34375" y="-17.5703125" x="-47.171875" ry="0" rx="0" style="" class="basic label-container"></rect><g transform="translate(-39.671875, -10.0703125)" style="" class="label"><rect></rect><foreignObject height="20.140625" width="79.34375"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="nodeLabel">AlertDelivery</span></div></foreignObject></g></g><g transform="translate(51.4375, 333.1328125)" data-id="DomaineCarte" data-node="true" id="flowchart-DomaineCarte-59" class="node default default flowchart-label"><rect height="35.140625" width="102.875" y="-17.5703125" x="-51.4375" ry="0" rx="0" style="" class="basic label-container"></rect><g transform="translate(-43.9375, -10.0703125)" style="" class="label"><rect></rect><foreignObject height="20.140625" width="87.875"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="nodeLabel">DomaineCarte</span></div></foreignObject></g></g><g transform="translate(297.8671875, 333.1328125)" data-id="CarteTheematique" data-node="true" id="flowchart-CarteTheematique-60" class="node default default flowchart-label"><rect height="35.140625" width="128.140625" y="-17.5703125" x="-64.0703125" ry="0" rx="0" style="" class="basic label-container"></rect><g transform="translate(-56.5703125, -10.0703125)" style="" class="label"><rect></rect><foreignObject height="20.140625" width="113.140625"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="nodeLabel">CarteTheematique</span></div></foreignObject></g></g></g></g></g></svg></div>
+<p><em>Lecture : « Champ 1 → n FieldIndicatorSnapshot » = un champ possède
+plusieurs mesures d'indicateurs.</em></p>
+<table>
+<thead>
+<tr>
+<th>Modèle</th>
+<th>Table</th>
+<th>Rôle</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>authentication.UserProfile</code></td>
+<td><code>authentication_userprofile</code></td>
+<td>Secteur d'activité, WhatsApp, accepte les alertes</td>
+</tr>
+<tr>
+<td><code>agriculture.Champ</code></td>
+<td><code>agriculture_champ</code></td>
+<td>Parcelle : nom, propriétaire, culture, date de semis, <code>geom</code> (GeometryField 4326), <code>owner</code></td>
+</tr>
+<tr>
+<td><code>agriculture.CropCalendar</code></td>
+<td><code>agriculture_crop_calendar</code></td>
+<td>Culture, variété, type (céréale, légume, tubercule, légumineuse), durée du cycle, mois de semis / sarclage / récolte</td>
+</tr>
+<tr>
+<td><code>agriculture.FieldIndicatorSnapshot</code></td>
+<td><code>agriculture_fieldindicatorsnapshot</code></td>
+<td>Une valeur d'indicateur pour un champ à une date (+ référence, unité, source, métadonnées JSON)</td>
+</tr>
+<tr>
+<td><code>agriculture.AlertRule</code></td>
+<td><code>agriculture_alertrule</code></td>
+<td>Règle : indicateur, opérateur (<code>LT</code>, <code>LTE</code>, <code>GT</code>, <code>GTE</code>, <code>EQ</code>, <code>CHANGE_PCT</code>), seuil, sévérité, gabarits de message, délai anti-répétition</td>
+</tr>
+<tr>
+<td><code>agriculture.RiskAssessment</code></td>
+<td><code>agriculture_riskassessment</code></td>
+<td>Score 0-100, niveau, sous-scores JSON, instantané des indicateurs</td>
+</tr>
+<tr>
+<td><code>agriculture.FarmerAlert</code></td>
+<td><code>agriculture_farmeralert</code></td>
+<td>Alerte émise : type, niveau, score, indicateurs contributeurs, message, recommandation, statut (<code>OPEN</code>, <code>ACKNOWLEDGED</code>, <code>RESOLVED</code>, <code>EXPIRED</code>)</td>
+</tr>
+<tr>
+<td><code>agriculture.AlertDelivery</code></td>
+<td><code>agriculture_alertdelivery</code></td>
+<td>Envoi d'une alerte : canal (<code>EMAIL</code>, <code>WHATSAPP</code>), destinataire, statut (<code>PENDING</code>, <code>SENT</code>, <code>FAILED</code>, <code>SKIPPED</code>), tentatives</td>
+</tr>
+<tr>
+<td><code>cartotheque.DomaineCarte</code></td>
+<td><code>cartotheque_domainecarte</code></td>
+<td>Domaine thématique (icône Lucide, couleur, ordre)</td>
+</tr>
+<tr>
+<td><code>cartotheque.CarteTheematique</code></td>
+<td><code>cartotheque_cartetheematique</code></td>
+<td>Carte : image, vignette, GeoJSON, centre / zoom, fond, statut (<code>brouillon</code>, <code>publie</code>…), échelle, format, prix</td>
+</tr>
+</tbody>
+</table>
+<p>Plus les tables Django standard (<code>auth_*</code>, <code>django_*</code>, <code>authtoken_token</code>).</p>
+<h3 id="doc3-42-tables-non-gérées-managed--false">4.2 Tables NON gérées (<code>managed = False</code>)</h3>
+<p>Ces modèles décrivent des tables <strong>créées hors de Django</strong> (import de
+shapefiles avec QGIS ou <code>shp2pgsql</code>). <code>migrate</code> ne les crée pas.</p>
+<table>
+<thead>
+<tr>
+<th>Modèle</th>
+<th>Table</th>
+<th>Géométrie</th>
+<th>Champs principaux</th>
+<th>Créée par <code>import_blitta2</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>geoportail.Commune</code></td>
+<td><code>bl2</code></td>
+<td>MultiPolygon</td>
+<td>commune, code_commu, region, prefecture</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>geoportail.Cantons</code></td>
+<td><code>cant_bli2</code></td>
+<td>MultiPolygon</td>
+<td>gid (PK), canton, code_canto</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>geoportail.routes</code></td>
+<td><code>routeb2</code></td>
+<td>MultiLineString</td>
+<td>route_type, route_clas, route_reco, route_nom</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>geoportail.marche</code></td>
+<td><code>marches</code></td>
+<td>Point</td>
+<td>marche_nom, jour, photo</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>geoportail.lycee</code> / <code>college</code> / <code>jardin</code></td>
+<td><code>lyc2</code> / <code>collegeb2</code> / <code>jardb2</code></td>
+<td>Point</td>
+<td>etablissem, etab_adr, ouverture, etabliss_1 (statut), inspection, ministere</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>geoportail.pea</code></td>
+<td><code>pea</code></td>
+<td>Point</td>
+<td>forage_nom, forage_typ, batiment_n</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>geoportail.bornefontaine</code></td>
+<td><code>bornefontaines</code></td>
+<td>Point</td>
+<td>borne_font</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>geoportail.chateau</code></td>
+<td><code>chatea</code></td>
+<td>Point</td>
+<td>chateau_no, organisme</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>geoportail.hopitale</code></td>
+<td><code>formation_s</code></td>
+<td>Point</td>
+<td>nom_fs, secteur, services_p</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>geoportail.terrain</code></td>
+<td><code>stade_terrainbl2</code></td>
+<td>MultiPolygon</td>
+<td>terrain, terrain_sp</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>geoportail.coperative</code></td>
+<td><code>cooperativebl2</code></td>
+<td>Point</td>
+<td>cooperativ, cooperat_1</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>geoportail.magazinbl2</code></td>
+<td><code>magazin_intrantbl2</code></td>
+<td>Point</td>
+<td>etab_nom, organisme</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>agriculture.Region</code></td>
+<td><code>region</code></td>
+<td>MultiPolygon</td>
+<td>region</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><code>agriculture.Prefecture</code></td>
+<td><code>couche_prefecture_utm</code></td>
+<td>MultiPolygon</td>
+<td>prefecture</td>
+<td>❌</td>
+</tr>
+<tr>
+<td><code>agriculture.Commune</code></td>
+<td><code>communes_togo_utm</code></td>
+<td>MultiPolygon</td>
+<td>commune, prefecture</td>
+<td>❌</td>
+</tr>
+</tbody>
+</table>
+<p>Toutes les couches ponctuelles du géoportail ont en plus <code>canton_nom</code> et, sauf
+exception, <code>nom_locali</code> (localité).</p>
+<blockquote>
+<p>Les valeurs de <code>routeb2.route_type</code> sont <strong>utilisées par le style</strong> de la
+carte : seules <code>Route nationale revêtue</code> et <code>Piste rurale</code> sont dessinées
+(comparaison insensible à la casse et aux accents, fonction <code>styleRoute</code>
+dans <code>geoportail/static/js/script.js</code>).</p>
+</blockquote>
+<hr>
+<h2 id="doc3-5-api-et-routes">5. API et routes</h2>
+<p>Routes racine (<code>horison/urls.py</code>) : <code>admin/</code>, <code>auth/</code>, <code>geoportail/</code>,
+<code>agriculture/</code>, <code>api/cartotheque/</code>, plus le service des fichiers <code>media/</code> en
+mode <code>DEBUG</code>.</p>
+<h3 id="doc3-51-authentification--auth">5.1 Authentification — <code>/auth/</code></h3>
+<p>Authentification par <strong>jeton</strong> : envoyer l'en-tête
+<code>Authorization: Token &lt;clé&gt;</code> (les vues agriculture acceptent aussi <code>Bearer</code>).</p>
+<table>
+<thead>
+<tr>
+<th>Méthode</th>
+<th>Route</th>
+<th>Accès</th>
+<th>Corps / réponse</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>POST</td>
+<td><code>/auth/register/</code></td>
+<td>public</td>
+<td><code>username, email, first_name, last_name, password, password_confirm, secteur_activite?, whatsapp?, recevoir_alertes?</code> → <code>{token, user}</code></td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/auth/login/</code></td>
+<td>public</td>
+<td><code>username</code> (ou identifiant), <code>password</code> → <code>{token, user}</code></td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/auth/me/</code></td>
+<td>connecté</td>
+<td>profil de l'utilisateur</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/auth/logout/</code></td>
+<td>connecté</td>
+<td>supprime le jeton</td>
+</tr>
+</tbody>
+</table>
+<h3 id="doc3-52-géoportail--geoportail">5.2 Géoportail — <code>/geoportail/</code></h3>
+<table>
+<thead>
+<tr>
+<th>Méthode</th>
+<th>Route</th>
+<th>Réponse</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GET</td>
+<td><code>/geoportail/</code></td>
+<td>page HTML de la carte</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/geoportail/geojson/commune/</code></td>
+<td>FeatureCollection <code>bl2</code></td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/geoportail/geojson/cantons/</code></td>
+<td>FeatureCollection <code>cant_bli2</code></td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/geoportail/geojson/routes/</code></td>
+<td><code>routeb2</code></td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/geoportail/geojson/lycee/</code>, <code>college/</code>, <code>jardin/</code></td>
+<td>établissements scolaires</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/geoportail/geojson/Point_eau/</code>, <code>bornefontaine/</code>, <code>chateau/</code></td>
+<td>eau</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/geoportail/geojson/Marches/</code></td>
+<td>marchés</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/geoportail/geojson/hopitale/</code></td>
+<td>formations sanitaires</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/geoportail/api/layers/</code></td>
+<td>toutes les couches en un seul appel</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/geoportail/api/search/?q=&lt;texte&gt;&amp;layer=&lt;couche&gt;</code></td>
+<td>recherche plein texte (15 résultats max par couche)</td>
+</tr>
+</tbody>
+</table>
+<p>Les vues <code>terrain_geojson</code>, <code>cooperative_geojson</code> et <code>magazin_geojson</code> existent
+dans <code>views.py</code> mais <strong>ne sont pas routées</strong> dans <code>urls.py</code>.</p>
+<h3 id="doc3-53-agriculture--agriculture">5.3 Agriculture — <code>/agriculture/</code></h3>
+<p>Sauf mention contraire, les POST attendent un corps JSON. 🔒 = jeton requis ;
+l'utilisateur ne voit que <strong>ses</strong> champs (ou tous s'il est <code>staff</code>).</p>
+<table>
+<thead>
+<tr>
+<th>Méthode</th>
+<th>Route</th>
+<th>🔒</th>
+<th>Rôle</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GET</td>
+<td><code>/agriculture/</code></td>
+<td></td>
+<td>page HTML</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>api/regions/</code>, <code>api/prefectures/</code>, <code>api/communes/</code></td>
+<td></td>
+<td>limites administratives (tables non gérées)</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>api/ndvi-tiles/</code></td>
+<td></td>
+<td>URL de tuiles NDVI Earth Engine</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>api/ndvi-timeseries/</code></td>
+<td></td>
+<td>série NDVI mensuelle d'une zone (<code>zone_type</code>, <code>zone_id</code>, <code>years</code>)</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>api/drought-indices/</code></td>
+<td></td>
+<td>VHI/VCI/TCI d'une zone (<code>zone_type</code>, <code>zone_id</code>, <code>years</code>, <code>index_type</code>)</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>api/champs/geojson/</code></td>
+<td>🔒</td>
+<td>champs de l'utilisateur</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>api/champs/create/</code></td>
+<td>🔒</td>
+<td>créer un champ (<code>nom, date_semi, geom, proprietaire, type_culture</code>)</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>api/field-ndvi/</code></td>
+<td>🔒</td>
+<td>historique d'un indice (<code>champ_id, index_type</code>)</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>api/field-indices-comparison/</code></td>
+<td>🔒</td>
+<td>plusieurs indices (<code>champ_id, indices[]</code>)</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>api/field-climate/</code></td>
+<td>🔒</td>
+<td>pluie CHIRPS + température ERA5 (<code>champ_id, start_date</code>)</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>api/field-climate-risk/</code></td>
+<td>🔒</td>
+<td>risque climatique (<code>champ_id, reference_date</code>)</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>api/field-realtime-status/</code></td>
+<td>🔒</td>
+<td>situation et prévision à 15 j : CHIRPS-GEFS, tendance CHIRPS, prévision Open-Meteo, SPI prévisionnel, alerte de synthèse</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>api/field-chirps-gefs/</code></td>
+<td>🔒</td>
+<td>prévision CHIRPS-GEFS (<code>forecast_days</code>)</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>api/field-forecast-spi/</code></td>
+<td>🔒</td>
+<td>SPI prévisionnel (<code>years_history</code>)</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>api/field-drought-indices/</code></td>
+<td>🔒</td>
+<td>VHI/VCI/TCI d'un champ</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>api/alerts/?status=&amp;champ_id=&amp;limit=</code></td>
+<td>🔒</td>
+<td>alertes de l'utilisateur</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>api/champ-risk/&lt;id&gt;/</code></td>
+<td>🔒</td>
+<td>dernière évaluation de risque</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>api/evaluate-champ/</code></td>
+<td>🔒</td>
+<td>évaluer un champ maintenant (<code>champ_id, collect, dry_run</code>)</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>api/crop-calendar/</code></td>
+<td></td>
+<td>calendrier cultural</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>api/crop-calendar/add/</code>, <code>update/&lt;pk&gt;/</code></td>
+<td>⚠️ aucun</td>
+<td>créer / modifier</td>
+</tr>
+<tr>
+<td>POST, DELETE</td>
+<td><code>api/crop-calendar/delete/&lt;pk&gt;/</code></td>
+<td>⚠️ aucun</td>
+<td>supprimer</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>api/crop-calendar/simulate/</code></td>
+<td></td>
+<td>stade de croissance (<code>calendar_id, day</code>)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="doc3-54-cartothèque--apicartotheque-router-drf">5.4 Cartothèque — <code>/api/cartotheque/</code> (router DRF)</h3>
+<table>
+<thead>
+<tr>
+<th>Route</th>
+<th>Accès</th>
+<th>Détails</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>domaines/</code></td>
+<td>lecture seule, public</td>
+<td>domaines actifs ; <code>?search=</code>, <code>?ordering=ordre</code></td>
+</tr>
+<tr>
+<td><code>cartes/</code></td>
+<td>lecture publique ; écriture selon les <strong>permissions Django</strong> (<code>add/change/delete_cartetheematique</code>)</td>
+<td><code>?statut=publie</code> (défaut) | <code>brouillon</code> | <code>tous</code>, <code>?domaine=&lt;id&gt;</code>, <code>?domaine_slug=</code>, <code>?search=</code>, <code>?ordering=</code></td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="doc3-6-système-dalertes-agricoles">6. Système d'alertes agricoles</h2>
+<h3 id="doc3-61-chaîne-de-traitement">6.1 Chaîne de traitement</h3>
+<p><code>python manage.py evaluate_field_alerts</code> enchaîne quatre modules :</p>
+<div class="mermaid" data-processed="true"><svg aria-roledescription="sequence" role="graphics-document document" viewBox="-50 -10 1412 731" style="max-width: 1412px;" xmlns="http://www.w3.org/2000/svg" width="100%" id="diagramme-4"><g><rect class="actor actor-bottom" ry="3" rx="3" name="Notif" height="65" width="176" stroke="#666" fill="#eaeaea" y="645" x="1136"></rect><text style="text-anchor: middle; font-size: 16px; font-weight: 400; font-family: Inter, &quot;Segoe UI&quot;, sans-serif;" class="actor" alignment-baseline="central" dominant-baseline="central" y="677.5" x="1224"><tspan dy="0" x="1224">notification_services</tspan></text></g><g><rect class="actor actor-bottom" ry="3" rx="3" name="Al" height="65" width="150" stroke="#666" fill="#eaeaea" y="645" x="936"></rect><text style="text-anchor: middle; font-size: 16px; font-weight: 400; font-family: Inter, &quot;Segoe UI&quot;, sans-serif;" class="actor" alignment-baseline="central" dominant-baseline="central" y="677.5" x="1011"><tspan dy="0" x="1011">alert_services</tspan></text></g><g><rect class="actor actor-bottom" ry="3" rx="3" name="Risk" height="65" width="150" stroke="#666" fill="#eaeaea" y="645" x="603"></rect><text style="text-anchor: middle; font-size: 16px; font-weight: 400; font-family: Inter, &quot;Segoe UI&quot;, sans-serif;" class="actor" alignment-baseline="central" dominant-baseline="central" y="677.5" x="678"><tspan dy="0" x="678">risk_engine</tspan></text></g><g><rect class="actor actor-bottom" ry="3" rx="3" name="Col" height="65" width="159" stroke="#666" fill="#eaeaea" y="645" x="340"></rect><text style="text-anchor: middle; font-size: 16px; font-weight: 400; font-family: Inter, &quot;Segoe UI&quot;, sans-serif;" class="actor" alignment-baseline="central" dominant-baseline="central" y="677.5" x="419.5"><tspan dy="0" x="419.5">indicator_collector</tspan></text></g><g><rect class="actor actor-bottom" ry="3" rx="3" name="Cmd" height="65" width="173" stroke="#666" fill="#eaeaea" y="645" x="0"></rect><text style="text-anchor: middle; font-size: 16px; font-weight: 400; font-family: Inter, &quot;Segoe UI&quot;, sans-serif;" class="actor" alignment-baseline="central" dominant-baseline="central" y="677.5" x="86.5"><tspan dy="0" x="86.5">evaluate_field_alerts</tspan></text></g><g><line stroke="#999" stroke-width="0.5px" class="200" y2="645" x2="1224" y1="5" x1="1224" id="actor4"></line><g id="root-4"><rect class="actor actor-top" ry="3" rx="3" name="Notif" height="65" width="176" stroke="#666" fill="#eaeaea" y="0" x="1136"></rect><text style="text-anchor: middle; font-size: 16px; font-weight: 400; font-family: Inter, &quot;Segoe UI&quot;, sans-serif;" class="actor" alignment-baseline="central" dominant-baseline="central" y="32.5" x="1224"><tspan dy="0" x="1224">notification_services</tspan></text></g></g><g><line stroke="#999" stroke-width="0.5px" class="200" y2="645" x2="1011" y1="5" x1="1011" id="actor3"></line><g id="root-3"><rect class="actor actor-top" ry="3" rx="3" name="Al" height="65" width="150" stroke="#666" fill="#eaeaea" y="0" x="936"></rect><text style="text-anchor: middle; font-size: 16px; font-weight: 400; font-family: Inter, &quot;Segoe UI&quot;, sans-serif;" class="actor" alignment-baseline="central" dominant-baseline="central" y="32.5" x="1011"><tspan dy="0" x="1011">alert_services</tspan></text></g></g><g><line stroke="#999" stroke-width="0.5px" class="200" y2="645" x2="678" y1="5" x1="678" id="actor2"></line><g id="root-2"><rect class="actor actor-top" ry="3" rx="3" name="Risk" height="65" width="150" stroke="#666" fill="#eaeaea" y="0" x="603"></rect><text style="text-anchor: middle; font-size: 16px; font-weight: 400; font-family: Inter, &quot;Segoe UI&quot;, sans-serif;" class="actor" alignment-baseline="central" dominant-baseline="central" y="32.5" x="678"><tspan dy="0" x="678">risk_engine</tspan></text></g></g><g><line stroke="#999" stroke-width="0.5px" class="200" y2="645" x2="419.5" y1="5" x1="419.5" id="actor1"></line><g id="root-1"><rect class="actor actor-top" ry="3" rx="3" name="Col" height="65" width="159" stroke="#666" fill="#eaeaea" y="0" x="340"></rect><text style="text-anchor: middle; font-size: 16px; font-weight: 400; font-family: Inter, &quot;Segoe UI&quot;, sans-serif;" class="actor" alignment-baseline="central" dominant-baseline="central" y="32.5" x="419.5"><tspan dy="0" x="419.5">indicator_collector</tspan></text></g></g><g><line stroke="#999" stroke-width="0.5px" class="200" y2="645" x2="86.5" y1="5" x1="86.5" id="actor0"></line><g id="root-0"><rect class="actor actor-top" ry="3" rx="3" name="Cmd" height="65" width="173" stroke="#666" fill="#eaeaea" y="0" x="0"></rect><text style="text-anchor: middle; font-size: 16px; font-weight: 400; font-family: Inter, &quot;Segoe UI&quot;, sans-serif;" class="actor" alignment-baseline="central" dominant-baseline="central" y="32.5" x="86.5"><tspan dy="0" x="86.5">evaluate_field_alerts</tspan></text></g></g><style>#diagramme-4{font-family:Inter,Segoe UI,sans-serif;font-size:13px;fill:#1c2420;}#diagramme-4 .error-icon{fill:#f7faf8;}#diagramme-4 .error-text{fill:#080507;stroke:#080507;}#diagramme-4 .edge-thickness-normal{stroke-width:2px;}#diagramme-4 .edge-thickness-thick{stroke-width:3.5px;}#diagramme-4 .edge-pattern-solid{stroke-dasharray:0;}#diagramme-4 .edge-pattern-dashed{stroke-dasharray:3;}#diagramme-4 .edge-pattern-dotted{stroke-dasharray:2;}#diagramme-4 .marker{fill:#5b6b62;stroke:#5b6b62;}#diagramme-4 .marker.cross{stroke:#5b6b62;}#diagramme-4 svg{font-family:Inter,Segoe UI,sans-serif;font-size:13px;}#diagramme-4 .actor{stroke:#15803d;fill:#ecf6ef;}#diagramme-4 text.actor&gt;tspan{fill:#1c2420;stroke:none;}#diagramme-4 .actor-line{stroke:grey;}#diagramme-4 .messageLine0{stroke-width:1.5;stroke-dasharray:none;stroke:#1c2420;}#diagramme-4 .messageLine1{stroke-width:1.5;stroke-dasharray:2,2;stroke:#1c2420;}#diagramme-4 #arrowhead path{fill:#1c2420;stroke:#1c2420;}#diagramme-4 .sequenceNumber{fill:#a4949d;}#diagramme-4 #sequencenumber{fill:#1c2420;}#diagramme-4 #crosshead path{fill:#1c2420;stroke:#1c2420;}#diagramme-4 .messageText{fill:#1c2420;stroke:none;}#diagramme-4 .labelBox{stroke:#15803d;fill:#ecf6ef;}#diagramme-4 .labelText,#diagramme-4 .labelText&gt;tspan{fill:#1c2420;stroke:none;}#diagramme-4 .loopText,#diagramme-4 .loopText&gt;tspan{fill:#1c2420;stroke:none;}#diagramme-4 .loopLine{stroke-width:2px;stroke-dasharray:2,2;stroke:#15803d;fill:#15803d;}#diagramme-4 .note{stroke:hsl(52.6829268293, 60%, 73.9215686275%);fill:#fff5ad;}#diagramme-4 .noteText,#diagramme-4 .noteText&gt;tspan{fill:#333;stroke:none;}#diagramme-4 .activation0{fill:#fff8e6;stroke:hsl(43.2, 100%, 85.0980392157%);}#diagramme-4 .activation1{fill:#fff8e6;stroke:hsl(43.2, 100%, 85.0980392157%);}#diagramme-4 .activation2{fill:#fff8e6;stroke:hsl(43.2, 100%, 85.0980392157%);}#diagramme-4 .actorPopupMenu{position:absolute;}#diagramme-4 .actorPopupMenuPanel{position:absolute;fill:#ecf6ef;box-shadow:0px 8px 16px 0px rgba(0,0,0,0.2);filter:drop-shadow(3px 5px 2px rgb(0 0 0 / 0.4));}#diagramme-4 .actor-man line{stroke:#15803d;fill:#ecf6ef;}#diagramme-4 .actor-man circle,#diagramme-4 line{stroke:#15803d;fill:#ecf6ef;stroke-width:2px;}#diagramme-4 :root{--mermaid-font-family:Inter,Segoe UI,sans-serif;}</style><g></g><defs><symbol height="24" width="24" id="computer"><path d="M2 2v13h20v-13h-20zm18 11h-16v-9h16v9zm-10.228 6l.466-1h3.524l.467 1h-4.457zm14.228 3h-24l2-6h2.104l-1.33 4h18.45l-1.297-4h2.073l2 6zm-5-10h-14v-7h14v7z" transform="scale(.5)"></path></symbol></defs><defs><symbol clip-rule="evenodd" fill-rule="evenodd" id="database"><path d="M12.258.001l.256.004.255.005.253.008.251.01.249.012.247.015.246.016.242.019.241.02.239.023.236.024.233.027.231.028.229.031.225.032.223.034.22.036.217.038.214.04.211.041.208.043.205.045.201.046.198.048.194.05.191.051.187.053.183.054.18.056.175.057.172.059.168.06.163.061.16.063.155.064.15.066.074.033.073.033.071.034.07.034.069.035.068.035.067.035.066.035.064.036.064.036.062.036.06.036.06.037.058.037.058.037.055.038.055.038.053.038.052.038.051.039.05.039.048.039.047.039.045.04.044.04.043.04.041.04.04.041.039.041.037.041.036.041.034.041.033.042.032.042.03.042.029.042.027.042.026.043.024.043.023.043.021.043.02.043.018.044.017.043.015.044.013.044.012.044.011.045.009.044.007.045.006.045.004.045.002.045.001.045v17l-.001.045-.002.045-.004.045-.006.045-.007.045-.009.044-.011.045-.012.044-.013.044-.015.044-.017.043-.018.044-.02.043-.021.043-.023.043-.024.043-.026.043-.027.042-.029.042-.03.042-.032.042-.033.042-.034.041-.036.041-.037.041-.039.041-.04.041-.041.04-.043.04-.044.04-.045.04-.047.039-.048.039-.05.039-.051.039-.052.038-.053.038-.055.038-.055.038-.058.037-.058.037-.06.037-.06.036-.062.036-.064.036-.064.036-.066.035-.067.035-.068.035-.069.035-.07.034-.071.034-.073.033-.074.033-.15.066-.155.064-.16.063-.163.061-.168.06-.172.059-.175.057-.18.056-.183.054-.187.053-.191.051-.194.05-.198.048-.201.046-.205.045-.208.043-.211.041-.214.04-.217.038-.22.036-.223.034-.225.032-.229.031-.231.028-.233.027-.236.024-.239.023-.241.02-.242.019-.246.016-.247.015-.249.012-.251.01-.253.008-.255.005-.256.004-.258.001-.258-.001-.256-.004-.255-.005-.253-.008-.251-.01-.249-.012-.247-.015-.245-.016-.243-.019-.241-.02-.238-.023-.236-.024-.234-.027-.231-.028-.228-.031-.226-.032-.223-.034-.22-.036-.217-.038-.214-.04-.211-.041-.208-.043-.204-.045-.201-.046-.198-.048-.195-.05-.19-.051-.187-.053-.184-.054-.179-.056-.176-.057-.172-.059-.167-.06-.164-.061-.159-.063-.155-.064-.151-.066-.074-.033-.072-.033-.072-.034-.07-.034-.069-.035-.068-.035-.067-.035-.066-.035-.064-.036-.063-.036-.062-.036-.061-.036-.06-.037-.058-.037-.057-.037-.056-.038-.055-.038-.053-.038-.052-.038-.051-.039-.049-.039-.049-.039-.046-.039-.046-.04-.044-.04-.043-.04-.041-.04-.04-.041-.039-.041-.037-.041-.036-.041-.034-.041-.033-.042-.032-.042-.03-.042-.029-.042-.027-.042-.026-.043-.024-.043-.023-.043-.021-.043-.02-.043-.018-.044-.017-.043-.015-.044-.013-.044-.012-.044-.011-.045-.009-.044-.007-.045-.006-.045-.004-.045-.002-.045-.001-.045v-17l.001-.045.002-.045.004-.045.006-.045.007-.045.009-.044.011-.045.012-.044.013-.044.015-.044.017-.043.018-.044.02-.043.021-.043.023-.043.024-.043.026-.043.027-.042.029-.042.03-.042.032-.042.033-.042.034-.041.036-.041.037-.041.039-.041.04-.041.041-.04.043-.04.044-.04.046-.04.046-.039.049-.039.049-.039.051-.039.052-.038.053-.038.055-.038.056-.038.057-.037.058-.037.06-.037.061-.036.062-.036.063-.036.064-.036.066-.035.067-.035.068-.035.069-.035.07-.034.072-.034.072-.033.074-.033.151-.066.155-.064.159-.063.164-.061.167-.06.172-.059.176-.057.179-.056.184-.054.187-.053.19-.051.195-.05.198-.048.201-.046.204-.045.208-.043.211-.041.214-.04.217-.038.22-.036.223-.034.226-.032.228-.031.231-.028.234-.027.236-.024.238-.023.241-.02.243-.019.245-.016.247-.015.249-.012.251-.01.253-.008.255-.005.256-.004.258-.001.258.001zm-9.258 20.499v.01l.001.021.003.021.004.022.005.021.006.022.007.022.009.023.01.022.011.023.012.023.013.023.015.023.016.024.017.023.018.024.019.024.021.024.022.025.023.024.024.025.052.049.056.05.061.051.066.051.07.051.075.051.079.052.084.052.088.052.092.052.097.052.102.051.105.052.11.052.114.051.119.051.123.051.127.05.131.05.135.05.139.048.144.049.147.047.152.047.155.047.16.045.163.045.167.043.171.043.176.041.178.041.183.039.187.039.19.037.194.035.197.035.202.033.204.031.209.03.212.029.216.027.219.025.222.024.226.021.23.02.233.018.236.016.24.015.243.012.246.01.249.008.253.005.256.004.259.001.26-.001.257-.004.254-.005.25-.008.247-.011.244-.012.241-.014.237-.016.233-.018.231-.021.226-.021.224-.024.22-.026.216-.027.212-.028.21-.031.205-.031.202-.034.198-.034.194-.036.191-.037.187-.039.183-.04.179-.04.175-.042.172-.043.168-.044.163-.045.16-.046.155-.046.152-.047.148-.048.143-.049.139-.049.136-.05.131-.05.126-.05.123-.051.118-.052.114-.051.11-.052.106-.052.101-.052.096-.052.092-.052.088-.053.083-.051.079-.052.074-.052.07-.051.065-.051.06-.051.056-.05.051-.05.023-.024.023-.025.021-.024.02-.024.019-.024.018-.024.017-.024.015-.023.014-.024.013-.023.012-.023.01-.023.01-.022.008-.022.006-.022.006-.022.004-.022.004-.021.001-.021.001-.021v-4.127l-.077.055-.08.053-.083.054-.085.053-.087.052-.09.052-.093.051-.095.05-.097.05-.1.049-.102.049-.105.048-.106.047-.109.047-.111.046-.114.045-.115.045-.118.044-.12.043-.122.042-.124.042-.126.041-.128.04-.13.04-.132.038-.134.038-.135.037-.138.037-.139.035-.142.035-.143.034-.144.033-.147.032-.148.031-.15.03-.151.03-.153.029-.154.027-.156.027-.158.026-.159.025-.161.024-.162.023-.163.022-.165.021-.166.02-.167.019-.169.018-.169.017-.171.016-.173.015-.173.014-.175.013-.175.012-.177.011-.178.01-.179.008-.179.008-.181.006-.182.005-.182.004-.184.003-.184.002h-.37l-.184-.002-.184-.003-.182-.004-.182-.005-.181-.006-.179-.008-.179-.008-.178-.01-.176-.011-.176-.012-.175-.013-.173-.014-.172-.015-.171-.016-.17-.017-.169-.018-.167-.019-.166-.02-.165-.021-.163-.022-.162-.023-.161-.024-.159-.025-.157-.026-.156-.027-.155-.027-.153-.029-.151-.03-.15-.03-.148-.031-.146-.032-.145-.033-.143-.034-.141-.035-.14-.035-.137-.037-.136-.037-.134-.038-.132-.038-.13-.04-.128-.04-.126-.041-.124-.042-.122-.042-.12-.044-.117-.043-.116-.045-.113-.045-.112-.046-.109-.047-.106-.047-.105-.048-.102-.049-.1-.049-.097-.05-.095-.05-.093-.052-.09-.051-.087-.052-.085-.053-.083-.054-.08-.054-.077-.054v4.127zm0-5.654v.011l.001.021.003.021.004.021.005.022.006.022.007.022.009.022.01.022.011.023.012.023.013.023.015.024.016.023.017.024.018.024.019.024.021.024.022.024.023.025.024.024.052.05.056.05.061.05.066.051.07.051.075.052.079.051.084.052.088.052.092.052.097.052.102.052.105.052.11.051.114.051.119.052.123.05.127.051.131.05.135.049.139.049.144.048.147.048.152.047.155.046.16.045.163.045.167.044.171.042.176.042.178.04.183.04.187.038.19.037.194.036.197.034.202.033.204.032.209.03.212.028.216.027.219.025.222.024.226.022.23.02.233.018.236.016.24.014.243.012.246.01.249.008.253.006.256.003.259.001.26-.001.257-.003.254-.006.25-.008.247-.01.244-.012.241-.015.237-.016.233-.018.231-.02.226-.022.224-.024.22-.025.216-.027.212-.029.21-.03.205-.032.202-.033.198-.035.194-.036.191-.037.187-.039.183-.039.179-.041.175-.042.172-.043.168-.044.163-.045.16-.045.155-.047.152-.047.148-.048.143-.048.139-.05.136-.049.131-.05.126-.051.123-.051.118-.051.114-.052.11-.052.106-.052.101-.052.096-.052.092-.052.088-.052.083-.052.079-.052.074-.051.07-.052.065-.051.06-.05.056-.051.051-.049.023-.025.023-.024.021-.025.02-.024.019-.024.018-.024.017-.024.015-.023.014-.023.013-.024.012-.022.01-.023.01-.023.008-.022.006-.022.006-.022.004-.021.004-.022.001-.021.001-.021v-4.139l-.077.054-.08.054-.083.054-.085.052-.087.053-.09.051-.093.051-.095.051-.097.05-.1.049-.102.049-.105.048-.106.047-.109.047-.111.046-.114.045-.115.044-.118.044-.12.044-.122.042-.124.042-.126.041-.128.04-.13.039-.132.039-.134.038-.135.037-.138.036-.139.036-.142.035-.143.033-.144.033-.147.033-.148.031-.15.03-.151.03-.153.028-.154.028-.156.027-.158.026-.159.025-.161.024-.162.023-.163.022-.165.021-.166.02-.167.019-.169.018-.169.017-.171.016-.173.015-.173.014-.175.013-.175.012-.177.011-.178.009-.179.009-.179.007-.181.007-.182.005-.182.004-.184.003-.184.002h-.37l-.184-.002-.184-.003-.182-.004-.182-.005-.181-.007-.179-.007-.179-.009-.178-.009-.176-.011-.176-.012-.175-.013-.173-.014-.172-.015-.171-.016-.17-.017-.169-.018-.167-.019-.166-.02-.165-.021-.163-.022-.162-.023-.161-.024-.159-.025-.157-.026-.156-.027-.155-.028-.153-.028-.151-.03-.15-.03-.148-.031-.146-.033-.145-.033-.143-.033-.141-.035-.14-.036-.137-.036-.136-.037-.134-.038-.132-.039-.13-.039-.128-.04-.126-.041-.124-.042-.122-.043-.12-.043-.117-.044-.116-.044-.113-.046-.112-.046-.109-.046-.106-.047-.105-.048-.102-.049-.1-.049-.097-.05-.095-.051-.093-.051-.09-.051-.087-.053-.085-.052-.083-.054-.08-.054-.077-.054v4.139zm0-5.666v.011l.001.02.003.022.004.021.005.022.006.021.007.022.009.023.01.022.011.023.012.023.013.023.015.023.016.024.017.024.018.023.019.024.021.025.022.024.023.024.024.025.052.05.056.05.061.05.066.051.07.051.075.052.079.051.084.052.088.052.092.052.097.052.102.052.105.051.11.052.114.051.119.051.123.051.127.05.131.05.135.05.139.049.144.048.147.048.152.047.155.046.16.045.163.045.167.043.171.043.176.042.178.04.183.04.187.038.19.037.194.036.197.034.202.033.204.032.209.03.212.028.216.027.219.025.222.024.226.021.23.02.233.018.236.017.24.014.243.012.246.01.249.008.253.006.256.003.259.001.26-.001.257-.003.254-.006.25-.008.247-.01.244-.013.241-.014.237-.016.233-.018.231-.02.226-.022.224-.024.22-.025.216-.027.212-.029.21-.03.205-.032.202-.033.198-.035.194-.036.191-.037.187-.039.183-.039.179-.041.175-.042.172-.043.168-.044.163-.045.16-.045.155-.047.152-.047.148-.048.143-.049.139-.049.136-.049.131-.051.126-.05.123-.051.118-.052.114-.051.11-.052.106-.052.101-.052.096-.052.092-.052.088-.052.083-.052.079-.052.074-.052.07-.051.065-.051.06-.051.056-.05.051-.049.023-.025.023-.025.021-.024.02-.024.019-.024.018-.024.017-.024.015-.023.014-.024.013-.023.012-.023.01-.022.01-.023.008-.022.006-.022.006-.022.004-.022.004-.021.001-.021.001-.021v-4.153l-.077.054-.08.054-.083.053-.085.053-.087.053-.09.051-.093.051-.095.051-.097.05-.1.049-.102.048-.105.048-.106.048-.109.046-.111.046-.114.046-.115.044-.118.044-.12.043-.122.043-.124.042-.126.041-.128.04-.13.039-.132.039-.134.038-.135.037-.138.036-.139.036-.142.034-.143.034-.144.033-.147.032-.148.032-.15.03-.151.03-.153.028-.154.028-.156.027-.158.026-.159.024-.161.024-.162.023-.163.023-.165.021-.166.02-.167.019-.169.018-.169.017-.171.016-.173.015-.173.014-.175.013-.175.012-.177.01-.178.01-.179.009-.179.007-.181.006-.182.006-.182.004-.184.003-.184.001-.185.001-.185-.001-.184-.001-.184-.003-.182-.004-.182-.006-.181-.006-.179-.007-.179-.009-.178-.01-.176-.01-.176-.012-.175-.013-.173-.014-.172-.015-.171-.016-.17-.017-.169-.018-.167-.019-.166-.02-.165-.021-.163-.023-.162-.023-.161-.024-.159-.024-.157-.026-.156-.027-.155-.028-.153-.028-.151-.03-.15-.03-.148-.032-.146-.032-.145-.033-.143-.034-.141-.034-.14-.036-.137-.036-.136-.037-.134-.038-.132-.039-.13-.039-.128-.041-.126-.041-.124-.041-.122-.043-.12-.043-.117-.044-.116-.044-.113-.046-.112-.046-.109-.046-.106-.048-.105-.048-.102-.048-.1-.05-.097-.049-.095-.051-.093-.051-.09-.052-.087-.052-.085-.053-.083-.053-.08-.054-.077-.054v4.153zm8.74-8.179l-.257.004-.254.005-.25.008-.247.011-.244.012-.241.014-.237.016-.233.018-.231.021-.226.022-.224.023-.22.026-.216.027-.212.028-.21.031-.205.032-.202.033-.198.034-.194.036-.191.038-.187.038-.183.04-.179.041-.175.042-.172.043-.168.043-.163.045-.16.046-.155.046-.152.048-.148.048-.143.048-.139.049-.136.05-.131.05-.126.051-.123.051-.118.051-.114.052-.11.052-.106.052-.101.052-.096.052-.092.052-.088.052-.083.052-.079.052-.074.051-.07.052-.065.051-.06.05-.056.05-.051.05-.023.025-.023.024-.021.024-.02.025-.019.024-.018.024-.017.023-.015.024-.014.023-.013.023-.012.023-.01.023-.01.022-.008.022-.006.023-.006.021-.004.022-.004.021-.001.021-.001.021.001.021.001.021.004.021.004.022.006.021.006.023.008.022.01.022.01.023.012.023.013.023.014.023.015.024.017.023.018.024.019.024.02.025.021.024.023.024.023.025.051.05.056.05.06.05.065.051.07.052.074.051.079.052.083.052.088.052.092.052.096.052.101.052.106.052.11.052.114.052.118.051.123.051.126.051.131.05.136.05.139.049.143.048.148.048.152.048.155.046.16.046.163.045.168.043.172.043.175.042.179.041.183.04.187.038.191.038.194.036.198.034.202.033.205.032.21.031.212.028.216.027.22.026.224.023.226.022.231.021.233.018.237.016.241.014.244.012.247.011.25.008.254.005.257.004.26.001.26-.001.257-.004.254-.005.25-.008.247-.011.244-.012.241-.014.237-.016.233-.018.231-.021.226-.022.224-.023.22-.026.216-.027.212-.028.21-.031.205-.032.202-.033.198-.034.194-.036.191-.038.187-.038.183-.04.179-.041.175-.042.172-.043.168-.043.163-.045.16-.046.155-.046.152-.048.148-.048.143-.048.139-.049.136-.05.131-.05.126-.051.123-.051.118-.051.114-.052.11-.052.106-.052.101-.052.096-.052.092-.052.088-.052.083-.052.079-.052.074-.051.07-.052.065-.051.06-.05.056-.05.051-.05.023-.025.023-.024.021-.024.02-.025.019-.024.018-.024.017-.023.015-.024.014-.023.013-.023.012-.023.01-.023.01-.022.008-.022.006-.023.006-.021.004-.022.004-.021.001-.021.001-.021-.001-.021-.001-.021-.004-.021-.004-.022-.006-.021-.006-.023-.008-.022-.01-.022-.01-.023-.012-.023-.013-.023-.014-.023-.015-.024-.017-.023-.018-.024-.019-.024-.02-.025-.021-.024-.023-.024-.023-.025-.051-.05-.056-.05-.06-.05-.065-.051-.07-.052-.074-.051-.079-.052-.083-.052-.088-.052-.092-.052-.096-.052-.101-.052-.106-.052-.11-.052-.114-.052-.118-.051-.123-.051-.126-.051-.131-.05-.136-.05-.139-.049-.143-.048-.148-.048-.152-.048-.155-.046-.16-.046-.163-.045-.168-.043-.172-.043-.175-.042-.179-.041-.183-.04-.187-.038-.191-.038-.194-.036-.198-.034-.202-.033-.205-.032-.21-.031-.212-.028-.216-.027-.22-.026-.224-.023-.226-.022-.231-.021-.233-.018-.237-.016-.241-.014-.244-.012-.247-.011-.25-.008-.254-.005-.257-.004-.26-.001-.26.001z" transform="scale(.5)"></path></symbol></defs><defs><symbol height="24" width="24" id="clock"><path d="M12 2c5.514 0 10 4.486 10 10s-4.486 10-10 10-10-4.486-10-10 4.486-10 10-10zm0-2c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm5.848 12.459c.202.038.202.333.001.372-1.907.361-6.045 1.111-6.547 1.111-.719 0-1.301-.582-1.301-1.301 0-.512.77-5.447 1.125-7.445.034-.192.312-.181.343.014l.985 6.238 5.394 1.011z" transform="scale(.5)"></path></symbol></defs><defs><marker orient="auto" markerHeight="12" markerWidth="12" markerUnits="userSpaceOnUse" refY="5" refX="7.9" id="arrowhead"><path d="M 0 0 L 10 5 L 0 10 z"></path></marker></defs><defs><marker refY="4.5" refX="4" orient="auto" markerHeight="8" markerWidth="15" id="crosshead"><path style="stroke-dasharray: 0, 0;" d="M 1,2 L 6,7 M 6,2 L 1,7" stroke-width="1pt" stroke="#000000" fill="none"></path></marker></defs><defs><marker orient="auto" markerHeight="28" markerWidth="20" refY="7" refX="15.5" id="filled-head"><path d="M 18,7 L9,13 L14,7 L9,1 Z"></path></marker></defs><defs><marker orient="auto" markerHeight="40" markerWidth="60" refY="15" refX="15" id="sequencenumber"><circle r="6" cy="15" cx="15"></circle></marker></defs><text style="font-family: Inter, &quot;Segoe UI&quot;, sans-serif; font-size: 16px; font-weight: 400;" dy="1em" class="messageText" alignment-baseline="middle" dominant-baseline="middle" text-anchor="middle" y="80" x="252">collect_all_champs()</text><line style="fill: none;" marker-end="url(#arrowhead)" stroke="none" stroke-width="2" class="messageLine0" y2="115" x2="415.5" y1="115" x1="87.5"></line><text style="font-family: Inter, &quot;Segoe UI&quot;, sans-serif; font-size: 16px; font-weight: 400;" dy="1em" class="messageText" alignment-baseline="middle" dominant-baseline="middle" text-anchor="middle" y="130" x="421">gee_utils (Sentinel-2, MODIS, CHIRPS) + chirps_gefs</text><path style="fill: none;" marker-end="url(#arrowhead)" stroke="none" stroke-width="2" class="messageLine0" d="M 420.5,165 C 480.5,155 480.5,195 420.5,185"></path><text style="font-family: Inter, &quot;Segoe UI&quot;, sans-serif; font-size: 16px; font-weight: 400;" dy="1em" class="messageText" alignment-baseline="middle" dominant-baseline="middle" text-anchor="middle" y="210" x="255">FieldIndicatorSnapshot enregistrés</text><line style="stroke-dasharray: 3, 3; fill: none;" marker-end="url(#arrowhead)" stroke="none" stroke-width="2" class="messageLine1" y2="245" x2="90.5" y1="245" x1="418.5"></line><text style="font-family: Inter, &quot;Segoe UI&quot;, sans-serif; font-size: 16px; font-weight: 400;" dy="1em" class="messageText" alignment-baseline="middle" dominant-baseline="middle" text-anchor="middle" y="260" x="547">evaluate_all_champs()</text><line style="fill: none;" marker-end="url(#arrowhead)" stroke="none" stroke-width="2" class="messageLine0" y2="295" x2="1007" y1="295" x1="87.5"></line><text style="font-family: Inter, &quot;Segoe UI&quot;, sans-serif; font-size: 16px; font-weight: 400;" dy="1em" class="messageText" alignment-baseline="middle" dominant-baseline="middle" text-anchor="middle" y="310" x="846">assess_champ_risk(champ)</text><line style="fill: none;" marker-end="url(#arrowhead)" stroke="none" stroke-width="2" class="messageLine0" y2="345" x2="682" y1="345" x1="1010"></line><text style="font-family: Inter, &quot;Segoe UI&quot;, sans-serif; font-size: 16px; font-weight: 400;" dy="1em" class="messageText" alignment-baseline="middle" dominant-baseline="middle" text-anchor="middle" y="360" x="843">score 0-100, niveau, types d'alerte</text><line style="stroke-dasharray: 3, 3; fill: none;" marker-end="url(#arrowhead)" stroke="none" stroke-width="2" class="messageLine1" y2="395" x2="1007" y1="395" x1="679"></line><text style="font-family: Inter, &quot;Segoe UI&quot;, sans-serif; font-size: 16px; font-weight: 400;" dy="1em" class="messageText" alignment-baseline="middle" dominant-baseline="middle" text-anchor="middle" y="410" x="1012">niveau ≠ niveau précédent ?</text><path style="fill: none;" marker-end="url(#arrowhead)" stroke="none" stroke-width="2" class="messageLine0" d="M 1012,445 C 1072,435 1072,475 1012,465"></path><text style="font-family: Inter, &quot;Segoe UI&quot;, sans-serif; font-size: 16px; font-weight: 400;" dy="1em" class="messageText" alignment-baseline="middle" dominant-baseline="middle" text-anchor="middle" y="490" x="550">FarmerAlert + AlertDelivery(EMAIL, PENDING)</text><line style="stroke-dasharray: 3, 3; fill: none;" marker-end="url(#arrowhead)" stroke="none" stroke-width="2" class="messageLine1" y2="525" x2="90.5" y1="525" x1="1010"></line><text style="font-family: Inter, &quot;Segoe UI&quot;, sans-serif; font-size: 16px; font-weight: 400;" dy="1em" class="messageText" alignment-baseline="middle" dominant-baseline="middle" text-anchor="middle" y="540" x="654">send_pending_email_deliveries()</text><line style="fill: none;" marker-end="url(#arrowhead)" stroke="none" stroke-width="2" class="messageLine0" y2="575" x2="1220" y1="575" x1="87.5"></line><text style="font-family: Inter, &quot;Segoe UI&quot;, sans-serif; font-size: 16px; font-weight: 400;" dy="1em" class="messageText" alignment-baseline="middle" dominant-baseline="middle" text-anchor="middle" y="590" x="657">e-mails HTML envoyés (SENT / FAILED)</text><line style="stroke-dasharray: 3, 3; fill: none;" marker-end="url(#arrowhead)" stroke="none" stroke-width="2" class="messageLine1" y2="625" x2="90.5" y1="625" x1="1223"></line></svg></div>
+<ol>
+<li><strong>Collecte</strong> (<code>indicator_collector.py</code>) : pour chaque champ, appelle
+   <code>gee_utils</code> et <code>chirps_gefs</code>. Chaque indice est protégé : si l'un échoue,
+   les autres sont quand même enregistrés.</li>
+<li>
+<p><strong>Score</strong> (<code>risk_engine.py</code>) : 5 sous-scores de 0 à 100, pondérés :</p>
+<table>
+<thead>
+<tr>
+<th>Dimension</th>
+<th>Poids</th>
+<th>Indicateurs</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Végétation</td>
+<td>0,30</td>
+<td>NDVI, EVI, MSAVI (baisse + valeur absolue)</td>
+</tr>
+<tr>
+<td>Humidité</td>
+<td>0,20</td>
+<td>NDWI, corroboré par EVI / MSAVI</td>
+</tr>
+<tr>
+<td>Sécheresse</td>
+<td>0,25</td>
+<td>SPI_30, SPI_90, SPI_FORECAST</td>
+</tr>
+<tr>
+<td>Précipitations</td>
+<td>0,15</td>
+<td>RAINFALL_24H, RAINFALL_72H (excès ou déficit)</td>
+</tr>
+<tr>
+<td>Prévision</td>
+<td>0,10</td>
+<td>SPI_FORECAST, pluie prévue</td>
+</tr>
+</tbody>
+</table>
+<p>Les poids sont dans la constante <code>WEIGHTS</code> (leur somme doit valoir 1).
+ Niveaux : 0-25 <code>NORMAL</code>, 26-50 <code>VIGILANCE</code>, 51-75 <code>ALERTE</code>, 76-100 <code>CRITIQUE</code>.
+3. <strong>Décision</strong> (<code>alert_services.py</code>) : une alerte n'est créée <strong>que si le
+ niveau change</strong> par rapport au dernier <code>RiskAssessment</code> (1re détection,
+ aggravation, amélioration, fin d'alerte). Types :
+ <code>STRESS_VEGETATIF</code>, <code>STRESS_HYDRIQUE</code>, <code>SECHERESSE</code>, <code>EXCES_PLUIE</code>,
+ <code>GENERIC</code>. Un <code>AlertDelivery</code> EMAIL n'est créé que si le profil a
+ <code>recevoir_alertes=True</code>.
+4. <strong>Envoi</strong> (<code>notification_services.py</code>) : e-mail HTML (niveau, score,
+ tableau des indicateurs contributeurs, recommandation).</p>
+</li>
+</ol>
+<h3 id="doc3-62-indicateurs">6.2 Indicateurs</h3>
+<table>
+<thead>
+<tr>
+<th>Code</th>
+<th>Source</th>
+<th>Sens</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>NDVI</code>, <code>EVI</code>, <code>MSAVI</code></td>
+<td>Sentinel-2 (masque nuages), via GEE</td>
+<td>vigueur de la végétation</td>
+</tr>
+<tr>
+<td><code>NDWI</code></td>
+<td>Sentinel-2</td>
+<td>eau dans la végétation</td>
+</tr>
+<tr>
+<td><code>VCI</code>, <code>TCI</code>, <code>VHI</code></td>
+<td>MODIS NDVI (MOD13A2) + température de surface (MOD11A2), via GEE</td>
+<td>sécheresse (végétation, température, combiné) ; la collecte quotidienne enregistre le <strong>VHI</strong></td>
+</tr>
+<tr>
+<td><code>NCWSI</code></td>
+<td>MODIS NDVI / température de surface, via GEE</td>
+<td>stress hydrique normalisé</td>
+</tr>
+<tr>
+<td><code>SPI_30</code>, <code>SPI_90</code></td>
+<td>CHIRPS, climatologie sur 10 ans</td>
+<td>anomalie de pluie observée</td>
+</tr>
+<tr>
+<td><code>SPI_FORECAST</code></td>
+<td>CHIRPS-GEFS</td>
+<td>anomalie de pluie prévue sur 15 jours</td>
+</tr>
+<tr>
+<td><code>RAINFALL_24H</code>, <code>RAINFALL_72H</code></td>
+<td>GPM IMERG (NASA), repli sur CHIRPS-GEFS</td>
+<td>pluie récente</td>
+</tr>
+</tbody>
+</table>
+<p><code>weather_forecast.py</code> (Open-Meteo, sans clé) détecte en plus les <strong>épisodes
+secs</strong> prévus (7 / 10 / 14 jours consécutifs &lt; 1 mm) et les <strong>cumuls
+d'inondation</strong> sur 3 jours (60 / 100 / 150 mm).</p>
+<h3 id="doc3-63-earth-engine">6.3 Earth Engine</h3>
+<p><code>gee_utils.initialize_ee()</code> lit la clé de compte de service
+<code>ee-koutoumbogajules-c99000ca569e.json</code> <strong>dans le répertoire courant</strong>, puis
+appelle <code>ee.Initialize(credentials)</code>. Principales fonctions :
+<code>get_monthly_ndvi_series</code>, <code>get_8_day_ndvi_series</code>, <code>get_field_ndvi_history</code>,
+<code>get_field_indices_history</code>, <code>get_chirps_precipitation_series</code>,
+<code>get_era5_temperature_series</code>, <code>compute_climate_risk</code>,
+<code>compute_observed_spi_windows</code>, <code>get_realtime_precipitation</code>,
+<code>get_drought_index_map_url</code>.</p>
+<hr>
+<h2 id="doc3-7-données-et-sources">7. Données et sources</h2>
+<h3 id="doc3-71-couches-du-géoportail">7.1 Couches du géoportail</h3>
+<p>Les données de terrain d'origine sont dans la base de l'auteur. Sans elles,
+<code>python manage.py import_blitta2</code> reconstruit les couches :</p>
+<table>
+<thead>
+<tr>
+<th>Étape</th>
+<th>Source</th>
+<th>Détail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Cantons</td>
+<td><a href="https://data.humdata.org/dataset/cod-ab-tgo">OCHA COD-AB Togo</a>, niveau ADM3</td>
+<td>P-codes <code>TG010101</code> Agbandi, <code>TG010110</code> Langabou, <code>TG010109</code> Koffiti, <code>TG010115</code> Tcharè-Baou</td>
+</tr>
+<tr>
+<td>Commune</td>
+<td>Union des 4 cantons</td>
+<td>Composition : décret publié au <a href="https://jo.gouv.tg/sites/default/files/JO/JOS_08_01_18-63e%20ANNEE%20N%C2%B01.pdf">JO du 08/01/2018</a>, en application de la loi n°2017-008</td>
+</tr>
+<tr>
+<td>Infrastructures</td>
+<td>OpenStreetMap via Overpass</td>
+<td>Emprise des 4 cantons, puis découpage au contour de la commune</td>
+</tr>
+<tr>
+<td>Santé</td>
+<td><a href="https://data.humdata.org/dataset/health-facilities-in-sub-saharan-africa">Inventaire OMS/KEMRI</a> (Maina et al., 2019)</td>
+<td>Rapprochement à 2,5 km avec les objets OSM (coordonnées arrondies)</td>
+</tr>
+</tbody>
+</table>
+<p>Règles de correspondance OSM :</p>
+<table>
+<thead>
+<tr>
+<th>Couche</th>
+<th>Critère OSM</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Routes</td>
+<td><code>highway=trunk/primary</code> → <em>Route nationale revêtue</em> ; <code>secondary/tertiary/unclassified/track</code> → <em>Piste rurale</em> (sauf réf. <code>N…</code> revêtue)</td>
+</tr>
+<tr>
+<td>Lycées / collèges / jardins</td>
+<td><code>amenity=school/kindergarten</code> classé par nom (<code>Lycée</code>, <code>CEG</code>, <code>Collège</code>, <code>Jardin</code>…) ; les écoles primaires n'ont pas de couche</td>
+</tr>
+<tr>
+<td>Santé</td>
+<td><code>amenity=hospital/clinic/doctors/health_post</code>, <code>healthcare=*</code> ; type déduit du nom (USP, CMS, CHP…) ; doublons &lt; 50 m fusionnés</td>
+</tr>
+<tr>
+<td>Marchés</td>
+<td><code>amenity=marketplace</code></td>
+</tr>
+<tr>
+<td>Points d'eau</td>
+<td><code>man_made=water_well/borehole</code> (type selon <code>pump=*</code>)</td>
+</tr>
+<tr>
+<td>Bornes-fontaines</td>
+<td><code>amenity=drinking_water/water_point</code>, <code>man_made=water_tap</code></td>
+</tr>
+<tr>
+<td>Châteaux d'eau</td>
+<td><code>man_made=water_tower</code>, <code>storage_tank</code> (+ <code>content=water</code>)</td>
+</tr>
+<tr>
+<td>Terrains</td>
+<td><code>leisure=pitch/stadium</code> (polygones)</td>
+</tr>
+<tr>
+<td>Coopératives / intrants</td>
+<td><code>office=cooperative</code>, <code>shop=agrarian/farm</code></td>
+</tr>
+</tbody>
+</table>
+<p>Canton : intersection spatiale. Localité : <code>place=*</code> le plus proche.
+Valeur inconnue : <code>Non renseigné</code>.</p>
+<blockquote>
+<p><strong>Licences</strong> : les données OSM sont sous licence <strong>ODbL</strong>. Toute carte
+publiée doit mentionner « © contributeurs OpenStreetMap ».</p>
+</blockquote>
+<h3 id="doc3-72-cartothèque">7.2 Cartothèque</h3>
+<p><code>cartotheque/fixtures/initial_domaines.json</code> : 14 domaines thématiques.</p>
+<hr>
+<h2 id="doc3-8-front-end">8. Front-end</h2>
+<h3 id="doc3-pages-servies-par-django">Pages servies par Django</h3>
+<ul>
+<li><code>geoportail/templates/index.html</code> + <code>geoportail/static/js/script.js</code> :
+  carte Leaflet centrée sur <code>[8.08, 1.12]</code> (zoom 14), fonds OSM / Esri /
+  Google, couches GeoJSON chargées en parallèle (<code>initMap</code>), icônes dans
+  <code>static/icone/</code>, outils de dessin et de mesure (Leaflet.draw + Turf),
+  filtres et statistiques par canton.
+  <code>scripts.js</code> est une ancienne version reposant sur un GeoServer local
+  (<code>localhost:8089</code>) ; seul <code>script.js</code> est chargé par le gabarit.</li>
+<li><code>agriculture/templates/agriculture/index.html</code> + <code>static/js/main.js</code> :
+  carte simple (centrée sur Aného, couches GeoServer locales).</li>
+</ul>
+<blockquote>
+<p><strong>Fond OSM</strong> : Django envoie <code>Referrer-Policy: same-origin</code> par défaut. Les
+couches de tuiles OSM déclarent donc
+<code>referrerPolicy: 'strict-origin-when-cross-origin'</code> ; sans cette option,
+OSM répond 403 « Access blocked ».</p>
+</blockquote>
+<h3 id="doc3-frontend-externe">Frontend externe</h3>
+<p>La configuration CORS (<code>localhost:3001</code>), l'authentification par jeton et les
+icônes « Lucide » de la cartothèque indiquent une application frontend
+séparée (probablement React), <strong>absente de ce dépôt</strong>, qui consomme les API
+<code>/auth/</code>, <code>/agriculture/api/</code> et <code>/api/cartotheque/</code>.</p>
+<hr>
+<h2 id="doc3-9-commandes-de-gestion">9. Commandes de gestion</h2>
+<table>
+<thead>
+<tr>
+<th>Commande</th>
+<th>Rôle</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>python manage.py migrate</code></td>
+<td>crée / met à jour les tables gérées</td>
+</tr>
+<tr>
+<td><code>python manage.py loaddata cartotheque/fixtures/initial_domaines.json</code></td>
+<td>domaines de la cartothèque</td>
+</tr>
+<tr>
+<td><code>python manage.py import_blitta2 [--cache-dir D] [--refresh] [--sans-oms]</code></td>
+<td>reconstruit les couches du géoportail (<strong>écrase</strong> leur contenu)</td>
+</tr>
+<tr>
+<td><code>python manage.py evaluate_field_alerts [--champ-id N] [--dry-run] [--no-collect] [--no-email]</code></td>
+<td>chaîne d'alertes complète</td>
+</tr>
+<tr>
+<td><code>python manage.py createsuperuser</code></td>
+<td>compte administrateur</td>
+</tr>
+<tr>
+<td><code>python manage.py collectstatic</code></td>
+<td>copie les fichiers statiques dans <code>staticfiles/</code> (production)</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="doc3-10-sécurité">10. Sécurité</h2>
+<ul>
+<li><strong>Secrets</strong> : uniquement dans <code>.env</code> ou les variables d'environnement.
+  <code>.env</code>, les clés <code>ee-*.json</code>, <code>db.sqlite3</code>, <code>*.log</code> et <code>staticfiles/</code> sont
+  ignorés par Git.</li>
+<li><strong>Historique Git</strong> : d'anciens commits contiennent des mots de passe
+  d'application Gmail et une <code>SECRET_KEY</code>. Ils doivent être <strong>révoqués</strong>
+  (voir la PR n°1). Les retirer du code ne les efface pas de l'historique.</li>
+<li><strong>Points à durcir</strong> avant une mise en ligne (détails dans
+  <a href="#doc4">4-AMELIORER.md</a>) :<ul>
+<li>endpoints <code>crop-calendar</code> add / update / delete sans authentification et
+  exemptés de CSRF ;</li>
+<li><code>CORS_ALLOW_ALL_ORIGINS = True</code> ;</li>
+<li><code>DEBUG</code> doit rester à <code>False</code> en production (c'est la valeur par défaut) ;</li>
+<li>le mot de passe <code>postgres</code> par défaut (<code>1234</code>) doit être changé.</li>
+</ul>
+</li>
+</ul>
+</section>
+<section class="chapter" id="doc4">
+  <div class="chapter-label">Partie 4</div>
+  <h1 id="doc4-4-améliorer-le-projet">4. Améliorer le projet</h1>
+<blockquote>
+<p>Pour toute personne qui veut <strong>faire évoluer</strong> E-commune : développeurs,
+étudiants, bénévoles. Ceux qui ne codent pas peuvent aussi aider : voir
+<a href="#doc4-5-contribuer-sans-coder">Contribuer sans coder</a>.</p>
+</blockquote>
+<h2 id="doc4-sommaire">Sommaire</h2>
+<ol>
+<li><a href="#doc4-1-proposer-une-modification-fork-et-pull-request">Proposer une modification (fork et Pull Request)</a></li>
+<li><a href="#doc4-2-recettes-pas-à-pas">Recettes pas à pas</a></li>
+<li><a href="#doc4-3-limites-connues">Limites connues</a></li>
+<li><a href="#doc4-4-feuille-de-route-proposée">Feuille de route proposée</a></li>
+<li><a href="#doc4-5-contribuer-sans-coder">Contribuer sans coder</a></li>
+</ol>
+<hr>
+<h2 id="doc4-1-proposer-une-modification-fork-et-pull-request">1. Proposer une modification (fork et Pull Request)</h2>
+<p>Le dépôt de référence est <strong>https://github.com/1998Jules/projet_horieon</strong>.
+Si vous n'en êtes pas collaborateur, passez par un <strong>fork</strong> (votre copie
+personnelle) et une <strong>Pull Request</strong> (PR : demande d'intégration).</p>
+<div class="mermaid" data-processed="true"><svg aria-roledescription="flowchart-v2" role="graphics-document document" viewBox="-8 -8 652.171875 118.8515625" style="max-width: 652.171875px;" xmlns="http://www.w3.org/2000/svg" width="100%" id="diagramme-5"><style>#diagramme-5{font-family:Inter,Segoe UI,sans-serif;font-size:13px;fill:#1c2420;}#diagramme-5 .error-icon{fill:#f7faf8;}#diagramme-5 .error-text{fill:#080507;stroke:#080507;}#diagramme-5 .edge-thickness-normal{stroke-width:2px;}#diagramme-5 .edge-thickness-thick{stroke-width:3.5px;}#diagramme-5 .edge-pattern-solid{stroke-dasharray:0;}#diagramme-5 .edge-pattern-dashed{stroke-dasharray:3;}#diagramme-5 .edge-pattern-dotted{stroke-dasharray:2;}#diagramme-5 .marker{fill:#5b6b62;stroke:#5b6b62;}#diagramme-5 .marker.cross{stroke:#5b6b62;}#diagramme-5 svg{font-family:Inter,Segoe UI,sans-serif;font-size:13px;}#diagramme-5 .label{font-family:Inter,Segoe UI,sans-serif;color:#1c2420;}#diagramme-5 .cluster-label text{fill:#080507;}#diagramme-5 .cluster-label span,#diagramme-5 p{color:#080507;}#diagramme-5 .label text,#diagramme-5 span,#diagramme-5 p{fill:#1c2420;color:#1c2420;}#diagramme-5 .node rect,#diagramme-5 .node circle,#diagramme-5 .node ellipse,#diagramme-5 .node polygon,#diagramme-5 .node path{fill:#ecf6ef;stroke:#15803d;stroke-width:1px;}#diagramme-5 .flowchart-label text{text-anchor:middle;}#diagramme-5 .node .katex path{fill:#000;stroke:#000;stroke-width:1px;}#diagramme-5 .node .label{text-align:center;}#diagramme-5 .node.clickable{cursor:pointer;}#diagramme-5 .arrowheadPath{fill:#0b0b0b;}#diagramme-5 .edgePath .path{stroke:#5b6b62;stroke-width:2.0px;}#diagramme-5 .flowchart-link{stroke:#5b6b62;fill:none;}#diagramme-5 .edgeLabel{background-color:#fff8e6;text-align:center;}#diagramme-5 .edgeLabel rect{opacity:0.5;background-color:#fff8e6;fill:#fff8e6;}#diagramme-5 .labelBkg{background-color:rgba(255, 248, 230, 0.5);}#diagramme-5 .cluster rect{fill:#f7faf8;stroke:hsl(140, 0%, 87.4509803922%);stroke-width:1px;}#diagramme-5 .cluster text{fill:#080507;}#diagramme-5 .cluster span,#diagramme-5 p{color:#080507;}#diagramme-5 div.mermaidTooltip{position:absolute;text-align:center;max-width:200px;padding:2px;font-family:Inter,Segoe UI,sans-serif;font-size:12px;background:#f7faf8;border:1px solid hsl(140, 0%, 87.4509803922%);border-radius:2px;pointer-events:none;z-index:100;}#diagramme-5 .flowchartTitleText{text-anchor:middle;font-size:18px;fill:#1c2420;}#diagramme-5 :root{--mermaid-font-family:Inter,Segoe UI,sans-serif;}</style><g><marker orient="auto" markerHeight="12" markerWidth="12" markerUnits="userSpaceOnUse" refY="5" refX="6" viewBox="0 0 10 10" class="marker flowchart" id="diagramme-5_flowchart-pointEnd"><path style="stroke-width: 1; stroke-dasharray: 1, 0;" class="arrowMarkerPath" d="M 0 0 L 10 5 L 0 10 z"></path></marker><marker orient="auto" markerHeight="12" markerWidth="12" markerUnits="userSpaceOnUse" refY="5" refX="4.5" viewBox="0 0 10 10" class="marker flowchart" id="diagramme-5_flowchart-pointStart"><path style="stroke-width: 1; stroke-dasharray: 1, 0;" class="arrowMarkerPath" d="M 0 5 L 10 10 L 10 0 z"></path></marker><marker orient="auto" markerHeight="11" markerWidth="11" markerUnits="userSpaceOnUse" refY="5" refX="11" viewBox="0 0 10 10" class="marker flowchart" id="diagramme-5_flowchart-circleEnd"><circle style="stroke-width: 1; stroke-dasharray: 1, 0;" class="arrowMarkerPath" r="5" cy="5" cx="5"></circle></marker><marker orient="auto" markerHeight="11" markerWidth="11" markerUnits="userSpaceOnUse" refY="5" refX="-1" viewBox="0 0 10 10" class="marker flowchart" id="diagramme-5_flowchart-circleStart"><circle style="stroke-width: 1; stroke-dasharray: 1, 0;" class="arrowMarkerPath" r="5" cy="5" cx="5"></circle></marker><marker orient="auto" markerHeight="11" markerWidth="11" markerUnits="userSpaceOnUse" refY="5.2" refX="12" viewBox="0 0 11 11" class="marker cross flowchart" id="diagramme-5_flowchart-crossEnd"><path style="stroke-width: 2; stroke-dasharray: 1, 0;" class="arrowMarkerPath" d="M 1,1 l 9,9 M 10,1 l -9,9"></path></marker><marker orient="auto" markerHeight="11" markerWidth="11" markerUnits="userSpaceOnUse" refY="5.2" refX="-1" viewBox="0 0 11 11" class="marker cross flowchart" id="diagramme-5_flowchart-crossStart"><path style="stroke-width: 2; stroke-dasharray: 1, 0;" class="arrowMarkerPath" d="M 1,1 l 9,9 M 10,1 l -9,9"></path></marker><g class="root"><g class="clusters"></g><g class="edgePaths"><path marker-end="url(#diagramme-5_flowchart-pointEnd)" style="fill:none;" class="edge-thickness-normal edge-pattern-solid flowchart-link LS-A LE-B" id="L-A-B-0" d="M170.328,18.606L180.832,17.183C191.336,15.761,212.344,12.916,232.478,12.959C252.613,13.003,271.874,15.936,281.505,17.402L291.135,18.869"></path><path marker-end="url(#diagramme-5_flowchart-pointEnd)" style="fill:none;" class="edge-thickness-normal edge-pattern-solid flowchart-link LS-B LE-C" id="L-B-C-0" d="M433.953,17.659L440.923,16.394C447.893,15.129,461.833,12.6,475.278,12.62C488.723,12.641,501.672,15.211,508.147,16.497L514.622,17.782"></path><path marker-end="url(#diagramme-5_flowchart-pointEnd)" style="fill:none;" class="edge-thickness-normal edge-pattern-solid flowchart-link LS-C LE-C" id="L-C-C-0" d="M555.827,47.711L549.826,52.719C543.825,57.727,531.823,67.742,525.821,74.002C519.82,80.262,519.82,82.766,529.331,85.27C538.841,87.773,557.862,90.277,576.883,90.277C595.904,90.277,614.924,87.773,624.435,85.27C633.945,82.766,633.945,80.262,628.622,74.568C623.299,68.874,612.654,59.99,607.331,55.549L602.008,51.107"></path><path marker-end="url(#diagramme-5_flowchart-pointEnd)" style="fill:none;" class="edge-thickness-normal edge-pattern-solid flowchart-link LS-C LE-B" id="L-C-B-0" d="M519.82,41.468L512.479,42.925C505.138,44.382,490.456,47.296,477.014,47.647C463.572,47.997,451.37,45.783,445.269,44.676L439.168,43.569"></path><path marker-end="url(#diagramme-5_flowchart-pointEnd)" style="fill:none;" class="edge-thickness-normal edge-pattern-solid flowchart-link LS-B LE-A" id="L-B-A-0" d="M296.375,40.615L285.871,42.214C275.367,43.813,254.359,47.012,234.227,47.307C214.094,47.603,194.837,44.995,185.209,43.691L175.58,42.386"></path></g><g class="edgeLabels"><g transform="translate(233.3515625, 10.0703125)" class="edgeLabel"><g transform="translate(-12.234375, -10.0703125)" class="label"><foreignObject height="20.140625" width="24.46875"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="edgeLabel">fork</span></div></foreignObject></g></g><g transform="translate(475.7734375, 10.0703125)" class="edgeLabel"><g transform="translate(-16.8203125, -10.0703125)" class="label"><foreignObject height="20.140625" width="33.640625"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="edgeLabel">clone</span></div></foreignObject></g></g><g transform="translate(576.8828125, 92.78125)" class="edgeLabel"><g transform="translate(-59.2890625, -10.0703125)" class="label"><foreignObject height="20.140625" width="118.578125"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="edgeLabel">branche + commits</span></div></foreignObject></g></g><g transform="translate(475.7734375, 50.2109375)" class="edgeLabel"><g transform="translate(-15.1015625, -10.0703125)" class="label"><foreignObject height="20.140625" width="30.203125"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="edgeLabel">push</span></div></foreignObject></g></g><g transform="translate(233.3515625, 50.2109375)" class="edgeLabel"><g transform="translate(-38.0234375, -10.0703125)" class="label"><foreignObject height="20.140625" width="76.046875"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="edgeLabel">Pull Request</span></div></foreignObject></g></g></g><g class="nodes"><g transform="translate(85.1640625, 30.140625)" data-id="A" data-node="true" id="flowchart-A-61" class="node default default flowchart-label"><rect height="55.28125" width="170.328125" y="-27.640625" x="-85.1640625" ry="0" rx="0" style="" class="basic label-container"></rect><g transform="translate(-77.6640625, -20.140625)" style="" class="label"><rect></rect><foreignObject height="40.28125" width="155.328125"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="nodeLabel">Dépôt de référence<br>1998Jules/projet_horieon</span></div></foreignObject></g></g><g transform="translate(365.1640625, 30.140625)" data-id="B" data-node="true" id="flowchart-B-62" class="node default default flowchart-label"><rect height="55.28125" width="137.578125" y="-27.640625" x="-68.7890625" ry="0" rx="0" style="" class="basic label-container"></rect><g transform="translate(-61.2890625, -20.140625)" style="" class="label"><rect></rect><foreignObject height="40.28125" width="122.578125"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="nodeLabel">Votre copie<br>vous/projet_horieon</span></div></foreignObject></g></g><g transform="translate(576.8828125, 30.140625)" data-id="C" data-node="true" id="flowchart-C-64" class="node default default flowchart-label"><rect height="35.140625" width="114.125" y="-17.5703125" x="-57.0625" ry="0" rx="0" style="" class="basic label-container"></rect><g transform="translate(-49.5625, -10.0703125)" style="" class="label"><rect></rect><foreignObject height="20.140625" width="99.125"><div style="display: inline-block; white-space: nowrap;" xmlns="http://www.w3.org/1999/xhtml"><span class="nodeLabel">Votre ordinateur</span></div></foreignObject></g></g></g></g></g></svg></div>
+<h3 id="doc4-étapes">Étapes</h3>
+<pre class="highlight"><code class="language-bash"># 1. Une seule fois : forker sur GitHub (bouton « Fork »), ou avec GitHub CLI :
+gh repo fork 1998Jules/projet_horieon --clone
+cd projet_horieon
+
+# 2. Pour chaque amélioration : partir d'une version à jour
+git checkout main
+git pull origin main
+git checkout -b corrige-selection-canton     # nom de branche explicite
+
+# 3. Modifier, puis vérifier (voir la check-list ci-dessous)
+
+# 4. Enregistrer
+git add fichier1 fichier2
+git commit -m "Corrige la liste « Choisir canton » du géoportail"
+
+# 5. Publier et proposer
+git push -u origin corrige-selection-canton    # origin = votre fork
+gh pr create --repo 1998Jules/projet_horieon --fill</code></pre>
+<h3 id="doc4-check-list-avant-douvrir-une-pr">Check-list avant d'ouvrir une PR</h3>
+<ul class="task-list">
+<li class="task-list-item"><input type="checkbox" disabled=""> <code>python manage.py check</code> ne signale aucune erreur.</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <code>python manage.py makemigrations --check --dry-run</code> : si vous avez
+      modifié un modèle, la migration est incluse dans la PR.</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> Les pages touchées ont été testées dans le navigateur, <strong>console
+      JavaScript comprise</strong> (F12 › Console).</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> <strong>Aucun secret</strong> dans les fichiers : mots de passe, <code>SECRET_KEY</code>, clés
+      <code>ee-*.json</code>, fichier <code>.env</code>.</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> Les fichiers sont en <strong>UTF-8</strong>. Sous Windows, <code>pip freeze &gt; requirements.txt</code>
+      dans PowerShell produit de l'UTF-16 que <code>pip</code> ne sait pas relire :
+      préférez <code>pip freeze | Out-File -Encoding utf8 requirements.txt</code>, ou
+      éditez le fichier à la main.</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> Pas de fichiers générés : <code>__pycache__/</code>, <code>staticfiles/</code>, <code>db.sqlite3</code>,
+      <code>*.log</code> (déjà dans <code>.gitignore</code>).</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> La description de la PR explique <strong>quoi</strong>, <strong>pourquoi</strong> et <strong>comment
+      c'est testé</strong>.</li>
+<li class="task-list-item"><input type="checkbox" disabled=""> La documentation (<code>docs/</code>) est mise à jour si le comportement change.</li>
+</ul>
+<h3 id="doc4-conventions">Conventions</h3>
+<ul>
+<li>Code, commentaires et messages de commit <strong>en français</strong> (comme le reste du
+  projet), noms de variables en anglais ou en français selon le fichier
+  modifié.</li>
+<li>Un commit = une idée. Message à l'infinitif ou au présent :
+  « Ajoute… », « Corrige… ».</li>
+<li>Configuration : jamais de valeur sensible dans le code ; ajoutez une
+  variable dans <code>.env.exemple</code> et lisez-la avec <code>os.environ.get(...)</code> dans
+  <code>horison/settings.py</code>.</li>
+</ul>
+<hr>
+<h2 id="doc4-2-recettes-pas-à-pas">2. Recettes pas à pas</h2>
+<h3 id="doc4-21-ajouter-une-couche-au-géoportail">2.1 Ajouter une couche au géoportail</h3>
+<p>Exemple : une couche « Mairies ».</p>
+<ol>
+<li>
+<p><strong>Modèle</strong> (<code>geoportail/models.py</code>) :</p>
+<pre class="highlight"><code class="language-python">class mairie(models.Model):
+    canton_nom = models.CharField(max_length=100)
+    nom = models.CharField(max_length=100)
+    geom = models.PointField(srid=4326)
+
+    class Meta:
+        db_table = "mairies"
+        managed = False   # comme les autres couches ; ou True pour qu'une migration crée la table</code></pre>
+<p>Avec <code>managed = False</code>, créez la table vous-même (import QGIS,
+ <code>shp2pgsql</code>), ou ajoutez son remplissage à <code>import_blitta2</code>, qui crée
+ automatiquement les tables manquantes de l'application <code>geoportail</code>.</p>
+</li>
+<li>
+<p><strong>Vue</strong> (<code>geoportail/views.py</code>), sur le modèle des autres :</p>
+<pre class="highlight"><code class="language-python">def mairie_geojson(request):
+    qs = mairie.objects.exclude(geom__isnull=True)
+    geojson = serialize('geojson', qs, geometry_field='geom', fields=('canton_nom', 'nom'))
+    return HttpResponse(geojson, content_type='application/json')</code></pre>
+</li>
+<li>
+<p><strong>Route</strong> (<code>geoportail/urls.py</code>) :
+   <code>path('geojson/mairie/', views.mairie_geojson, name='mairie_geojson'),</code></p>
+</li>
+<li>
+<p><strong>Carte</strong> (<code>geoportail/static/js/script.js</code>) :</p>
+<ul>
+<li>une icône dans <code>geoportail/static/icone/mairie.png</code> et sa déclaration
+   <code>L.icon(...)</code> à côté de <code>infraIcons</code> ;</li>
+<li>la couche : <code>geoLayers["Mairies"] = L.geoJSON(null, { pointToLayer: ..., onEachFeature: ... });</code></li>
+<li>son chargement dans <code>initMap()</code> :
+   <code>loadGeoJSON("/geoportail/geojson/mairie/", geoLayers["Mairies"]),</code></li>
+<li>son rattachement au bon <strong>thème</strong> dans le panneau des couches.</li>
+</ul>
+</li>
+<li>
+<p><strong>Recherche</strong> (facultatif) : ajouter la couche à <code>SEARCHABLE_LAYERS</code> dans
+   <code>views.py</code>.</p>
+</li>
+<li>
+<p><strong>Tester</strong> : <code>/geoportail/geojson/mairie/</code> renvoie une FeatureCollection,
+   puis la couche apparaît sur la carte.</p>
+</li>
+</ol>
+<h3 id="doc4-22-mettre-à-jour-les-données-depuis-openstreetmap">2.2 Mettre à jour les données depuis OpenStreetMap</h3>
+<p>Après des ajouts dans OpenStreetMap :</p>
+<pre class="highlight"><code class="language-bash">python manage.py import_blitta2 --refresh</code></pre>
+<p><code>--refresh</code> retélécharge les sources au lieu d'utiliser le cache
+(<code>%TEMP%\horieon_import</code> par défaut, modifiable avec <code>--cache-dir</code>).</p>
+<h3 id="doc4-23-adapter-limport-à-une-autre-commune">2.3 Adapter l'import à une autre commune</h3>
+<p>Dans <code>geoportail/management/commands/import_blitta2.py</code> :</p>
+<ol>
+<li>remplacez le dictionnaire <code>CANTONS</code> par les <strong>P-codes COD-AB</strong> des cantons
+   de la commune (liste dans le fichier <code>tgo_admin3.geojson</code> du jeu
+   <a href="https://data.humdata.org/dataset/cod-ab-tgo">cod-ab-tgo</a>) et leurs noms
+   officiels ;</li>
+<li>adaptez le nom et les codes de la commune dans <code>load_boundaries()</code> ;</li>
+<li>changez le centre de la carte dans <code>geoportail/static/js/script.js</code>
+   (<code>setView([lat, lon], zoom)</code>).</li>
+</ol>
+<p>La composition des communes est fixée par le décret publié au <em>Journal
+officiel</em> du 8 janvier 2018 (application de la loi n°2017-008).</p>
+<h3 id="doc4-24-ajuster-le-score-de-risque-agricole">2.4 Ajuster le score de risque agricole</h3>
+<ul>
+<li><strong>Pondérations</strong> : constante <code>WEIGHTS</code> dans <code>agriculture/risk_engine.py</code>
+  (la somme doit rester égale à 1, une assertion le vérifie).</li>
+<li><strong>Seuils d'une dimension</strong> : fonctions <code>_score_vegetation</code>,
+  <code>_score_humidity</code>, <code>_score_drought</code>, <code>_score_rainfall</code>, <code>_score_forecast</code>.</li>
+<li><strong>Niveaux</strong> : <code>_level_from_score</code>.</li>
+<li><strong>Messages et recommandations</strong> : <code>ALERT_TEMPLATES</code> dans
+  <code>agriculture/alert_services.py</code>.</li>
+<li><strong>Règles d'alerte</strong> : modèle <code>AlertRule</code>, modifiable depuis <code>/admin/</code>
+  (règles par défaut : migration <code>0008_default_alert_rules.py</code>).</li>
+</ul>
+<p>Testez sans rien envoyer :
+<code>python manage.py evaluate_field_alerts --champ-id &lt;id&gt; --dry-run</code>.</p>
+<h3 id="doc4-25-ajouter-un-indicateur-agricole">2.5 Ajouter un indicateur agricole</h3>
+<ol>
+<li>Ajoutez son code dans <code>FieldIndicatorSnapshot.INDEX_CHOICES</code>
+   (<code>agriculture/models.py</code>), puis <code>python manage.py makemigrations agriculture</code>.</li>
+<li>Calculez-le dans <code>gee_utils.py</code> (ou un nouveau module).</li>
+<li>Collectez-le dans <code>indicator_collector.py</code>.</li>
+<li>Utilisez-le dans une dimension de <code>risk_engine.py</code>.</li>
+</ol>
+<h3 id="doc4-26-ajouter-lenvoi-par-whatsapp">2.6 Ajouter l'envoi par WhatsApp</h3>
+<p>Le modèle est prêt (<code>AlertDelivery.CHANNELS</code> contient <code>WHATSAPP</code>,
+<code>UserProfile.whatsapp</code> stocke le numéro). Il reste à :</p>
+<ol>
+<li>créer les <code>AlertDelivery(channel="WHATSAPP")</code> dans <code>alert_services.py</code> ;</li>
+<li>écrire <code>send_pending_whatsapp_deliveries()</code> (API WhatsApp Business, ou
+   un fournisseur SMS comme Twilio) dans <code>notification_services.py</code> ;</li>
+<li>l'appeler depuis <code>evaluate_field_alerts</code>.</li>
+</ol>
+<hr>
+<h2 id="doc4-3-limites-connues">3. Limites connues</h2>
+<p>Classées par gravité. Les numéros de ligne correspondent à la version de ce
+document.</p>
+<h3 id="doc4-sécurité">Sécurité</h3>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Problème</th>
+<th>Où</th>
+<th>Piste</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>S1</td>
+<td>Des mots de passe Gmail et une <code>SECRET_KEY</code> sont <strong>dans l'historique Git</strong></td>
+<td>anciens commits</td>
+<td>Les <strong>révoquer</strong> côté Google et en production. Réécrire l'historique (<code>git filter-repo</code>) ne suffit pas si le dépôt a été cloné</td>
+</tr>
+<tr>
+<td>S2</td>
+<td><code>crop-calendar/add</code>, <code>update</code>, <code>delete</code> : <strong>aucune authentification</strong>, CSRF désactivé</td>
+<td><code>agriculture/views.py</code> (<code>add_crop_calendar</code>, <code>update_crop_calendar</code>, <code>delete_crop_calendar</code>)</td>
+<td>Ajouter <code>@require_api_user</code> + vérification <code>is_staff</code></td>
+</tr>
+<tr>
+<td>S3</td>
+<td><code>CORS_ALLOW_ALL_ORIGINS = True</code></td>
+<td><code>horison/settings.py:110</code></td>
+<td>En production : <code>CORS_ALLOWED_ORIGINS</code> lu depuis <code>.env</code></td>
+</tr>
+<tr>
+<td>S4</td>
+<td>Mot de passe base par défaut <code>1234</code></td>
+<td><code>settings.py</code>, exemples</td>
+<td>Imposer <code>DB_PASSWORD</code> en production</td>
+</tr>
+</tbody>
+</table>
+<h3 id="doc4-fonctionnement">Fonctionnement</h3>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Problème</th>
+<th>Où</th>
+<th>Piste</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>F1</td>
+<td>Pas de page d'accueil (404 sur <code>/</code>)</td>
+<td><code>horison/urls.py</code></td>
+<td><code>path('', RedirectView.as_view(url='/geoportail/'))</code></td>
+</tr>
+<tr>
+<td>F2</td>
+<td>La liste « Choisir canton » reste vide : le code lit <code>properties.cant</code>, l'API renvoie <code>canton</code></td>
+<td><code>geoportail/static/js/script.js:398-401</code></td>
+<td>Lire <code>feature.properties.canton</code> ; faire zoomer la carte sur le canton choisi</td>
+</tr>
+<tr>
+<td>F3</td>
+<td>Pas de couche « quartiers » (<code>allQuartiers</code> jamais rempli)</td>
+<td><code>script.js</code></td>
+<td>Ajouter une couche quartiers (voir 2.1)</td>
+</tr>
+<tr>
+<td>F4</td>
+<td>Vues <code>terrain_geojson</code>, <code>cooperative_geojson</code>, <code>magazin_geojson</code> non routées</td>
+<td><code>geoportail/urls.py</code></td>
+<td>Ajouter les <code>path(...)</code> et charger les couches dans <code>initMap()</code></td>
+</tr>
+<tr>
+<td>F5</td>
+<td><code>api/champs/</code> pointe vers <code>ndvi_timeseries</code> (copier-coller)</td>
+<td><code>agriculture/urls.py:22</code></td>
+<td>Vérifier l'usage côté frontend, puis corriger ou supprimer</td>
+</tr>
+<tr>
+<td>F6</td>
+<td>Tables <code>region</code>, <code>couche_prefecture_utm</code>, <code>communes_togo_utm</code> absentes : erreur 500 sur <code>api/regions/</code>, <code>prefectures/</code>, <code>communes/</code></td>
+<td><code>agriculture/models.py</code></td>
+<td>Les remplir depuis COD-AB (ADM1, ADM2, communes) avec une commande d'import</td>
+</tr>
+<tr>
+<td>F7</td>
+<td>Carte agriculture centrée sur Aného, couches GeoServer <code>localhost:8089</code></td>
+<td><code>agriculture/static/js/main.js</code></td>
+<td>Centrer sur Blitta 2, servir les couches depuis Django</td>
+</tr>
+<tr>
+<td>F8</td>
+<td>Clé Earth Engine : nom de fichier codé en dur, chemin relatif au dossier de lancement</td>
+<td><code>agriculture/gee_utils.py:14</code></td>
+<td>Variable <code>GEE_SERVICE_ACCOUNT_KEY</code> (chemin absolu) + <code>GEE_PROJECT</code> dans <code>.env</code></td>
+</tr>
+<tr>
+<td>F9</td>
+<td><code>run_alerts.bat</code> et <code>install_alerts_task.ps1</code> contiennent des chemins <code>D:\Horison\...</code></td>
+<td>racine</td>
+<td>Chemins relatifs (<code>%~dp0</code>) et venv <code>.venv</code></td>
+</tr>
+<tr>
+<td>F10</td>
+<td>Réponses GeoJSON sans <code>charset</code></td>
+<td><code>geoportail/views.py</code></td>
+<td><code>content_type='application/json; charset=utf-8'</code></td>
+</tr>
+<tr>
+<td>F11</td>
+<td>Langue et fuseau <code>en-us</code> / <code>UTC</code></td>
+<td><code>settings.py:204</code></td>
+<td><code>fr-fr</code> et <code>Africa/Lome</code> (même heure qu'UTC)</td>
+</tr>
+<tr>
+<td>F12</td>
+<td><code>X_FRAME_OPTIONS = "ALLOW-FROM ..."</code> obsolète</td>
+<td><code>settings.py:219</code></td>
+<td>En-tête <code>Content-Security-Policy: frame-ancestors</code></td>
+</tr>
+<tr>
+<td>F13</td>
+<td>Alertes seulement par e-mail</td>
+<td><code>notification_services.py</code></td>
+<td>Voir 2.6</td>
+</tr>
+</tbody>
+</table>
+<h3 id="doc4-qualité-du-code">Qualité du code</h3>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Problème</th>
+<th>Piste</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Q1</td>
+<td><strong>Aucun test automatisé</strong> (<code>tests.py</code> vides)</td>
+<td>Commencer par les vues GeoJSON, <code>risk_engine</code> (fonctions pures, faciles à tester) et <code>import_blitta2</code></td>
+</tr>
+<tr>
+<td>Q2</td>
+<td>Fichiers en double ou inutilisés à la racine : <code>urls.py</code>, <code>wsgi.py</code>, <code>asgi.py</code>, <code>__init__.py</code>, <code>model.py</code>, <code>commune.geojson</code>, et <code>geoportail/static/js/scripts.js</code></td>
+<td>Vérifier qu'aucun déploiement ne les utilise, puis les supprimer</td>
+</tr>
+<tr>
+<td>Q3</td>
+<td>Fonctions redéfinies dans le même fichier (ex. <code>geojson_to_ee_geometry</code> deux fois dans <code>gee_utils.py</code>, imports répétés dans <code>views.py</code>)</td>
+<td>Nettoyage</td>
+</tr>
+<tr>
+<td>Q4</td>
+<td>Noms de tables et de modèles hétérogènes (<code>chatea</code>, <code>formation_s</code>, classes en minuscules)</td>
+<td>Harmoniser lors d'une future migration de données</td>
+</tr>
+<tr>
+<td>Q5</td>
+<td>Pas d'intégration continue</td>
+<td>GitHub Actions : <code>pip install</code>, <code>manage.py check</code>, tests, avec un service PostGIS</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="doc4-4-feuille-de-route-proposée">4. Feuille de route proposée</h2>
+<table>
+<thead>
+<tr>
+<th>Priorité</th>
+<th>Objectif</th>
+<th>Tâches</th>
+<th>Effort</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>P0 — urgent</strong></td>
+<td>Sécurité</td>
+<td>S1 (révocation des secrets), S2, S3</td>
+<td>½ journée</td>
+</tr>
+<tr>
+<td><strong>P1</strong></td>
+<td>Application utilisable partout</td>
+<td>F1, F2, F6, F8, F9</td>
+<td>2 à 3 jours</td>
+</tr>
+<tr>
+<td><strong>P1</strong></td>
+<td>Fiabilité</td>
+<td>Q1 (premiers tests), Q5 (CI)</td>
+<td>2 jours</td>
+</tr>
+<tr>
+<td><strong>P2</strong></td>
+<td>Données</td>
+<td>Campagne de collecte terrain (jours de marché, points d'eau, châteaux d'eau, coopératives) ; contribution à OpenStreetMap ; couche quartiers (F3) ; couches F4</td>
+<td>variable</td>
+</tr>
+<tr>
+<td><strong>P2</strong></td>
+<td>Agriculture</td>
+<td>F7 ; WhatsApp / SMS (F13) ; tableau de bord des alertes dans l'admin</td>
+<td>1 à 2 semaines</td>
+</tr>
+<tr>
+<td><strong>P3</strong></td>
+<td>Confort</td>
+<td>Page d'accueil, interface mobile, export PDF des cartes de la cartothèque, traduction en langues locales (éwé, kabiyè…)</td>
+<td>variable</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="doc4-5-contribuer-sans-coder">5. Contribuer sans coder</h2>
+<ul>
+<li><strong>Compléter OpenStreetMap</strong> (https://www.openstreetmap.org, compte
+  gratuit) : ajouter un marché, un forage, une école, le nom d'une piste.
+  Ces ajouts sont repris au prochain <code>import_blitta2 --refresh</code>. Les
+  applications mobiles <strong>StreetComplete</strong> ou <strong>Every Door</strong> permettent de le
+  faire sur le terrain.</li>
+<li><strong>Signaler une erreur</strong> : ouvrir une <em>issue</em> sur
+  https://github.com/1998Jules/projet_horieon/issues en décrivant ce qui ne va
+  pas (lieu, capture d'écran).</li>
+<li><strong>Collecter des données de terrain</strong> (formulaire papier ou application
+  comme KoboToolbox / ODK) : nom, position GPS, canton, localité, et selon le
+  type : jour de marché, type de pompe, statut public / privé, date
+  d'ouverture…</li>
+<li><strong>Tester</strong> une nouvelle version et faire part de vos retours.</li>
+<li><strong>Améliorer cette documentation</strong> : une explication pas claire est un défaut
+  comme un autre.</li>
+</ul>
+</section>
+
+</body></html>

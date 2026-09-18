@@ -168,18 +168,21 @@ géométries sont en **WGS 84 (EPSG:4326)**.
 ### 4.1 Tables gérées par les migrations
 
 ```mermaid
-erDiagram
-    User ||--o| UserProfile : "profil"
-    User ||--o{ Champ : "owner"
-    Champ ||--o{ FieldIndicatorSnapshot : "indicator_snapshots"
-    Champ ||--o{ RiskAssessment : "risk_assessments"
-    Champ ||--o{ FarmerAlert : "farmer_alerts"
-    User ||--o{ FarmerAlert : "farmer"
-    AlertRule |o--o{ FarmerAlert : "rule"
-    RiskAssessment }o--o{ FarmerAlert : "triggered_alerts"
-    FarmerAlert ||--o{ AlertDelivery : "deliveries"
-    DomaineCarte ||--o{ CarteTheematique : "cartes"
+flowchart LR
+    User[User] -- "1 → 0..1" --> UserProfile[UserProfile]
+    User -- "1 → n · owner" --> Champ[Champ]
+    Champ -- "1 → n" --> FieldIndicatorSnapshot[FieldIndicatorSnapshot]
+    Champ -- "1 → n" --> RiskAssessment[RiskAssessment]
+    Champ -- "1 → n" --> FarmerAlert[FarmerAlert]
+    User -- "1 → n · farmer" --> FarmerAlert
+    AlertRule[AlertRule] -- "0..1 → n" --> FarmerAlert
+    RiskAssessment -- "n ↔ n · triggered_alerts" --> FarmerAlert
+    FarmerAlert -- "1 → n" --> AlertDelivery[AlertDelivery]
+    DomaineCarte[DomaineCarte] -- "1 → n" --> CarteTheematique[CarteTheematique]
 ```
+
+*Lecture : « Champ 1 → n FieldIndicatorSnapshot » = un champ possède
+plusieurs mesures d'indicateurs.*
 
 | Modèle | Table | Rôle |
 |---|---|---|

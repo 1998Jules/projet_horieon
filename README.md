@@ -1,5 +1,8 @@
 # E-commune Horison — Géoportail de la commune de Blitta 2 (Togo)
 
+> 📄 **Lire la documentation complète en PDF (43 pages, mise en page) :
+> [docs/Documentation_E-commune.pdf](docs/Documentation_E-commune.pdf)**
+
 **E-commune** est une application web qui affiche sur une carte interactive les
 infrastructures d'une commune togolaise (écoles, centres de santé, marchés,
 points d'eau, routes…) et qui aide les agriculteurs à **surveiller leurs champs
