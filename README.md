@@ -73,6 +73,10 @@ Puis ouvrir :
 
 ## Documentation
 
+📄 **Version PDF prête à lire ou à imprimer** :
+[docs/Documentation_E-commune.pdf](docs/Documentation_E-commune.pdf)
+(regénérée par `python docs/generer_pdf.py`).
+
 | Guide | Pour qui | Contenu |
 |---|---|---|
 | [1. Comprendre le projet](docs/1-COMPRENDRE.md) | Tout le monde | À quoi sert l'application, comment l'utiliser, lexique (NDVI, SPI, SIG…) |
