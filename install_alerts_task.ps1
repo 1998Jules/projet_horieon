@@ -1,16 +1,20 @@
 # ============================================================
-#  Installation de la tâche planifiée Windows pour les alertes agricoles
+#  install_alerts_task.ps1 — Task Scheduler Windows (amélioré)
 # ============================================================
+#  Crée une tâche planifiée qui exécute run_alerts.bat
 #
-#  Ce script crée une tâche planifiée qui exécute la surveillance
-#  agricole tous les jours à 06:00 (par défaut).
+#  Améliorations vs version originale :
+#  - Chemins configurables via paramètres -ProjectDir / -VenvDir
+#  - Vérification que run_alerts.bat existe
+#  - Validation du fichier .env si présent
 #
 #  Usage :
-#     .\install_alerts_task.ps1                    # quotidien à 06:00
-#     .\install_alerts_task.ps1 -Time "08:30"     # quotidien à 08:30
-#     .\install_alerts_task.ps1 -Interval 6       # toutes les 6 heures
-#     .\install_alerts_task.ps1 -Uninstall        # supprimer la tâche
-#     .\install_alerts_task.ps1 -Test             # tester immédiatement
+#     .\install_alerts_task.ps1                            # quotidien à 06:00
+#     .\install_alerts_task.ps1 -Time "08:30"             # quotidien à 08:30
+#     .\install_alerts_task.ps1 -Interval 6               # toutes les 6 heures
+#     .\install_alerts_task.ps1 -Uninstall                # supprimer la tâche
+#     .\install_alerts_task.ps1 -Test                     # tester immédiatement
+#     .\install_alerts_task.ps1 -ProjectDir "D:\Horison\horison" -BatchPath "D:\Horison\horison\run_alerts.bat"
 #
 #  Doit être exécuté en tant qu'administrateur.
 # ============================================================
@@ -18,6 +22,8 @@
 param(
     [string]$Time = "06:00",
     [int]$Interval = 0,
+    [string]$ProjectDir = "D:\Horison\horison",
+    [string]$BatchPath = "D:\Horison\horison\run_alerts.bat",
     [switch]$Uninstall = $false,
     [switch]$Test = $false
 )
@@ -26,12 +32,12 @@ $ErrorActionPreference = "Stop"
 
 # --- Configuration ---
 $TaskName = "AlertesAgricoles_Auto"
-$BatchPath = "D:\Horison\horison\run_alerts.bat"
 
 Write-Host "============================================================" -ForegroundColor Cyan
 Write-Host " Installation de la tache planifiee - Alertes Agricoles   " -ForegroundColor Cyan
 Write-Host "============================================================" -ForegroundColor Cyan
 Write-Host "Nom de la tache : $TaskName"
+Write-Host "Projet          : $ProjectDir"
 Write-Host "Batch execute   : $BatchPath"
 
 # --- Mode désinstallation ---
@@ -66,8 +72,24 @@ if (-not $isAdmin) {
 }
 Write-Host "    [OK] Droits administrateur." -ForegroundColor Green
 
-# Supprimer une tâche existante avec le même nom
-Write-Host "`n[2/4] Suppression de l'ancienne tache (si existe)..." -ForegroundColor Yellow
+# Vérifier manage.py
+$managePy = Join-Path $ProjectDir "manage.py"
+if (-not (Test-Path $managePy)) {
+    Write-Host "    [ERREUR] manage.py introuvable dans $ProjectDir" -ForegroundColor Red
+    exit 1
+}
+Write-Host "    [OK] manage.py trouve." -ForegroundColor Green
+
+# Vérifier .env si présent
+$envFile = Join-Path $ProjectDir ".env"
+if (Test-Path $envFile) {
+    Write-Host "    [OK] Fichier .env detecte." -ForegroundColor Green
+} else {
+    Write-Host "    [INFO] Pas de fichier .env (valeurs par defaut utilisees)." -ForegroundColor Gray
+}
+
+# Supprimer une tâche existante
+Write-Host "`n[2/4] Suppression de l'ancienne tache..." -ForegroundColor Yellow
 try {
     Unregister-ScheduledTask -TaskName $TaskName -Confirm:$false -ErrorAction Stop
     Write-Host "    [OK] Ancienne tache supprimee." -ForegroundColor Green
@@ -75,34 +97,28 @@ try {
     Write-Host "    [INFO] Aucune ancienne tache a supprimer." -ForegroundColor Gray
 }
 
-# --- Mode test : exécuter immédiatement ---
+# --- Mode test ---
 if ($Test) {
-    Write-Host "`n[TEST] Execution immediate du batch pour verification..." -ForegroundColor Magenta
-    Write-Host "    (La tache planifiee n'est pas cree en mode -Test)"
-    Write-Host ""
+    Write-Host "`n[TEST] Execution immediate du batch..." -ForegroundColor Magenta
     & $BatchPath
-    Write-Host "`n[OK] Test termine. Verifiez le fichier alerts.log." -ForegroundColor Green
+    Write-Host "`n[OK] Test termine. Verifiez les logs dans $ProjectDir\logs\" -ForegroundColor Green
     exit 0
 }
 
-# --- Création de la tâche planifiée ---
+# --- Création de la tâche ---
 Write-Host "`n[3/4] Creation de la tache planifiee..." -ForegroundColor Yellow
 
-$Action = New-ScheduledTaskAction -Execute $BatchPath -WorkingDirectory "D:\Horison\horison"
+$Action = New-ScheduledTaskAction -Execute $BatchPath -WorkingDirectory $ProjectDir
 
-# Déterminer le déclencheur
 if ($Interval -gt 0) {
-    # Mode intervalle (toutes les N heures)
     $Trigger = New-ScheduledTaskTrigger -Once -At (Get-Date).Date.AddMinutes(5) -RepetitionInterval (New-TimeSpan -Hours $Interval)
     Write-Host "    Mode intervalle : toutes les $Interval heure(s)" -ForegroundColor Gray
 } else {
-    # Mode quotidien à heure fixe
     $triggerTime = [DateTime]::Parse($Time)
     $Trigger = New-ScheduledTaskTrigger -Daily -At $triggerTime
     Write-Host "    Mode quotidien : tous les jours a $Time" -ForegroundColor Gray
 }
 
-# Paramètres : démarrer même si l'utilisateur n'est pas connecté, redémarrer en cas d'échec
 $Settings = New-ScheduledTaskSettingsSet `
     -AllowStartIfOnBatteries `
     -DontStopIfGoingOnBatteries `
@@ -111,7 +127,6 @@ $Settings = New-ScheduledTaskSettingsSet `
     -RestartInterval (New-TimeSpan -Minutes 15) `
     -ExecutionTimeLimit (New-TimeSpan -Hours 1)
 
-# Exécuter en tant qu'utilisateur actuel avec privilèges élevés
 $Principal = New-ScheduledTaskPrincipal `
     -UserId "$env:USERDOMAIN\$env:USERNAME" `
     -LogonType S4U `
@@ -124,7 +139,7 @@ try {
         -Trigger $Trigger `
         -Settings $Settings `
         -Principal $Principal `
-        -Description "Surveillance agricole preventive - collecte indicateurs + scoring + alertes + emails" `
+        -Description "Surveillance agricole preventive - collecte + scoring + alertes + emails" `
         -Force | Out-Null
     Write-Host "    [OK] Tache creee avec succes." -ForegroundColor Green
 } catch {
@@ -132,7 +147,7 @@ try {
     exit 1
 }
 
-# --- Affichage du récap ---
+# --- Récap ---
 Write-Host "`n[4/4] Recapitulatif..." -ForegroundColor Yellow
 $task = Get-ScheduledTask -TaskName $TaskName
 $taskInfo = $task | Get-ScheduledTaskInfo
@@ -150,10 +165,10 @@ if ($Interval -gt 0) {
 }
 Write-Host "Prochaine exec : $($taskInfo.NextRunTime)"
 Write-Host "Derniere exec : $($taskInfo.LastRunTime)"
-Write-Host "Log           : D:\Horison\horison\alerts.log"
+Write-Host "Log           : $ProjectDir\logs\alerts_YYYYMMDD.log"
 Write-Host ""
 Write-Host "Commandes utiles :" -ForegroundColor Cyan
 Write-Host "  - Tester maintenant    : Start-ScheduledTask -TaskName '$TaskName'"
-Write-Host "  - Voir le statut       : Get-ScheduledTask -TaskName '$TaskName' | Get-ScheduledTaskInfo"
-Write-Host "  - Supprimer la tache   : .\install_alerts_task.ps1 -Uninstall"
+Write-Host "  - Voir le statut      : Get-ScheduledTask -TaskName '$TaskName' | Get-ScheduledTaskInfo"
+Write-Host "  - Supprimer la tache  : .\install_alerts_task.ps1 -Uninstall"
 Write-Host "============================================================" -ForegroundColor Green

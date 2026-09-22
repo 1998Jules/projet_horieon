@@ -1,0 +1,110 @@
+[18/09/202611:23:24,09] ============================================ 
+[18/09/202611:23:24,09] Demarrage surveillance agricole preventive 
+[18/09/202611:23:24,09] Projet : D:\Horison\horison 
+[18/09/202611:23:24,09] Venv   : D:\Horison\hori 
+[18/09/202611:23:24,09] ============================================ 
+[18/09/202611:23:24,09] Activation du virtualenv... 
+[18/09/202611:23:24,09] Verification connexion DB... 
+✓ PROJ_LIB trouvé: D:\Horison\.venv\Lib\site-packages\osgeo\data\proj
+✓ GDAL_DATA trouvé: D:\Horison\.venv\Lib\site-packages\osgeo\data\gdal
+✓ OSGeo ajouté au PATH: D:\Horison\.venv\Lib\site-packages\osgeo
+==================================================
+CONFIGURATION GIS:
+  GDAL_LIBRARY_PATH: D:\Horison\.venv\Lib\site-packages\osgeo\gdal.dll
+  GEOS_LIBRARY_PATH: D:\Horison\.venv\Lib\site-packages\osgeo\geos_c.dll
+  PROJ_LIB: D:\Horison\.venv\Lib\site-packages\osgeo\data\proj
+  GDAL_DATA: D:\Horison\.venv\Lib\site-packages\osgeo\data\gdal
+==================================================
+System check identified no issues (0 silenced).
+[18/09/202611:23:24,09] Connexion DB OK 
+[18/09/202611:23:24,09] Lancement : evaluate_field_alerts  
+[18/09/202611:23:24,09] Debut execution : voir sortie ci-dessous 
+Erreur get_drought_index_timeseries: Image.subtract: If one image has no bands, the other must also have no bands. Got 0 and 1.
+Erreur VHI champ 71: Image.subtract: If one image has no bands, the other must also have no bands. Got 0 and 1.
+Échec envoi email alerte 19 : [WinError 10060] Une tentative de connexion a échoué car le parti connecté n’a pas répondu convenablement au-delà d’une certaine durée ou une connexion établie a échoué car l’hôte de connexion n’a pas répondu
+✓ PROJ_LIB trouvé: D:\Horison\.venv\Lib\site-packages\osgeo\data\proj
+✓ GDAL_DATA trouvé: D:\Horison\.venv\Lib\site-packages\osgeo\data\gdal
+✓ OSGeo ajouté au PATH: D:\Horison\.venv\Lib\site-packages\osgeo
+==================================================
+CONFIGURATION GIS:
+  GDAL_LIBRARY_PATH: D:\Horison\.venv\Lib\site-packages\osgeo\gdal.dll
+  GEOS_LIBRARY_PATH: D:\Horison\.venv\Lib\site-packages\osgeo\geos_c.dll
+  PROJ_LIB: D:\Horison\.venv\Lib\site-packages\osgeo\data\proj
+  GDAL_DATA: D:\Horison\.venv\Lib\site-packages\osgeo\data\gdal
+==================================================
+============================================================
+SURVEILLANCE AGRICOLE PRÉVENTIVE
+============================================================
+
+📡 ÉTAPE 1/4 — Collecte des indicateurs
+Earth Engine initialisé avec succès via Service Account.
+Earth Engine initialisé avec succès via Service Account.
+Earth Engine initialisé avec succès via Service Account.
+Earth Engine initialisé avec succès via Service Account.
+Earth Engine initialisé avec succès via Service Account.
+   ✓ 1 champ(s) traité(s) — 9 snapshot(s) persisté(s), 0 erreur(s)
+
+🎯 ÉTAPE 2/4 — Scoring & détection d'alertes
+   🟡 Champ 71 (première parcelle) : score=47/100 niveau=VIGILANCE
+      types détectés : SECHERESSE
+
+   Récap : 1 alerte(s) créée(s), 1 livraison(s) email programmée(s)
+
+📧 ÉTAPE 4/4 — Envoi des emails en attente
+   ✓ 0 envoyé(s), 1 échec(s), 0 ignoré(s)
+
+============================================================
+✅ Surveillance terminée.
+============================================================
+[18/09/202611:23:24,09] Script termine avec succes 
+[18/09/202611:23:24,09] ============================================ 
+[18/09/202611:30:12,31] ============================================ 
+[18/09/202611:30:12,31] Demarrage surveillance agricole preventive 
+[18/09/202611:30:12,31] Projet : D:\Horison\horison 
+[18/09/202611:30:12,31] Venv   : D:\Horison\hori 
+[18/09/202611:30:12,31] ============================================ 
+[18/09/202611:30:12,31] Activation du virtualenv... 
+[18/09/202611:30:12,31] Verification connexion DB... 
+✓ PROJ_LIB trouvé: D:\Horison\.venv\Lib\site-packages\osgeo\data\proj
+✓ GDAL_DATA trouvé: D:\Horison\.venv\Lib\site-packages\osgeo\data\gdal
+✓ OSGeo ajouté au PATH: D:\Horison\.venv\Lib\site-packages\osgeo
+==================================================
+CONFIGURATION GIS:
+  GDAL_LIBRARY_PATH: D:\Horison\.venv\Lib\site-packages\osgeo\gdal.dll
+  GEOS_LIBRARY_PATH: D:\Horison\.venv\Lib\site-packages\osgeo\geos_c.dll
+  PROJ_LIB: D:\Horison\.venv\Lib\site-packages\osgeo\data\proj
+  GDAL_DATA: D:\Horison\.venv\Lib\site-packages\osgeo\data\gdal
+==================================================
+System check identified no issues (0 silenced).
+[18/09/202611:30:12,31] Connexion DB OK 
+[18/09/202611:30:12,31] Lancement : evaluate_field_alerts --champ-id 69 
+[18/09/202611:30:12,31] Debut execution : voir sortie ci-dessous 
+✓ PROJ_LIB trouvé: D:\Horison\.venv\Lib\site-packages\osgeo\data\proj
+✓ GDAL_DATA trouvé: D:\Horison\.venv\Lib\site-packages\osgeo\data\gdal
+✓ OSGeo ajouté au PATH: D:\Horison\.venv\Lib\site-packages\osgeo
+==================================================
+CONFIGURATION GIS:
+  GDAL_LIBRARY_PATH: D:\Horison\.venv\Lib\site-packages\osgeo\gdal.dll
+  GEOS_LIBRARY_PATH: D:\Horison\.venv\Lib\site-packages\osgeo\geos_c.dll
+  PROJ_LIB: D:\Horison\.venv\Lib\site-packages\osgeo\data\proj
+  GDAL_DATA: D:\Horison\.venv\Lib\site-packages\osgeo\data\gdal
+==================================================
+============================================================
+SURVEILLANCE AGRICOLE PRÉVENTIVE
+============================================================
+
+📡 ÉTAPE 1/4 — Collecte des indicateurs
+   ✓ 0 champ(s) traité(s) — 0 snapshot(s) persisté(s), 0 erreur(s)
+
+🎯 ÉTAPE 2/4 — Scoring & détection d'alertes
+
+   Récap : 0 alerte(s) créée(s), 0 livraison(s) email programmée(s)
+
+📧 ÉTAPE 4/4 — Envoi des emails en attente
+   ✓ 0 envoyé(s), 0 échec(s), 0 ignoré(s)
+
+============================================================
+✅ Surveillance terminée.
+============================================================
+[18/09/202611:30:12,31] Script termine avec succes 
+[18/09/202611:30:12,31] ============================================ 

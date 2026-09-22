@@ -1493,3 +1493,41 @@ def evaluate_champ_now(request):
             "assessment_id": result.assessment_id,
         },
     })
+
+
+
+@csrf_exempt
+@require_api_user
+@require_http_methods(["PATCH"])
+def acknowledge_alert(request, alert_id):
+    """Marque une alerte comme acquittée (status OPEN -> ACKNOWLEDGED).
+
+    Body JSON optionnel :
+    - status : ACKNOWLEDGED (défaut) | RESOLVED | EXPIRED
+    """
+    try:
+        data = json.loads(request.body or "{}")
+    except json.JSONDecodeError:
+        data = {}
+    new_status = data.get("status", "ACKNOWLEDGED").upper()
+    if new_status not in {"ACKNOWLEDGED", "RESOLVED", "EXPIRED"}:
+        return JsonResponse(
+            {"success": False, "error": "Statut invalide."},
+            status=400,
+        )
+
+    alert = FarmerAlert.objects.filter(id=alert_id, farmer=request.user).first()
+    if alert is None:
+        return JsonResponse(
+            {"success": False, "error": "Alerte introuvable ou non autorisée."},
+            status=404,
+        )
+
+    alert.status = new_status
+    alert.save(update_fields=["status", "updated_at"])
+    return JsonResponse({
+        "success": True,
+        "id": alert.id,
+        "status": alert.status,
+        "status_display": alert.get_status_display(),
+    })

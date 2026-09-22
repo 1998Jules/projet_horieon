@@ -63,6 +63,10 @@ urlpatterns = [
 
     # Liste des alertes de l'utilisateur connecté
         path('api/alerts/', views.my_alerts, name='my_alerts'),
+         # Liste des alertes de l'utilisateur connecté
+
+        # Marquer une alerte comme acquittée / résolue (PATCH)
+        path('api/alerts/<int:alert_id>/acknowledge/', views.acknowledge_alert, name='acknowledge_alert'),
         # Évaluation de risque d'un champ (score, niveau, sous-scores, historique)
         path('api/champ-risk/<int:champ_id>/', views.champ_risk, name='champ_risk'),
         # Déclenchement manuel : collecte + scoring + création d'alertes

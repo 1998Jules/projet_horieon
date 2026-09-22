@@ -1,0 +1,103 @@
+[21/09/202610:30:02,46] ============================================ 
+[21/09/202610:30:02,46] Demarrage surveillance agricole preventive 
+[21/09/202610:30:02,46] Projet : D:\Horison\horison 
+[21/09/202610:30:02,46] Venv   : D:\Horison\hori 
+[21/09/202610:30:02,46] ============================================ 
+[21/09/202610:30:02,46] Activation du virtualenv... 
+[21/09/202610:30:02,46] Verification connexion DB... 
+✓ PROJ_LIB trouvé: D:\Horison\.venv\Lib\site-packages\osgeo\data\proj
+✓ GDAL_DATA trouvé: D:\Horison\.venv\Lib\site-packages\osgeo\data\gdal
+✓ OSGeo ajouté au PATH: D:\Horison\.venv\Lib\site-packages\osgeo
+==================================================
+CONFIGURATION GIS:
+  GDAL_LIBRARY_PATH: D:\Horison\.venv\Lib\site-packages\osgeo\gdal.dll
+  GEOS_LIBRARY_PATH: D:\Horison\.venv\Lib\site-packages\osgeo\geos_c.dll
+  PROJ_LIB: D:\Horison\.venv\Lib\site-packages\osgeo\data\proj
+  GDAL_DATA: D:\Horison\.venv\Lib\site-packages\osgeo\data\gdal
+==================================================
+System check identified no issues (0 silenced).
+[21/09/202610:30:02,46] Connexion DB OK 
+[21/09/202610:30:02,46] Lancement : evaluate_field_alerts  
+[21/09/202610:30:02,46] Debut execution : voir sortie ci-dessous 
+*** Earth Engine *** Share your feedback by taking our Annual Developer Satisfaction Survey: https://google.qualtrics.com/jfe/form/SV_9oS0DRcPvElRMNw?source=python
+Erreur get_drought_index_timeseries: Image.subtract: If one image has no bands, the other must also have no bands. Got 1 and 0.
+Erreur VHI champ 71: Image.subtract: If one image has no bands, the other must also have no bands. Got 1 and 0.
+Erreur get_drought_index_timeseries: Image.subtract: If one image has no bands, the other must also have no bands. Got 1 and 0.
+Erreur VHI champ 72: Image.subtract: If one image has no bands, the other must also have no bands. Got 1 and 0.
+Erreur get_drought_index_timeseries: Image.subtract: If one image has no bands, the other must also have no bands. Got 1 and 0.
+Erreur VHI champ 73: Image.subtract: If one image has no bands, the other must also have no bands. Got 1 and 0.
+Erreur get_drought_index_timeseries: Image.subtract: If one image has no bands, the other must also have no bands. Got 0 and 1.
+Erreur VHI champ 74: Image.subtract: If one image has no bands, the other must also have no bands. Got 0 and 1.
+Erreur get_drought_index_timeseries: Image.subtract: If one image has no bands, the other must also have no bands. Got 0 and 1.
+Erreur VHI champ 75: Image.subtract: If one image has no bands, the other must also have no bands. Got 0 and 1.
+Échec envoi email alerte 23 : [WinError 10060] Une tentative de connexion a échoué car le parti connecté n’a pas répondu convenablement au-delà d’une certaine durée ou une connexion établie a échoué car l’hôte de connexion n’a pas répondu
+Échec envoi email alerte 24 : [WinError 10060] Une tentative de connexion a échoué car le parti connecté n’a pas répondu convenablement au-delà d’une certaine durée ou une connexion établie a échoué car l’hôte de connexion n’a pas répondu
+✓ PROJ_LIB trouvé: D:\Horison\.venv\Lib\site-packages\osgeo\data\proj
+✓ GDAL_DATA trouvé: D:\Horison\.venv\Lib\site-packages\osgeo\data\gdal
+✓ OSGeo ajouté au PATH: D:\Horison\.venv\Lib\site-packages\osgeo
+==================================================
+CONFIGURATION GIS:
+  GDAL_LIBRARY_PATH: D:\Horison\.venv\Lib\site-packages\osgeo\gdal.dll
+  GEOS_LIBRARY_PATH: D:\Horison\.venv\Lib\site-packages\osgeo\geos_c.dll
+  PROJ_LIB: D:\Horison\.venv\Lib\site-packages\osgeo\data\proj
+  GDAL_DATA: D:\Horison\.venv\Lib\site-packages\osgeo\data\gdal
+==================================================
+============================================================
+SURVEILLANCE AGRICOLE PRÉVENTIVE
+============================================================
+
+📡 ÉTAPE 1/4 — Collecte des indicateurs
+Earth Engine initialisé avec succès via Service Account.
+Earth Engine initialisé avec succès via Service Account.
+Earth Engine initialisé avec succès via Service Account.
+Earth Engine initialisé avec succès via Service Account.
+Earth Engine initialisé avec succès via Service Account.
+Earth Engine initialisé avec succès via Service Account.
+Earth Engine initialisé avec succès via Service Account.
+Earth Engine initialisé avec succès via Service Account.
+Earth Engine initialisé avec succès via Service Account.
+Earth Engine initialisé avec succès via Service Account.
+Earth Engine initialisé avec succès via Service Account.
+Earth Engine initialisé avec succès via Service Account.
+Earth Engine initialisé avec succès via Service Account.
+Earth Engine initialisé avec succès via Service Account.
+Earth Engine initialisé avec succès via Service Account.
+Earth Engine initialisé avec succès via Service Account.
+Earth Engine initialisé avec succès via Service Account.
+Earth Engine initialisé avec succès via Service Account.
+Earth Engine initialisé avec succès via Service Account.
+Earth Engine initialisé avec succès via Service Account.
+Earth Engine initialisé avec succès via Service Account.
+Earth Engine initialisé avec succès via Service Account.
+Earth Engine initialisé avec succès via Service Account.
+Earth Engine initialisé avec succès via Service Account.
+Earth Engine initialisé avec succès via Service Account.
+   ✓ 5 champ(s) traité(s) — 37 snapshot(s) persisté(s), 0 erreur(s)
+
+🎯 ÉTAPE 2/4 — Scoring & détection d'alertes
+   🟠 Champ 71 (première parcelle) : score=68/100 niveau=ALERT
+      précédent=VIGILANCE → CHANGEMENT
+      types détectés : STRESS_HYDRIQUE, SECHERESSE
+   🔴 Champ 72 (KOUTOUMBOGA) : score=77/100 niveau=CRITICAL
+      précédent=VIGILANCE → CHANGEMENT
+      types détectés : STRESS_VEGETATIF, STRESS_HYDRIQUE, SECHERESSE
+   🟡 Champ 73 (z) : score=31/100 niveau=VIGILANCE
+      précédent=VIGILANCE → inchangé
+      types détectés : SECHERESSE
+   🟢 Champ 74 (1) : score=18/100 niveau=NORMAL
+      précédent=NORMAL → inchangé
+      types détectés : SECHERESSE
+   🟡 Champ 75 (A) : score=36/100 niveau=VIGILANCE
+      précédent=VIGILANCE → inchangé
+      types détectés : SECHERESSE
+
+   Récap : 2 alerte(s) créée(s), 2 livraison(s) email programmée(s)
+
+📧 ÉTAPE 4/4 — Envoi des emails en attente
+   ✓ 0 envoyé(s), 2 échec(s), 0 ignoré(s)
+
+============================================================
+✅ Surveillance terminée.
+============================================================
+[21/09/202610:30:02,46] Script termine avec succes 
+[21/09/202610:30:02,46] ============================================ 

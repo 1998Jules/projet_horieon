@@ -1,0 +1,309 @@
+[16/09/202621:15:00,54] ============================================ 
+[16/09/202621:15:00,54] Demarrage surveillance agricole preventive 
+[16/09/202621:15:00,54] Projet : D:\Horison\horison 
+[16/09/202621:15:00,54] Venv   : D:\Horison\hori 
+[16/09/202621:15:00,54] ============================================ 
+[16/09/202621:15:00,54] Activation du virtualenv... 
+[16/09/202621:15:00,54] Verification connexion DB... 
+✓ PROJ_LIB trouvé: D:\Horison\.venv\Lib\site-packages\osgeo\data\proj
+✓ GDAL_DATA trouvé: D:\Horison\.venv\Lib\site-packages\osgeo\data\gdal
+✓ OSGeo ajouté au PATH: D:\Horison\.venv\Lib\site-packages\osgeo
+==================================================
+CONFIGURATION GIS:
+  GDAL_LIBRARY_PATH: D:\Horison\.venv\Lib\site-packages\osgeo\gdal.dll
+  GEOS_LIBRARY_PATH: D:\Horison\.venv\Lib\site-packages\osgeo\geos_c.dll
+  PROJ_LIB: D:\Horison\.venv\Lib\site-packages\osgeo\data\proj
+  GDAL_DATA: D:\Horison\.venv\Lib\site-packages\osgeo\data\gdal
+==================================================
+System check identified no issues (0 silenced).
+[16/09/202621:15:00,54] Connexion DB OK 
+[16/09/202621:15:00,54] Lancement : evaluate_field_alerts  
+[16/09/202621:15:00,54] Debut execution : voir sortie ci-dessous 
+[16/09/202621:15:40,83] ============================================ 
+[16/09/202621:15:40,83] Demarrage surveillance agricole preventive 
+[16/09/202621:15:40,83] Projet : D:\Horison\horison 
+[16/09/202621:15:40,83] Venv   : D:\Horison\hori 
+[16/09/202621:15:40,83] ============================================ 
+[16/09/202621:15:40,83] Activation du virtualenv... 
+[16/09/202621:15:40,83] Verification connexion DB... 
+✓ PROJ_LIB trouvé: D:\Horison\.venv\Lib\site-packages\osgeo\data\proj
+✓ GDAL_DATA trouvé: D:\Horison\.venv\Lib\site-packages\osgeo\data\gdal
+✓ OSGeo ajouté au PATH: D:\Horison\.venv\Lib\site-packages\osgeo
+==================================================
+CONFIGURATION GIS:
+  GDAL_LIBRARY_PATH: D:\Horison\.venv\Lib\site-packages\osgeo\gdal.dll
+  GEOS_LIBRARY_PATH: D:\Horison\.venv\Lib\site-packages\osgeo\geos_c.dll
+  PROJ_LIB: D:\Horison\.venv\Lib\site-packages\osgeo\data\proj
+  GDAL_DATA: D:\Horison\.venv\Lib\site-packages\osgeo\data\gdal
+==================================================
+System check identified no issues (0 silenced).
+[16/09/202621:33:56,61] ============================================ 
+[16/09/202621:33:56,61] Demarrage surveillance agricole preventive 
+[16/09/202621:33:56,61] Projet : D:\Horison\horison 
+[16/09/202621:33:56,61] Venv   : D:\Horison\hori 
+[16/09/202621:33:56,61] ============================================ 
+[16/09/202621:33:56,61] Activation du virtualenv... 
+[16/09/202621:33:56,61] Verification connexion DB... 
+✓ PROJ_LIB trouvé: D:\Horison\.venv\Lib\site-packages\osgeo\data\proj
+✓ GDAL_DATA trouvé: D:\Horison\.venv\Lib\site-packages\osgeo\data\gdal
+✓ OSGeo ajouté au PATH: D:\Horison\.venv\Lib\site-packages\osgeo
+==================================================
+CONFIGURATION GIS:
+  GDAL_LIBRARY_PATH: D:\Horison\.venv\Lib\site-packages\osgeo\gdal.dll
+  GEOS_LIBRARY_PATH: D:\Horison\.venv\Lib\site-packages\osgeo\geos_c.dll
+  PROJ_LIB: D:\Horison\.venv\Lib\site-packages\osgeo\data\proj
+  GDAL_DATA: D:\Horison\.venv\Lib\site-packages\osgeo\data\gdal
+==================================================
+System check identified no issues (0 silenced).
+[16/09/202621:33:56,61] Connexion DB OK 
+[16/09/202621:33:56,61] Lancement : evaluate_field_alerts --dry-run 
+[16/09/202621:33:56,61] Debut execution : voir sortie ci-dessous 
+Erreur get_drought_index_timeseries: Image.subtract: If one image has no bands, the other must also have no bands. Got 1 and 0.
+Erreur VHI champ 55: Image.subtract: If one image has no bands, the other must also have no bands. Got 1 and 0.
+Erreur get_drought_index_timeseries: Image.subtract: If one image has no bands, the other must also have no bands. Got 1 and 0.
+Erreur VHI champ 56: Image.subtract: If one image has no bands, the other must also have no bands. Got 1 and 0.
+Erreur get_drought_index_timeseries: Image.subtract: If one image has no bands, the other must also have no bands. Got 1 and 0.
+Erreur VHI champ 57: Image.subtract: If one image has no bands, the other must also have no bands. Got 1 and 0.
+Erreur get_drought_index_timeseries: Image.subtract: If one image has no bands, the other must also have no bands. Got 0 and 1.
+Erreur VHI champ 58: Image.subtract: If one image has no bands, the other must also have no bands. Got 0 and 1.
+Erreur get_drought_index_timeseries: Image.subtract: If one image has no bands, the other must also have no bands. Got 0 and 1.
+Erreur VHI champ 59: Image.subtract: If one image has no bands, the other must also have no bands. Got 0 and 1.
+Erreur get_drought_index_timeseries: Image.subtract: If one image has no bands, the other must also have no bands. Got 0 and 1.
+Erreur VHI champ 60: Image.subtract: If one image has no bands, the other must also have no bands. Got 0 and 1.
+Erreur get_drought_index_timeseries: Image.subtract: If one image has no bands, the other must also have no bands. Got 0 and 1.
+Erreur VHI champ 61: Image.subtract: If one image has no bands, the other must also have no bands. Got 0 and 1.
+Erreur get_drought_index_timeseries: Image.subtract: If one image has no bands, the other must also have no bands. Got 0 and 1.
+Erreur VHI champ 62: Image.subtract: If one image has no bands, the other must also have no bands. Got 0 and 1.
+Erreur get_drought_index_timeseries: Image.subtract: If one image has no bands, the other must also have no bands. Got 0 and 1.
+Erreur VHI champ 63: Image.subtract: If one image has no bands, the other must also have no bands. Got 0 and 1.
+Erreur get_drought_index_timeseries: Image.subtract: If one image has no bands, the other must also have no bands. Got 0 and 1.
+Erreur VHI champ 64: Image.subtract: If one image has no bands, the other must also have no bands. Got 0 and 1.
+Erreur get_drought_index_timeseries: Image.subtract: If one image has no bands, the other must also have no bands. Got 0 and 1.
+Erreur VHI champ 65: Image.subtract: If one image has no bands, the other must also have no bands. Got 0 and 1.
+✓ PROJ_LIB trouvé: D:\Horison\.venv\Lib\site-packages\osgeo\data\proj
+✓ GDAL_DATA trouvé: D:\Horison\.venv\Lib\site-packages\osgeo\data\gdal
+✓ OSGeo ajouté au PATH: D:\Horison\.venv\Lib\site-packages\osgeo
+==================================================
+CONFIGURATION GIS:
+  GDAL_LIBRARY_PATH: D:\Horison\.venv\Lib\site-packages\osgeo\gdal.dll
+  GEOS_LIBRARY_PATH: D:\Horison\.venv\Lib\site-packages\osgeo\geos_c.dll
+  PROJ_LIB: D:\Horison\.venv\Lib\site-packages\osgeo\data\proj
+  GDAL_DATA: D:\Horison\.venv\Lib\site-packages\osgeo\data\gdal
+==================================================
+============================================================
+SURVEILLANCE AGRICOLE PRÉVENTIVE
+============================================================
+
+📡 ÉTAPE 1/4 — Collecte des indicateurs
+Earth Engine initialisé avec succès via Service Account.
+Earth Engine initialisé avec succès via Service Account.
+Earth Engine initialisé avec succès via Service Account.
+Earth Engine initialisé avec succès via Service Account.
+Earth Engine initialisé avec succès via Service Account.
+Earth Engine initialisé avec succès via Service Account.
+Earth Engine initialisé avec succès via Service Account.
+Earth Engine initialisé avec succès via Service Account.
+Earth Engine initialisé avec succès via Service Account.
+Earth Engine initialisé avec succès via Service Account.
+Earth Engine initialisé avec succès via Service Account.
+Earth Engine initialisé avec succès via Service Account.
+Earth Engine initialisé avec succès via Service Account.
+Earth Engine initialisé avec succès via Service Account.
+Earth Engine initialisé avec succès via Service Account.
+Earth Engine initialisé avec succès via Service Account.
+Earth Engine initialisé avec succès via Service Account.
+Earth Engine initialisé avec succès via Service Account.
+Earth Engine initialisé avec succès via Service Account.
+Earth Engine initialisé avec succès via Service Account.
+Earth Engine initialisé avec succès via Service Account.
+Earth Engine initialisé avec succès via Service Account.
+Earth Engine initialisé avec succès via Service Account.
+Earth Engine initialisé avec succès via Service Account.
+Earth Engine initialisé avec succès via Service Account.
+Earth Engine initialisé avec succès via Service Account.
+Earth Engine initialisé avec succès via Service Account.
+Earth Engine initialisé avec succès via Service Account.
+Earth Engine initialisé avec succès via Service Account.
+Earth Engine initialisé avec succès via Service Account.
+Earth Engine initialisé avec succès via Service Account.
+Earth Engine initialisé avec succès via Service Account.
+Earth Engine initialisé avec succès via Service Account.
+Earth Engine initialisé avec succès via Service Account.
+Earth Engine initialisé avec succès via Service Account.
+Earth Engine initialisé avec succès via Service Account.
+Earth Engine initialisé avec succès via Service Account.
+Earth Engine initialisé avec succès via Service Account.
+Earth Engine initialisé avec succès via Service Account.
+Earth Engine initialisé avec succès via Service Account.
+Earth Engine initialisé avec succès via Service Account.
+Earth Engine initialisé avec succès via Service Account.
+Earth Engine initialisé avec succès via Service Account.
+Earth Engine initialisé avec succès via Service Account.
+Earth Engine initialisé avec succès via Service Account.
+Earth Engine initialisé avec succès via Service Account.
+Earth Engine initialisé avec succès via Service Account.
+Earth Engine initialisé avec succès via Service Account.
+Earth Engine initialisé avec succès via Service Account.
+Earth Engine initialisé avec succès via Service Account.
+Earth Engine initialisé avec succès via Service Account.
+Earth Engine initialisé avec succès via Service Account.
+Earth Engine initialisé avec succès via Service Account.
+Earth Engine initialisé avec succès via Service Account.
+Earth Engine initialisé avec succès via Service Account.
+   ✓ 11 champ(s) traité(s) — 95 snapshot(s) persisté(s), 0 erreur(s)
+
+🎯 ÉTAPE 2/4 — Scoring & détection d'alertes
+   🟢 Champ 55 (FORET) : score=0/100 niveau=NORMAL
+      erreurs : Aucun agriculteur actif associé au champ
+   🟢 Champ 56 (A) : score=0/100 niveau=NORMAL
+      erreurs : Aucun agriculteur actif associé au champ
+   🟢 Champ 57 (Z) : score=0/100 niveau=NORMAL
+      erreurs : Aucun agriculteur actif associé au champ
+   🟢 Champ 58 (A) : score=0/100 niveau=NORMAL
+      erreurs : Aucun agriculteur actif associé au champ
+   🟢 Champ 59 (A) : score=0/100 niveau=NORMAL
+      erreurs : Aucun agriculteur actif associé au champ
+   🟢 Champ 60 (ZE) : score=0/100 niveau=NORMAL
+      erreurs : Aucun agriculteur actif associé au champ
+   🟢 Champ 61 (Parcelle A) : score=24/100 niveau=NORMAL
+      précédent=VIGILANCE → CHANGEMENT
+      types détectés : SECHERESSE
+      (dry-run) 1 alerte(s) aurait été créée(s)
+   🟡 Champ 62 (A) : score=34/100 niveau=VIGILANCE
+      précédent=VIGILANCE → inchangé
+      types détectés : SECHERESSE
+   🟠 Champ 63 (Z) : score=62/100 niveau=ALERT
+      précédent=ALERT → inchangé
+      types détectés : STRESS_HYDRIQUE, SECHERESSE
+   🟡 Champ 64 (P) : score=45/100 niveau=VIGILANCE
+      précédent=VIGILANCE → inchangé
+      types détectés : SECHERESSE
+   🟡 Champ 65 (A) : score=31/100 niveau=VIGILANCE
+      précédent=VIGILANCE → inchangé
+      types détectés : SECHERESSE
+
+   Récap : 1 alerte(s) créée(s), 0 livraison(s) email programmée(s)
+
+⏭️  Étape envoi emails ignorée (dry-run)
+[16/09/202621:33:56,61] Script termine avec succes 
+[16/09/202621:33:56,61] ============================================ 
+[16/09/202621:49:25,85] ============================================ 
+[16/09/202621:49:25,85] Demarrage surveillance agricole preventive 
+[16/09/202621:49:25,85] Projet : D:\Horison\horison 
+[16/09/202621:49:25,85] Venv   : D:\Horison\hori 
+[16/09/202621:49:25,85] ============================================ 
+[16/09/202621:49:25,85] Activation du virtualenv... 
+[16/09/202621:49:25,85] Verification connexion DB... 
+✓ PROJ_LIB trouvé: D:\Horison\.venv\Lib\site-packages\osgeo\data\proj
+✓ GDAL_DATA trouvé: D:\Horison\.venv\Lib\site-packages\osgeo\data\gdal
+✓ OSGeo ajouté au PATH: D:\Horison\.venv\Lib\site-packages\osgeo
+==================================================
+CONFIGURATION GIS:
+  GDAL_LIBRARY_PATH: D:\Horison\.venv\Lib\site-packages\osgeo\gdal.dll
+  GEOS_LIBRARY_PATH: D:\Horison\.venv\Lib\site-packages\osgeo\geos_c.dll
+  PROJ_LIB: D:\Horison\.venv\Lib\site-packages\osgeo\data\proj
+  GDAL_DATA: D:\Horison\.venv\Lib\site-packages\osgeo\data\gdal
+==================================================
+System check identified no issues (0 silenced).
+[16/09/202621:49:25,85] Connexion DB OK 
+[16/09/202621:49:25,85] Lancement : evaluate_field_alerts --champ-id 61 
+[16/09/202621:49:25,85] Debut execution : voir sortie ci-dessous 
+Erreur get_drought_index_timeseries: Image.subtract: If one image has no bands, the other must also have no bands. Got 0 and 1.
+Erreur VHI champ 61: Image.subtract: If one image has no bands, the other must also have no bands. Got 0 and 1.
+✓ PROJ_LIB trouvé: D:\Horison\.venv\Lib\site-packages\osgeo\data\proj
+✓ GDAL_DATA trouvé: D:\Horison\.venv\Lib\site-packages\osgeo\data\gdal
+✓ OSGeo ajouté au PATH: D:\Horison\.venv\Lib\site-packages\osgeo
+==================================================
+CONFIGURATION GIS:
+  GDAL_LIBRARY_PATH: D:\Horison\.venv\Lib\site-packages\osgeo\gdal.dll
+  GEOS_LIBRARY_PATH: D:\Horison\.venv\Lib\site-packages\osgeo\geos_c.dll
+  PROJ_LIB: D:\Horison\.venv\Lib\site-packages\osgeo\data\proj
+  GDAL_DATA: D:\Horison\.venv\Lib\site-packages\osgeo\data\gdal
+==================================================
+============================================================
+SURVEILLANCE AGRICOLE PRÉVENTIVE
+============================================================
+
+📡 ÉTAPE 1/4 — Collecte des indicateurs
+Earth Engine initialisé avec succès via Service Account.
+Earth Engine initialisé avec succès via Service Account.
+Earth Engine initialisé avec succès via Service Account.
+Earth Engine initialisé avec succès via Service Account.
+Earth Engine initialisé avec succès via Service Account.
+   ✓ 1 champ(s) traité(s) — 9 snapshot(s) persisté(s), 0 erreur(s)
+
+🎯 ÉTAPE 2/4 — Scoring & détection d'alertes
+   🟢 Champ 61 (Parcelle A) : score=24/100 niveau=NORMAL
+      précédent=VIGILANCE → CHANGEMENT
+      types détectés : SECHERESSE
+
+   Récap : 1 alerte(s) créée(s), 1 livraison(s) email programmée(s)
+
+📧 ÉTAPE 4/4 — Envoi des emails en attente
+   ✓ 1 envoyé(s), 0 échec(s), 0 ignoré(s)
+
+============================================================
+✅ Surveillance terminée.
+============================================================
+[16/09/202621:49:25,85] Script termine avec succes 
+[16/09/202621:49:25,85] ============================================ 
+[16/09/202623:16:35,57] ============================================ 
+[16/09/202623:16:35,57] Demarrage surveillance agricole preventive 
+[16/09/202623:16:35,57] Projet : D:\Horison\horison 
+[16/09/202623:16:35,57] Venv   : D:\Horison\hori 
+[16/09/202623:16:35,57] ============================================ 
+[16/09/202623:16:35,57] Activation du virtualenv... 
+[16/09/202623:16:35,57] Verification connexion DB... 
+✓ PROJ_LIB trouvé: D:\Horison\.venv\Lib\site-packages\osgeo\data\proj
+✓ GDAL_DATA trouvé: D:\Horison\.venv\Lib\site-packages\osgeo\data\gdal
+✓ OSGeo ajouté au PATH: D:\Horison\.venv\Lib\site-packages\osgeo
+==================================================
+CONFIGURATION GIS:
+  GDAL_LIBRARY_PATH: D:\Horison\.venv\Lib\site-packages\osgeo\gdal.dll
+  GEOS_LIBRARY_PATH: D:\Horison\.venv\Lib\site-packages\osgeo\geos_c.dll
+  PROJ_LIB: D:\Horison\.venv\Lib\site-packages\osgeo\data\proj
+  GDAL_DATA: D:\Horison\.venv\Lib\site-packages\osgeo\data\gdal
+==================================================
+System check identified no issues (0 silenced).
+[16/09/202623:16:35,57] Connexion DB OK 
+[16/09/202623:16:35,57] Lancement : evaluate_field_alerts --champ-id 69 
+[16/09/202623:16:35,57] Debut execution : voir sortie ci-dessous 
+Erreur get_drought_index_timeseries: Image.subtract: If one image has no bands, the other must also have no bands. Got 0 and 1.
+Erreur VHI champ 69: Image.subtract: If one image has no bands, the other must also have no bands. Got 0 and 1.
+✓ PROJ_LIB trouvé: D:\Horison\.venv\Lib\site-packages\osgeo\data\proj
+✓ GDAL_DATA trouvé: D:\Horison\.venv\Lib\site-packages\osgeo\data\gdal
+✓ OSGeo ajouté au PATH: D:\Horison\.venv\Lib\site-packages\osgeo
+==================================================
+CONFIGURATION GIS:
+  GDAL_LIBRARY_PATH: D:\Horison\.venv\Lib\site-packages\osgeo\gdal.dll
+  GEOS_LIBRARY_PATH: D:\Horison\.venv\Lib\site-packages\osgeo\geos_c.dll
+  PROJ_LIB: D:\Horison\.venv\Lib\site-packages\osgeo\data\proj
+  GDAL_DATA: D:\Horison\.venv\Lib\site-packages\osgeo\data\gdal
+==================================================
+============================================================
+SURVEILLANCE AGRICOLE PRÉVENTIVE
+============================================================
+
+📡 ÉTAPE 1/4 — Collecte des indicateurs
+Earth Engine initialisé avec succès via Service Account.
+Earth Engine initialisé avec succès via Service Account.
+Earth Engine initialisé avec succès via Service Account.
+Earth Engine initialisé avec succès via Service Account.
+Earth Engine initialisé avec succès via Service Account.
+   ✓ 1 champ(s) traité(s) — 9 snapshot(s) persisté(s), 0 erreur(s)
+
+🎯 ÉTAPE 2/4 — Scoring & détection d'alertes
+   🟢 Champ 69 (A) : score=23/100 niveau=NORMAL
+      précédent=NORMAL → inchangé
+      types détectés : SECHERESSE
+
+   Récap : 0 alerte(s) créée(s), 0 livraison(s) email programmée(s)
+
+📧 ÉTAPE 4/4 — Envoi des emails en attente
+   ✓ 0 envoyé(s), 0 échec(s), 0 ignoré(s)
+
+============================================================
+✅ Surveillance terminée.
+============================================================
+[16/09/202623:16:35,57] Script termine avec succes 
+[16/09/202623:16:35,57] ============================================ 
