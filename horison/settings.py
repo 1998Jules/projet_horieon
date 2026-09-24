@@ -4,6 +4,7 @@ Django settings for horison project.
 import os
 import sys
 from pathlib import Path
+import dj_database_url
 from django.conf import settings
 from django.conf.urls.static import static
 
@@ -143,15 +144,15 @@ WSGI_APPLICATION = 'horison.wsgi.application'
 # ============================================
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.contrib.gis.db.backends.postgis',
-        'NAME': 'Ecommune',
-        'USER': 'postgres',
-        'PASSWORD': '1234',
-        'HOST': 'localhost',
-        'PORT': '5432',
-    }
+    'default': dj_database_url.config(
+        default=os.getenv('DATABASE_URL', 'sqlite:///db.sqlite3'),
+        conn_max_age=600,
+        conn_health_checks=True,
+    )
 }
+
+if DATABASES['default'].get('ENGINE') == 'django.db.backends.postgresql':
+    DATABASES['default']['ENGINE'] = 'django.contrib.gis.db.backends.postgis'
 
 # ============================================
 # PASSWORD VALIDATION
