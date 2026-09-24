@@ -9,96 +9,36 @@ from django.conf.urls.static import static
 
 
 # ============================================
-# CONFIGURATION GIS CRITIQUE (DOIT ÊTRE EN HAUT)
+# CONFIGURATION GIS PORTABLE (Linux Render et Windows local)
 # ============================================
 
 BASE_DIR = Path(__file__).resolve().parent.parent
+os.environ.setdefault('PROJ_NETWORK', 'OFF')
+os.environ.setdefault('PROJ_DEBUG', '0')
 
-# 1. DÉSACTIVER LES FONCTIONNALITÉS PROBABLES
-os.environ['PROJ_NETWORK'] = 'OFF'
-os.environ['PROJ_DEBUG'] = '0'
-
-# 2. UTILISER PROJ DE VOTRE VENV (GDAL 3.11.4)
-# Le chemin devrait être dans votre venv
-venv_path = r"D:\Horison\.venv"
-
-# Chercher proj.db dans le venv
-proj_paths_to_try = [
-    os.path.join(venv_path, "Lib", "site-packages", "osgeo", "data", "proj"),
-    os.path.join(venv_path, "Lib", "site-packages", "osgeo", "proj"),
-    os.path.join(venv_path, "Lib", "site-packages", "pyproj", "proj_dir", "share", "proj"),
-    os.path.join(venv_path, "share", "proj"),
-]
-
-for proj_path in proj_paths_to_try:
-    proj_db_path = os.path.join(proj_path, "proj.db")
-    if os.path.exists(proj_db_path):
-        os.environ['PROJ_LIB'] = proj_path
-        print(f"✓ PROJ_LIB trouvé: {proj_path}")
-        break
+if os.name == 'nt':
+    venv_path = os.getenv('VIRTUAL_ENV', r'D:\Horison\.venv')
+    proj_candidates = [os.path.join(venv_path, 'Lib', 'site-packages', 'osgeo', 'data', 'proj'), os.path.join(venv_path, 'Lib', 'site-packages', 'pyproj', 'proj_dir', 'share', 'proj')]
+    for proj_path in proj_candidates:
+        if os.path.exists(os.path.join(proj_path, 'proj.db')):
+            os.environ.setdefault('PROJ_LIB', proj_path)
+            break
+    osgeo_path = os.path.join(venv_path, 'Lib', 'site-packages', 'osgeo')
+    gdal_dll = os.path.join(osgeo_path, 'gdal.dll')
+    geos_dll = os.path.join(osgeo_path, 'geos_c.dll')
+    if os.path.exists(gdal_dll): GDAL_LIBRARY_PATH = gdal_dll
+    if os.path.exists(geos_dll): GEOS_LIBRARY_PATH = geos_dll
 else:
-    # Si non trouvé, désactiver la recherche automatique
-    os.environ['PROJ_LIB'] = r'D:\Horison\.venv\Lib\site-packages\osgeo\data\proj'
-    print(f"⚠ PROJ_LIB configuré par défaut")
-
-# 3. CONFIGURER GDAL_DATA
-gdal_data_paths = [
-    os.path.join(venv_path, "Lib", "site-packages", "osgeo", "data", "gdal"),
-    os.path.join(venv_path, "share", "gdal"),
-]
-
-for gdal_path in gdal_data_paths:
-    if os.path.exists(gdal_path):
-        os.environ['GDAL_DATA'] = gdal_path
-        print(f"✓ GDAL_DATA trouvé: {gdal_path}")
-        break
-
-# 4. AJOUTER OSGEO AU PATH
-osgeo_path = os.path.join(venv_path, "Lib", "site-packages", "osgeo")
-if os.path.exists(osgeo_path):
-    # Ajouter au début du PATH pour priorité
-    os.environ["PATH"] = osgeo_path + ";" + os.environ["PATH"]
-    print(f"✓ OSGeo ajouté au PATH: {osgeo_path}")
-
-# 5. CONFIGURER LES CHEMINS DES LIBRAIRIES
-GDAL_LIBRARY_PATH = os.path.join(osgeo_path, "gdal.dll")
-GEOS_LIBRARY_PATH = os.path.join(osgeo_path, "geos_c.dll")
-
-# Vérifier l'existence
-if not os.path.exists(GDAL_LIBRARY_PATH):
-    print(f"❌ GDAL library introuvable: {GDAL_LIBRARY_PATH}")
-    # Chercher dans d'autres emplacements
-    for root, dirs, files in os.walk(venv_path):
-        for file in files:
-            if file == "gdal.dll":
-                GDAL_LIBRARY_PATH = os.path.join(root, file)
-                print(f"✓ GDAL trouvé: {GDAL_LIBRARY_PATH}")
-                break
-
-if not os.path.exists(GEOS_LIBRARY_PATH):
-    print(f"❌ GEOS library introuvable: {GEOS_LIBRARY_PATH}")
-    for root, dirs, files in os.walk(venv_path):
-        for file in files:
-            if file == "geos_c.dll":
-                GEOS_LIBRARY_PATH = os.path.join(root, file)
-                print(f"✓ GEOS trouvé: {GEOS_LIBRARY_PATH}")
-                break
-
-print("=" * 50)
-print("CONFIGURATION GIS:")
-print(f"  GDAL_LIBRARY_PATH: {GDAL_LIBRARY_PATH}")
-print(f"  GEOS_LIBRARY_PATH: {GEOS_LIBRARY_PATH}")
-print(f"  PROJ_LIB: {os.environ.get('PROJ_LIB', 'Non défini')}")
-print(f"  GDAL_DATA: {os.environ.get('GDAL_DATA', 'Non défini')}")
-print("=" * 50)
+    os.environ.setdefault('PROJ_LIB', '/usr/share/proj')
+    os.environ.setdefault('GDAL_DATA', '/usr/share/gdal')
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-668s^s2k9$u3_zs8mps1+1dy5-)+%*dlmr3*yp-phgep2&!!vp'
+SECRET_KEY = os.getenv('SECRET_KEY', 'change-me-in-production')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = [h.strip() for h in os.getenv('ALLOWED_HOSTS', '*').split(',') if h.strip()]
 
 # ============================================
 # APPLICATION DEFINITION
@@ -267,12 +207,12 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'koutoumbogajules@gmail.com'  # Votre email d'envoi
-EMAIL_HOST_PASSWORD = 'cspz cfsx dhox wadj'  # Votre mot de passe d'application Gmail
-DEFAULT_FROM_EMAIL = 'koutoumbogajules@gmail.com'
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', '')  # Votre email d'envoi
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')  # Votre mot de passe d'application Gmail
+DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', EMAIL_HOST_USER)
 
 # L'adresse email qui reçoit les alertes (Contrôlée par vous)
-ALERT_RECIPIENT_EMAIL = 'koutoumbogabakota@gmail.com' 
+ALERT_RECIPIENT_EMAIL = os.getenv('ALERT_RECIPIENT_EMAIL', '') 
 
 # Seuil NDVI pour déclencher une alerte (ex: < 0.35 = Stress hydrique sévère)
 NDVI_ALERT_THRESHOLD = 0.35
